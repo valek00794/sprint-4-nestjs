@@ -4,5 +4,5 @@
 
 ## Description
 
-[First app](https://github.com/valek00794/sprint-1-back) IT Incubator mograte on nestjs
+[First app](https://github.com/valek00794/sprint-1-back) IT Incubator migrate on nestjs
 
