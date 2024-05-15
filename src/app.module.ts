@@ -9,6 +9,11 @@ import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.quer
 import { Blog, BlogsSchema } from './features/blogs/infrastructure/blogs-schema';
 import { ClearDbController } from './features/dev/clear-db.controller';
 import { DbService } from './features/dev/db.service';
+import { PostsController } from './features/posts/api/posts.controller';
+import { PostsRepository } from './features/posts/infrastructure/posts.repository';
+import { PostsQueryRepository } from './features/posts/infrastructure/posts.query-repository';
+import { PostsService } from './features/posts/api/app/posts.service';
+import { Post, PostsSchema } from './features/posts/infrastructure/posts-schema';
 
 @Module({
   imports: [
@@ -18,9 +23,21 @@ import { DbService } from './features/dev/db.service';
         name: Blog.name,
         schema: BlogsSchema,
       },
+      {
+        name: Post.name,
+        schema: PostsSchema,
+      },
     ]),
   ],
-  controllers: [BlogsController, ClearDbController],
-  providers: [BlogsService, BlogsRepository, BlogsQueryRepository, DbService],
+  controllers: [BlogsController, ClearDbController, PostsController],
+  providers: [
+    BlogsService,
+    BlogsRepository,
+    BlogsQueryRepository,
+    DbService,
+    PostsService,
+    PostsRepository,
+    PostsQueryRepository,
+  ],
 })
 export class AppModule {}
