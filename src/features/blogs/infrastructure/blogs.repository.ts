@@ -17,13 +17,9 @@ export class BlogsRepository {
     return await this.blogModel.findById(id);
   }
   async updateBlog(updatedBlog: Blog, id: string): Promise<boolean> {
-    const updatedResult = await this.blogModel.findByIdAndUpdate(
-      id,
-      updatedBlog,
-      {
-        new: true,
-      },
-    );
+    const updatedResult = await this.blogModel.findByIdAndUpdate(id, updatedBlog, {
+      new: true,
+    });
     return updatedResult ? true : false;
   }
   async deleteBlog(id: string): Promise<boolean> {

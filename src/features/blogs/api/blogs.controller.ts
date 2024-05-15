@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 
 import { CreateBlogModel } from './models/input/blogs.input.model';
 import { BlogsService } from './app/blogs.service';
@@ -38,10 +29,7 @@ export class BlogsController {
   }
 
   @Put(':id')
-  async updateBlog(
-    @Body() inputModel: CreateBlogModel,
-    @Param('id') id: string,
-  ) {
+  async updateBlog(@Body() inputModel: CreateBlogModel, @Param('id') id: string) {
     return await this.blogsService.updateBlog(inputModel, id);
   }
 
