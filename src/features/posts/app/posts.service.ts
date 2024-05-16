@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Post, PostDocument } from '../../infrastructure/posts-schema';
-import { CreatePostModel } from '../models/input/posts.input.model';
-import { PostsRepository } from '../../infrastructure/posts.repository';
+
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
+import { PostsRepository } from '../infrastructure/posts.repository';
+import { Post, PostDocument } from '../infrastructure/posts.schema';
+import { CreatePostModel } from '../api/models/input/posts.input.model';
 
 @Injectable()
 export class PostsService {
@@ -15,12 +15,12 @@ export class PostsService {
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
   ) {}
 
-  async createPost(inputModel: CreatePostModel, blogId?: string) {
+  async createPost(inputModel: CreatePostModel, blogId?: string): Promise<PostDocument> {
     if (blogId && !Types.ObjectId.isValid(blogId)) {
       throw new NotFoundException('Invalid blogId');
     }
-    const getBlogId = blogId && !Types.ObjectId.isValid(blogId) ? blogId : inputModel.blogId;
-    const blog = await this.blogsRepository.findBlog(getBlogId!);
+    const getBlogId = blogId && Types.ObjectId.isValid(blogId) ? blogId : inputModel.blogId;
+    const blog = await this.blogsRepository.findBlog(getBlogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -35,9 +35,10 @@ export class PostsService {
 
     return await this.postsRepository.createPost(newPosts);
   }
+
   async updatePost(inputModel: CreatePostModel, id: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new NotFoundException('Invalid ID');
+      throw new NotFoundException('Invalid post id');
     }
     const post = await this.postsRepository.findPost(id);
     if (!post) {
@@ -55,7 +56,7 @@ export class PostsService {
   }
   async deletePost(id: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new NotFoundException('Invalid ID');
+      throw new NotFoundException('Invalid post id');
     }
     return await this.postsRepository.deletePost(id);
   }

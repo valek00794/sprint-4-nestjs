@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Blog, BlogDocument } from './blogs-schema';
+import { Blog, BlogDocument } from './blogs.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { SearchQueryParametersType } from '../../domain/query.types';

@@ -1,4 +1,4 @@
-import { ObjectId, WithId } from 'mongodb';
+import type { Types } from 'mongoose';
 
 export enum LikeStatus {
   None = 'None',
@@ -8,15 +8,13 @@ export enum LikeStatus {
 
 export class LikesInfo {
   constructor(
-    public parrentId: ObjectId,
-    public authorId: ObjectId,
+    public parrentId: Types.ObjectId,
+    public authorId: Types.ObjectId,
     public authorLogin: string,
     public status: LikeStatus,
     public addedAt: Date,
   ) {}
 }
-
-export type LikesInfoDBType = WithId<LikesInfo>;
 
 export class LikesInfoView {
   constructor(

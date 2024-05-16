@@ -6,10 +6,10 @@ import { DbService } from './db.service';
 
 @Controller(SETTINGS.PATH.clearDb)
 export class ClearDbController {
-  constructor(protected bbService: DbService) {}
+  constructor(protected dbService: DbService) {}
   @Delete()
   async clearDb(@Res() res: Response) {
-    await this.bbService.clearDb();
+    await this.dbService.clearDb();
     res.sendStatus(204);
   }
 }

@@ -16,13 +16,11 @@ export const getSanitizationQuery = (
   query?: SearchQueryParametersType,
 ): SearchQueryParametersType => {
   return {
-    pageNumber:
-      typeof query?.pageNumber === 'number'
-        ? +query!.pageNumber
-        : defaultSearchQueryParameters.pageNumber,
+    pageNumber: !isNaN(query!.pageNumber!)
+      ? +query!.pageNumber
+      : defaultSearchQueryParameters.pageNumber,
     pageSize:
-      typeof query?.pageSize === 'number' ||
-      (query && query.pageSize <= defaultSearchQueryParameters.maxPageSize)
+      !isNaN(query!.pageSize!) || query!.pageSize! <= defaultSearchQueryParameters.maxPageSize
         ? +query!.pageSize
         : defaultSearchQueryParameters.pageSize,
     sortBy: query?.sortBy ? query.sortBy : defaultSearchQueryParameters.sortBy,

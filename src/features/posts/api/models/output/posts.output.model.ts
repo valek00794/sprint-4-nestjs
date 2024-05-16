@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { ExtendedLikesInfo } from 'src/features/likes/models/output/likes.output.model';
+import type { ExtendedLikesInfo } from 'src/features/likes/domain/likes.types';
 
 export class PostView {
   constructor(
