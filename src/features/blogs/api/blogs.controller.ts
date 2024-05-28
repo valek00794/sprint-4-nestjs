@@ -3,7 +3,7 @@ import { Response } from 'express';
 
 import { CreateBlogModel } from './models/input/blogs.input.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
-import { SETTINGS, StatusCodes } from 'src/settings';
+import { SETTINGS, StatusCodes } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { BlogsService } from '../app/blogs.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query-repository';

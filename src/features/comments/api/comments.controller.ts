@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 
-import { SETTINGS } from 'src/settings';
+import { SETTINGS } from 'src/settings/settings';
 import type { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 
 @Controller(SETTINGS.PATH.comments)

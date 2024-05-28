@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 
-import { SETTINGS, StatusCodes } from 'src/settings';
+import { SETTINGS, StatusCodes } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { CreatePostModel } from './models/input/posts.input.model';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';

@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { BlogsController } from './features/blogs/api/blogs.controller';
 import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository';
-import { SETTINGS } from './settings';
+import { SETTINGS } from './settings/settings';
 import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.query-repository';
 import { Blog, BlogsSchema } from './features/blogs/infrastructure/blogs.schema';
 import { ClearDbController } from './features/common/clear-db.controller';
@@ -28,6 +28,9 @@ import { UsersQueryRepository } from './features/users/infrastructure/users.quer
 import { LikesQueryRepository } from './features/likes/infrastructure/likeStatus.query-repository';
 import { Like, LikeSchema } from './features/likes/infrastructure/likeStatus.schema';
 
+const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
+const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
+const usersProviders = [UsersService, UsersRepository, UsersQueryRepository];
 @Module({
   imports: [
     MongooseModule.forRoot(SETTINGS.DB.mongoURI),
@@ -56,16 +59,10 @@ import { Like, LikeSchema } from './features/likes/infrastructure/likeStatus.sch
   ],
   controllers: [BlogsController, ClearDbController, PostsController, UsersController],
   providers: [
-    BlogsService,
-    BlogsRepository,
-    BlogsQueryRepository,
+    ...postsProviders,
+    ...blogsProviders,
+    ...usersProviders,
     DbService,
-    PostsService,
-    PostsRepository,
-    PostsQueryRepository,
-    UsersService,
-    UsersRepository,
-    UsersQueryRepository,
     LikesQueryRepository,
   ],
 })
