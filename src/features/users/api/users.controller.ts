@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { SETTINGS, StatusCodes } from 'src/settings/settings';
 import { CreateUserModel } from './models/input/users.input.models';
 import { UsersService } from '../app/users.service';
-import { UsersQueryRepository } from '../infrastructure/users.query-repository';
+import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 
 @Controller(SETTINGS.PATH.users)
@@ -27,7 +27,7 @@ export class UsersController {
 
   @Delete(':id')
   async deleteUser(@Param('id') id: string, @Res() res: Response) {
-    const deleteResult = await this.usersService.deleteUser(id);
+    const deleteResult = await this.usersService.deleteUserById(id);
     if (deleteResult) {
       return res.sendStatus(StatusCodes.NO_CONTENT_204);
     }

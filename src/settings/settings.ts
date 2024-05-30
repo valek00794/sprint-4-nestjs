@@ -38,6 +38,17 @@ export const SETTINGS = {
   },
 };
 
+export enum ResultStatus {
+  Success = 'Success',
+  Created = 'Created',
+  NoContent = 'NoContent',
+
+  BadRequest = 'BadRequest',
+  Unauthorized = 'Unauthorized',
+  NotFound = 'NotFound',
+  Forbidden = 'Forbidden',
+}
+
 export enum StatusCodes {
   OK_200 = 200,
   CREATED_201 = 201,

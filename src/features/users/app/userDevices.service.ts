@@ -1,0 +1,94 @@
+import {
+  ForbiddenException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import { jwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
+import { ResultStatus, SETTINGS, StatusCodes } from 'src/settings/settings';
+import type { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
+import type { AuthService } from './auth.service';
+import type { UsersDevicesDocument } from '../infrastructure/devices/usersDevices.schema';
+
+@Injectable()
+export class UsersDevicesService {
+  constructor(
+    protected authService: AuthService,
+    protected usersDevicesRepository: UsersDevicesRepository,
+  ) {}
+
+  async addUserDevice(
+    refreshToken: string,
+    deviceTitle: string,
+    ipAddress: string,
+  ): Promise<UsersDevicesDocument> {
+    const userVerifyInfo = await jwtAdapter.getUserInfoByToken(
+      refreshToken,
+      SETTINGS.JWT.RT_SECRET,
+    );
+    const device = {
+      deviceId: userVerifyInfo!.deviceId,
+      title: deviceTitle,
+      userId: userVerifyInfo!.userId,
+      ip: ipAddress,
+      lastActiveDate: new Date(userVerifyInfo!.iat! * 1000).toISOString(),
+      expiryDate: new Date(userVerifyInfo!.exp! * 1000).toISOString(),
+    };
+    return await this.usersDevicesRepository.addUserDevice(device);
+  }
+
+  async updateUserDevice(oldRefreshToken: string, refreshToken: string) {
+    const userVerifyInfoByOldToken = await jwtAdapter.getUserInfoByToken(
+      oldRefreshToken,
+      SETTINGS.JWT.RT_SECRET,
+    );
+    const userVerifyInfo = await jwtAdapter.getUserInfoByToken(
+      refreshToken,
+      SETTINGS.JWT.RT_SECRET,
+    );
+    const newLastActiveDate = new Date(userVerifyInfo!.iat! * 1000).toISOString();
+    const newExpiryDate = new Date(userVerifyInfo!.exp! * 1000).toISOString();
+    return await this.usersDevicesRepository.updateUserDevice(
+      userVerifyInfoByOldToken!,
+      newLastActiveDate,
+      newExpiryDate,
+    );
+  }
+
+  async getActiveDevicesByUser(refreshToken: string): Promise<UsersDevicesDocument[]> {
+    const userVerifyInfo = await this.authService.checkUserByRefreshToken(refreshToken);
+    if (userVerifyInfo === null) {
+      throw new UnauthorizedException();
+    }
+    return await this.usersDevicesRepository.getAllActiveDevicesByUser(
+      userVerifyInfo.userId.toString(),
+    );
+  }
+
+  async deleteAllDevicesByUser(refreshToken: string) {
+    const userVerifyInfo = await this.authService.checkUserByRefreshToken(refreshToken);
+    if (userVerifyInfo === null) {
+      throw new UnauthorizedException();
+    }
+    await this.usersDevicesRepository.deleteUserDevices(userVerifyInfo);
+    throw new HttpException(ResultStatus.NoContent, StatusCodes.NO_CONTENT_204);
+  }
+
+  async deleteUserDeviceById(refreshToken: string, deviceId: string) {
+    const userVerifyInfo = await this.authService.checkUserByRefreshToken(refreshToken);
+    if (userVerifyInfo === null) {
+      throw new UnauthorizedException();
+    }
+    const device = await this.usersDevicesRepository.getUserDeviceById(deviceId);
+    if (!device) {
+      throw new NotFoundException('Device not found');
+    }
+    if (userVerifyInfo.userId !== device.userId) {
+      throw new ForbiddenException();
+    }
+    await this.usersDevicesRepository.deleteUserDevicebyId(deviceId);
+    throw new HttpException(ResultStatus.NoContent, StatusCodes.NO_CONTENT_204);
+  }
+}

@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { User, type UserDocument } from './users.schema';
-import { UserViewModel } from '../api/models/output/users.output.models';
+import { UserViewModel } from '../../api/models/output/users.output.models';
 import { Paginator } from 'src/features/domain/result.types';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
-import { UserInfo } from '../domain/users.types';
+import { UserInfo } from '../../domain/users.types';
+import { User, UserDocument } from './users.schema';
 
 @Injectable()
 export class UsersQueryRepository {

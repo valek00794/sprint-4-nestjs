@@ -2,7 +2,7 @@ import { Controller, Delete, Res } from '@nestjs/common';
 import { Response } from 'express';
 
 import { SETTINGS } from 'src/settings/settings';
-import { DbService } from './db.service';
+import { DbService } from '../app/db.service';
 
 @Controller(SETTINGS.PATH.clearDb)
 export class ClearDbController {
