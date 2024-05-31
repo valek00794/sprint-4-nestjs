@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 
 import { SETTINGS, StatusCodes } from 'src/settings/settings';
@@ -6,7 +6,9 @@ import { CreateUserModel } from './models/input/users.input.models';
 import { UsersService } from '../app/users.service';
 import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
+import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 
+@UseGuards(AuthBasicGuard)
 @Controller(SETTINGS.PATH.users)
 export class UsersController {
   constructor(
