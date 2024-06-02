@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  HttpStatus,
 } from '@nestjs/common';
 
-import { jwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
-import { ResultStatus, SETTINGS, StatusCodes } from 'src/settings/settings';
+import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
+import { ResultStatus, SETTINGS } from 'src/settings/settings';
 import { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
 import { AuthService } from './auth.service';
 import { UsersDevicesDocument } from '../infrastructure/devices/usersDevices.schema';
@@ -17,6 +18,7 @@ export class UsersDevicesService {
   constructor(
     protected authService: AuthService,
     protected usersDevicesRepository: UsersDevicesRepository,
+    protected jwtAdapter: JwtAdapter,
   ) {}
 
   async addUserDevice(
@@ -24,7 +26,7 @@ export class UsersDevicesService {
     deviceTitle: string,
     ipAddress: string,
   ): Promise<UsersDevicesDocument> {
-    const userVerifyInfo = await jwtAdapter.getUserInfoByToken(
+    const userVerifyInfo = await this.jwtAdapter.getUserInfoByToken(
       refreshToken,
       SETTINGS.JWT.RT_SECRET,
     );
@@ -40,11 +42,11 @@ export class UsersDevicesService {
   }
 
   async updateUserDevice(oldRefreshToken: string, refreshToken: string) {
-    const userVerifyInfoByOldToken = await jwtAdapter.getUserInfoByToken(
+    const userVerifyInfoByOldToken = await this.jwtAdapter.getUserInfoByToken(
       oldRefreshToken,
       SETTINGS.JWT.RT_SECRET,
     );
-    const userVerifyInfo = await jwtAdapter.getUserInfoByToken(
+    const userVerifyInfo = await this.jwtAdapter.getUserInfoByToken(
       refreshToken,
       SETTINGS.JWT.RT_SECRET,
     );
@@ -73,7 +75,7 @@ export class UsersDevicesService {
       throw new UnauthorizedException();
     }
     await this.usersDevicesRepository.deleteUserDevices(userVerifyInfo);
-    throw new HttpException(ResultStatus.NoContent, StatusCodes.NO_CONTENT_204);
+    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 
   async deleteUserDeviceById(refreshToken: string, deviceId: string) {
@@ -89,6 +91,6 @@ export class UsersDevicesService {
       throw new ForbiddenException();
     }
     await this.usersDevicesRepository.deleteUserDevicebyId(deviceId);
-    throw new HttpException(ResultStatus.NoContent, StatusCodes.NO_CONTENT_204);
+    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 }

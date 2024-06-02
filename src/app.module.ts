@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
 
 import { BlogsController } from './features/blogs/api/blogs.controller';
 import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository';
@@ -37,6 +39,8 @@ import { AuthController } from './features/users/api/auth.controller';
 import { AuthService } from './features/users/app/auth.service';
 import { UsersDevicesRepository } from './features/users/infrastructure/devices/usersDevices-repository';
 import { UsersDevicesService } from './features/users/app/userDevices.service';
+import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
+import { JwtAdapter } from './infrastructure/adapters/jwt/jwt-adapter';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -81,6 +85,9 @@ const usersProviders = [
         schema: LikeSchema,
       },
     ]),
+    JwtModule.register({
+      global: true,
+    }),
   ],
   controllers: [
     BlogsController,
@@ -95,6 +102,11 @@ const usersProviders = [
     ...usersProviders,
     DbService,
     LikesQueryRepository,
+    JwtAdapter,
+    {
+      provide: APP_GUARD,
+      useClass: AuthBearerGuard,
+    },
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -15,7 +16,7 @@ import { UsersRepository } from '../infrastructure/users/users.repository';
 import { CreateUserModel } from '../api/models/input/users.input.models';
 import { emailManager } from 'src/features/users/domain/managers/email-manager';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt.adapter';
-import { ResultStatus, StatusCodes } from 'src/settings/settings';
+import { ResultStatus } from 'src/settings/settings';
 import { PasswordRecoveryModel } from '../api/models/input/auth.input.models';
 
 @Injectable()
@@ -67,7 +68,7 @@ export class UsersService {
         throw new ServiceUnavailableException('Error sending confirmation email');
       }
     }
-    return true;
+    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 
   async updateUserPassword(userId: string, password: string): Promise<boolean> {
@@ -80,9 +81,13 @@ export class UsersService {
 
   async deleteUserById(id: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(id)) {
-      return false;
+      throw new NotFoundException('User not found');
     }
-    return await this.usersRepository.deleteUserById(id);
+    const result = await this.usersRepository.deleteUserById(id);
+    if (!result) {
+      throw new NotFoundException('User not found');
+    }
+    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 
   async passwordRecovery(email: string): Promise<null> {
@@ -111,7 +116,7 @@ export class UsersService {
       ...newUserRecoveryPasswordInfo,
       userId,
     });
-    throw new HttpException(ResultStatus.NoContent, StatusCodes.NO_CONTENT_204);
+    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 
   async confirmPasswordRecovery(passwordRecoveryModel: PasswordRecoveryModel): Promise<true> {
@@ -133,6 +138,6 @@ export class UsersService {
 
     await this.updateUserPassword(recoveryInfo!.userId!, passwordRecoveryModel.newPassword);
 
-    return true;
+    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 }

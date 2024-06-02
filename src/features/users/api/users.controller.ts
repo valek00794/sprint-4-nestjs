@@ -1,13 +1,26 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+  HttpStatus,
+} from '@nestjs/common';
 import { Response } from 'express';
 
-import { SETTINGS, StatusCodes } from 'src/settings/settings';
+import { SETTINGS } from 'src/settings/settings';
 import { CreateUserModel } from './models/input/users.input.models';
 import { UsersService } from '../app/users.service';
 import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
+import { Public } from '../domain/decorators/public.decorator';
 
+@Public()
 @UseGuards(AuthBasicGuard)
 @Controller(SETTINGS.PATH.users)
 export class UsersController {
@@ -18,8 +31,8 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() inputModel: CreateUserModel) {
-    const createdPost = await this.usersService.createUser(inputModel);
-    return this.usersQueryRepository.mapToOutput(createdPost);
+    const createdUser = await this.usersService.createUser(inputModel);
+    return this.usersQueryRepository.mapToOutput(createdUser);
   }
 
   @Get()
@@ -31,8 +44,8 @@ export class UsersController {
   async deleteUser(@Param('id') id: string, @Res() res: Response) {
     const deleteResult = await this.usersService.deleteUserById(id);
     if (deleteResult) {
-      return res.sendStatus(StatusCodes.NO_CONTENT_204);
+      return res.sendStatus(HttpStatus.NO_CONTENT);
     }
-    return res.sendStatus(StatusCodes.NOT_FOUND_404);
+    return res.sendStatus(HttpStatus.NOT_FOUND);
   }
 }

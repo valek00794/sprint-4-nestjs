@@ -1,9 +1,20 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  HttpStatus,
+} from '@nestjs/common';
 import { Response } from 'express';
 
 import { CreateBlogModel } from './models/input/blogs.input.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
-import { SETTINGS, StatusCodes } from 'src/settings/settings';
+import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { BlogsService } from '../app/blogs.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query-repository';
@@ -41,16 +52,16 @@ export class BlogsController {
     @Res() res: Response,
   ) {
     await this.blogsService.updateBlog(inputModel, id);
-    return res.sendStatus(StatusCodes.NO_CONTENT_204);
+    return res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
   @Delete(':id')
   async deleteBlog(@Param('id') id: string, @Res() res: Response) {
     const deleteResult = await this.blogsService.deleteBlog(id);
     if (deleteResult) {
-      return res.sendStatus(StatusCodes.NO_CONTENT_204);
+      return res.sendStatus(HttpStatus.NO_CONTENT);
     }
-    return res.sendStatus(StatusCodes.NOT_FOUND_404);
+    return res.sendStatus(HttpStatus.NOT_FOUND);
   }
 
   @Get(':blogId/posts')
@@ -61,10 +72,10 @@ export class BlogsController {
   ) {
     const posts = await this.postsQueryRepository.getPosts(query, blogId);
     if (!posts) {
-      res.sendStatus(StatusCodes.NOT_FOUND_404);
+      res.sendStatus(HttpStatus.NOT_FOUND);
       return;
     } else {
-      res.status(StatusCodes.OK_200).send(posts);
+      res.status(HttpStatus.OK).send(posts);
       return;
     }
   }
@@ -77,10 +88,10 @@ export class BlogsController {
   ) {
     const createdPost = await this.postsService.createPost(inputModel, blogId);
     if (!createdPost) {
-      res.sendStatus(StatusCodes.NOT_FOUND_404);
+      res.sendStatus(HttpStatus.NOT_FOUND);
       return;
     } else {
-      res.status(StatusCodes.CREATED_201).send(this.postsQueryRepository.mapToOutput(createdPost));
+      res.status(HttpStatus.CREATED).send(this.postsQueryRepository.mapToOutput(createdPost));
       return;
     }
   }

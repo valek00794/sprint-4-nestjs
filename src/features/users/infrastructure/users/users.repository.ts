@@ -40,30 +40,34 @@ export class UsersRepository {
   }
 
   async updateConfirmationInfo(userId: string, emailConfirmationInfo: UserEmailConfirmationInfo) {
-    return await this.userModel.updateOne(
-      { userId },
-      { $set: { emailConfirmation: { ...emailConfirmationInfo } } },
+    return await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        emailConfirmation: emailConfirmationInfo,
+      },
+      { new: true },
     );
   }
 
   async updateConfirmation(id: string) {
-    return await this.userModel.findByIdAndUpdate(id, { isConfirmed: true }, { new: true });
+    return await this.userModel.findByIdAndUpdate(
+      id,
+      { 'emailConfirmation.isConfirmed': true },
+      { new: true },
+    );
   }
 
   async updatePasswordRecoveryInfo(userId: string, updatedRecoveryInfo: UsersRecoveryPasssword) {
     return this.usersRecoveryPassswordModel.findByIdAndUpdate(
       userId,
       { ...updatedRecoveryInfo },
-      { new: true },
+      { upsert: true, new: true },
     );
   }
 
-  async findUserByConfirmationCodeOrUserId(confirmationCodeOrUserId: string) {
+  async findUserByConfirmationCode(confirmationCode: string) {
     return await this.userModel.findOne({
-      $or: [
-        { _id: confirmationCodeOrUserId },
-        { 'emailConfirmation.confirmationCode': confirmationCodeOrUserId },
-      ],
+      'emailConfirmation.confirmationCode': confirmationCode,
     });
   }
 
