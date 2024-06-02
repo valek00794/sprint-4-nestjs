@@ -6,7 +6,12 @@ import { AuthService } from '../app/auth.service';
 import { UsersService } from '../app/users.service';
 import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { UsersDevicesService } from '../app/userDevices.service';
-import { SignInModel, PasswordRecoveryModel } from './models/input/auth.input.models';
+import {
+  SignInModel,
+  PasswordRecoveryModel,
+  type EmailInputModel,
+  type RegistrationConirmationModel,
+} from './models/input/auth.input.models';
 import { UserInfo } from '../domain/users.types';
 import { CreateUserModel } from '../api/models/input/users.input.models';
 import { Public } from '../domain/decorators/public.decorator';
@@ -39,8 +44,8 @@ export class AuthController {
 
   @Public()
   @Post('/password-recovery')
-  async passwordRecovery(@Body('email') email: string) {
-    await this.usersService.passwordRecovery(email);
+  async passwordRecovery(@Body() inputModel: EmailInputModel) {
+    await this.usersService.passwordRecovery(inputModel.email);
   }
 
   @Public()
@@ -51,8 +56,8 @@ export class AuthController {
 
   @Public()
   @Post('/registration-confirmation')
-  async signUpConfimation(@Body('code') code: string) {
-    await this.authService.confirmEmail(code);
+  async signUpConfimation(@Body() inputModel: RegistrationConirmationModel) {
+    await this.authService.confirmEmail(inputModel.code);
   }
 
   @Public()
@@ -63,8 +68,8 @@ export class AuthController {
 
   @Public()
   @Post('/registration-email-resending')
-  async signUpEmailResending(@Body('email') email: string) {
-    await this.authService.resentConfirmEmail(email);
+  async signUpEmailResending(@Body() inputModel: EmailInputModel) {
+    await this.authService.resentConfirmEmail(inputModel.email);
   }
 
   @UseGuards(AuthBearerGuard)
