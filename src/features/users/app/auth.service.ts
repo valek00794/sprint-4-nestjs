@@ -9,14 +9,14 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns/add';
 
-import type { UsersRepository } from '../infrastructure/users/users.repository';
+import { UsersRepository } from '../infrastructure/users/users.repository';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt.adapter';
 import { emailManager } from '../domain/managers/email-manager';
 import { jwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { ResultStatus, SETTINGS, StatusCodes } from 'src/settings/settings';
-import type { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
-import type { UserDeviceInfoType } from '../domain/users.types';
-import type { JWTTokensOutType } from 'src/infrastructure/adapters/jwt/jwt-types';
+import { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
+import { UserDeviceInfoType } from '../domain/users.types';
+import { JWTTokensOutType } from 'src/infrastructure/adapters/jwt/jwt-types';
 import { Types } from 'mongoose';
 
 @Injectable()
@@ -28,7 +28,8 @@ export class AuthService {
 
   async checkCredential(userId: string, password: string, passwordHash: string): Promise<boolean> {
     const user = await this.usersRepository.findUserByConfirmationCodeOrUserId(userId);
-    if (user !== null && !user.emailConfirmation!.isConfirmed) return false;
+    if (user !== null && user.emailConfirmation !== null && !user.emailConfirmation!.isConfirmed)
+      return false;
     const isAuth = await bcryptArapter.checkPassword(password, passwordHash);
     return isAuth ? true : false;
   }

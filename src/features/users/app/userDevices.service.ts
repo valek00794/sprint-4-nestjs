@@ -8,9 +8,9 @@ import {
 
 import { jwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { ResultStatus, SETTINGS, StatusCodes } from 'src/settings/settings';
-import type { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
-import type { AuthService } from './auth.service';
-import type { UsersDevicesDocument } from '../infrastructure/devices/usersDevices.schema';
+import { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
+import { AuthService } from './auth.service';
+import { UsersDevicesDocument } from '../infrastructure/devices/usersDevices.schema';
 
 @Injectable()
 export class UsersDevicesService {

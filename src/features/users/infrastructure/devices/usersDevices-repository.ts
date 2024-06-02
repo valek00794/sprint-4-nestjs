@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { UsersDevices, type UsersDevicesDocument } from './usersDevices.schema';
-import type { UserDeviceInfoType, UsersDevicesType } from '../../domain/users.types';
+import { UserDeviceInfoType, UsersDevicesType } from '../../domain/users.types';
 
 @Injectable()
 export class UsersDevicesRepository {

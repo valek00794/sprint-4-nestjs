@@ -33,10 +33,21 @@ import {
   UsersDevices,
   UsersDevicesSchema,
 } from './features/users/infrastructure/devices/usersDevices.schema';
+import { AuthController } from './features/users/api/auth.controller';
+import { AuthService } from './features/users/app/auth.service';
+import { UsersDevicesRepository } from './features/users/infrastructure/devices/usersDevices-repository';
+import { UsersDevicesService } from './features/users/app/userDevices.service';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
-const usersProviders = [UsersService, UsersRepository, UsersQueryRepository];
+const usersProviders = [
+  UsersService,
+  UsersRepository,
+  UsersQueryRepository,
+  AuthService,
+  UsersDevicesService,
+  UsersDevicesRepository,
+];
 @Module({
   imports: [
     MongooseModule.forRoot(SETTINGS.DB.mongoURI),
@@ -71,7 +82,13 @@ const usersProviders = [UsersService, UsersRepository, UsersQueryRepository];
       },
     ]),
   ],
-  controllers: [BlogsController, ClearDbController, PostsController, UsersController],
+  controllers: [
+    BlogsController,
+    ClearDbController,
+    PostsController,
+    UsersController,
+    AuthController,
+  ],
   providers: [
     ...postsProviders,
     ...blogsProviders,
@@ -80,4 +97,4 @@ const usersProviders = [UsersService, UsersRepository, UsersQueryRepository];
     LikesQueryRepository,
   ],
 })
-export class AppModule {}
+export class AppModule { }

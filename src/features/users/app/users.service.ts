@@ -16,6 +16,7 @@ import { CreateUserModel } from '../api/models/input/users.input.models';
 import { emailManager } from 'src/features/users/domain/managers/email-manager';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt.adapter';
 import { ResultStatus, StatusCodes } from 'src/settings/settings';
+import { PasswordRecoveryModel } from '../api/models/input/auth.input.models';
 
 @Injectable()
 export class UsersService {
@@ -32,6 +33,7 @@ export class UsersService {
       email: inputModel.email,
       passwordHash,
       createdAt: new Date().toISOString(),
+      emailConfirmation: null,
     });
     return await this.usersRepository.createUser(signUpData);
   }
@@ -112,14 +114,16 @@ export class UsersService {
     throw new HttpException(ResultStatus.NoContent, StatusCodes.NO_CONTENT_204);
   }
 
-  async confirmPasswordRecovery(recoveryCode: string, newPassword: string): Promise<true> {
-    const recoveryInfo = await this.usersRepository.findPasswordRecoveryInfo(recoveryCode);
+  async confirmPasswordRecovery(passwordRecoveryModel: PasswordRecoveryModel): Promise<true> {
+    const recoveryInfo = await this.usersRepository.findPasswordRecoveryInfo(
+      passwordRecoveryModel.recoveryCode,
+    );
     if (recoveryInfo === null) {
       throw new BadRequestException('User with current recovery code not found');
     }
 
     if (recoveryInfo !== null) {
-      if (recoveryInfo.recoveryCode !== recoveryCode) {
+      if (recoveryInfo.recoveryCode !== passwordRecoveryModel.recoveryCode) {
         throw new BadRequestException('Recovery code does not match');
       }
       if (recoveryInfo.expirationDate < new Date()) {
@@ -127,7 +131,7 @@ export class UsersService {
       }
     }
 
-    await this.updateUserPassword(recoveryInfo!.userId!, newPassword);
+    await this.updateUserPassword(recoveryInfo!.userId!, passwordRecoveryModel.newPassword);
 
     return true;
   }
