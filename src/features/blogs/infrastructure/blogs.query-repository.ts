@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Blog, BlogDocument } from './blogs.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -34,15 +34,12 @@ export class BlogsQueryRepository {
     );
   }
 
-  async findBlog(id: string): Promise<BlogView> {
+  async findBlog(id: string): Promise<BlogView | null> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new NotFoundException('Invalid ID');
+      return null;
     }
     const blog = await this.blogModel.findById(id);
-    if (!blog) {
-      throw new NotFoundException('Blog not found');
-    }
-    return this.mapToOutput(blog);
+    return blog ? this.mapToOutput(blog) : null;
   }
   mapToOutput(blog: BlogDocument): BlogView {
     return new BlogView(

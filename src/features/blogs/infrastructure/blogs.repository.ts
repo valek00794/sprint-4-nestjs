@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from './blogs.schema';
 import { Model } from 'mongoose';
-import { CreateBlogModel } from '../api/models/input/blogs.input.model';
+import { CreateBlogInputModel } from '../api/models/input/blogs.input.model';
 
 @Injectable()
 export class BlogsRepository {
   constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) {}
 
-  async createBlog(newBlog: CreateBlogModel) {
+  async createBlog(newBlog: CreateBlogInputModel) {
     const blog = new this.blogModel(newBlog);
     await blog.save();
     return blog;

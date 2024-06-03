@@ -18,8 +18,9 @@ import { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-r
 import { UserDeviceInfoType } from '../domain/users.types';
 import { JWTTokensOutType } from 'src/infrastructure/adapters/jwt/jwt-types';
 import { Types } from 'mongoose';
-import type { SignInModel } from '../api/models/input/auth.input.models';
+import type { SignInInputModel } from '../api/models/input/auth.input.models';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
+import type { UserDocument } from '../infrastructure/users/users.schema';
 
 @Injectable()
 export class AuthService {
@@ -29,25 +30,15 @@ export class AuthService {
     protected jwtAdapter: JwtAdapter,
   ) {}
 
-  async signIn(inputModel: SignInModel): Promise<JWTTokensOutType> {
+  async signIn(inputModel: SignInInputModel): Promise<JWTTokensOutType> {
     const user = await this.usersRepository.findUserByLoginOrEmail(inputModel.loginOrEmail);
     if (user === null) throw new UnauthorizedException();
     const isAuth = await bcryptArapter.checkPassword(inputModel.password, user.passwordHash);
     if (!isAuth) throw new UnauthorizedException();
     return await this.jwtAdapter.createJWTs(user._id!);
   }
-  /*
-  async checkCredential(userId: string, password: string, passwordHash: string): Promise<boolean> {
-    const user = await this.usersRepository.findUserById(userId);
-    if (user === null || (user.emailConfirmation !== null && !user.emailConfirmation!.isConfirmed))
-      throw new UnauthorizedException();
 
-    const isAuth = await bcryptArapter.checkPassword(password, passwordHash);
-    if (!isAuth) throw new UnauthorizedException();
-    return isAuth;
-  }*/
-
-  async confirmEmail(code: string): Promise<boolean> {
+  async confirmEmail(code: string): Promise<UserDocument | null> {
     const user = await this.usersRepository.findUserByConfirmationCode(code);
     if (user === null) {
       throw new NotFoundException('User not found');
@@ -65,12 +56,10 @@ export class AuthService {
         throw new BadRequestException('Verification code has expired, needs to be requested again');
       }
     }
-
-    await this.usersRepository.updateConfirmation(user!._id.toString());
-    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
+    return await this.usersRepository.updateConfirmation(user!._id.toString());
   }
 
-  async resentConfirmEmail(email: string): Promise<boolean> {
+  async resentConfirmEmail(email: string): Promise<UserDocument | null> {
     const user = await this.usersRepository.findUserByLoginOrEmail(email);
     if (user === null) {
       throw new NotFoundException('User with current email not found');
@@ -99,11 +88,10 @@ export class AuthService {
       throw new ServiceUnavailableException('Error sending confirmation email');
     }
 
-    await this.usersRepository.updateConfirmationInfo(
+    return await this.usersRepository.updateConfirmationInfo(
       user._id!.toString(),
       newUserConfirmationInfo,
     );
-    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 
   async checkUserByRefreshToken(oldRefreshToken: string): Promise<UserDeviceInfoType | null> {

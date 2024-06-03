@@ -1,10 +1,8 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
-  HttpStatus,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -16,8 +14,7 @@ import { UsersRepository } from '../infrastructure/users/users.repository';
 import { CreateUserModel } from '../api/models/input/users.input.models';
 import { emailManager } from 'src/features/users/domain/managers/email-manager';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt.adapter';
-import { ResultStatus } from 'src/settings/settings';
-import { PasswordRecoveryModel } from '../api/models/input/auth.input.models';
+import { PasswordRecoveryInputModel } from '../api/models/input/auth.input.models';
 
 @Injectable()
 export class UsersService {
@@ -68,12 +65,12 @@ export class UsersService {
         throw new ServiceUnavailableException('Error sending confirmation email');
       }
     }
-    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
+    return;
   }
 
   async updateUserPassword(userId: string, password: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(userId)) {
-      return false;
+      throw new NotFoundException('User not found');
     }
     const passwordHash = await bcryptArapter.generateHash(password);
     return await this.usersRepository.updateUserPassword(userId, passwordHash);
@@ -83,14 +80,10 @@ export class UsersService {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('User not found');
     }
-    const result = await this.usersRepository.deleteUserById(id);
-    if (!result) {
-      throw new NotFoundException('User not found');
-    }
-    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
+    return await this.usersRepository.deleteUserById(id);
   }
 
-  async passwordRecovery(email: string): Promise<null> {
+  async passwordRecovery(email: string): Promise<UserDocument> {
     const user = await this.usersRepository.findUserByLoginOrEmail(email);
     if (user === null) {
       throw new NotFoundException('User not found');
@@ -112,14 +105,15 @@ export class UsersService {
       throw new BadRequestException('Error sending confirmation email');
     }
     const userId = user!._id!.toString();
-    await this.usersRepository.updatePasswordRecoveryInfo(userId, {
+    return await this.usersRepository.updatePasswordRecoveryInfo(userId, {
       ...newUserRecoveryPasswordInfo,
       userId,
     });
-    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
   }
 
-  async confirmPasswordRecovery(passwordRecoveryModel: PasswordRecoveryModel): Promise<true> {
+  async confirmPasswordRecovery(
+    passwordRecoveryModel: PasswordRecoveryInputModel,
+  ): Promise<boolean> {
     const recoveryInfo = await this.usersRepository.findPasswordRecoveryInfo(
       passwordRecoveryModel.recoveryCode,
     );
@@ -136,8 +130,6 @@ export class UsersService {
       }
     }
 
-    await this.updateUserPassword(recoveryInfo!.userId!, passwordRecoveryModel.newPassword);
-
-    throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
+    return await this.updateUserPassword(recoveryInfo!.userId!, passwordRecoveryModel.newPassword);
   }
 }

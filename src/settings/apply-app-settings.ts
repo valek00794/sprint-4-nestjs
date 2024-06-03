@@ -1,5 +1,7 @@
 import { BadRequestException, INestApplication, ValidationPipe } from '@nestjs/common';
 import type { APIErrorResult } from './exception.filter.types';
+import { useContainer } from 'class-validator';
+import { AppModule } from 'src/app.module';
 
 export const applyAppSettings = (app: INestApplication) => {
   app.enableCors();
@@ -22,4 +24,5 @@ export const applyAppSettings = (app: INestApplication) => {
       },
     }),
   );
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 };

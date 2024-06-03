@@ -72,13 +72,13 @@ export class PostsQueryRepository {
     );
   }
 
-  async findPost(id: string, userId?: string): Promise<PostView> {
+  async findPost(id: string, userId?: string): Promise<PostView | null> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new NotFoundException('Invalid ID');
+      return null;
     }
     const post = await this.postModel.findById(id);
     if (!post) {
-      throw new NotFoundException('Post not found');
+      return null;
     }
 
     const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id);

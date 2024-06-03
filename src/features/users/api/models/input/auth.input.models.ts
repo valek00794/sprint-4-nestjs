@@ -1,14 +1,14 @@
 import { IsEmail, IsNotEmpty, Length } from 'class-validator';
 import { VALIDATE_PHARAMS } from './users.input.models';
 
-export class SignInModel {
+export class SignInInputModel {
   @IsNotEmpty()
   loginOrEmail: string;
   @IsNotEmpty()
   password: string;
 }
 
-export class PasswordRecoveryModel {
+export class PasswordRecoveryInputModel {
   @Length(VALIDATE_PHARAMS.password.minLength, VALIDATE_PHARAMS.password.maxLength)
   newPassword: string;
   @IsNotEmpty()
@@ -20,7 +20,7 @@ export class EmailInputModel {
   email: string;
 }
 
-export class RegistrationConirmationModel {
+export class ConirmationCodeInputModel {
   @IsNotEmpty()
   code: string;
 }

@@ -39,7 +39,10 @@ export class UsersRepository {
     return updatedResult ? true : false;
   }
 
-  async updateConfirmationInfo(userId: string, emailConfirmationInfo: UserEmailConfirmationInfo) {
+  async updateConfirmationInfo(
+    userId: string,
+    emailConfirmationInfo: UserEmailConfirmationInfo,
+  ): Promise<UserDocument | null> {
     return await this.userModel.findByIdAndUpdate(
       userId,
       {
@@ -57,7 +60,10 @@ export class UsersRepository {
     );
   }
 
-  async updatePasswordRecoveryInfo(userId: string, updatedRecoveryInfo: UsersRecoveryPasssword) {
+  async updatePasswordRecoveryInfo(
+    userId: string,
+    updatedRecoveryInfo: UsersRecoveryPasssword,
+  ): Promise<UserDocument> {
     return this.usersRecoveryPassswordModel.findByIdAndUpdate(
       userId,
       { ...updatedRecoveryInfo },

@@ -6,11 +6,11 @@ import {
   Param,
   Post,
   Query,
-  Res,
   UseGuards,
   HttpStatus,
+  HttpCode,
+  NotFoundException,
 } from '@nestjs/common';
-import { Response } from 'express';
 
 import { SETTINGS } from 'src/settings/settings';
 import { CreateUserModel } from './models/input/users.input.models';
@@ -41,11 +41,11 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async deleteUser(@Param('id') id: string, @Res() res: Response) {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteUser(@Param('id') id: string) {
     const deleteResult = await this.usersService.deleteUserById(id);
-    if (deleteResult) {
-      return res.sendStatus(HttpStatus.NO_CONTENT);
+    if (!deleteResult) {
+      throw new NotFoundException('User not found');
     }
-    return res.sendStatus(HttpStatus.NOT_FOUND);
   }
 }

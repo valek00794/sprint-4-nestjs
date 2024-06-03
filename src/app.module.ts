@@ -41,6 +41,8 @@ import { UsersDevicesRepository } from './features/users/infrastructure/devices/
 import { UsersDevicesService } from './features/users/app/userDevices.service';
 import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
 import { JwtAdapter } from './infrastructure/adapters/jwt/jwt-adapter';
+import { IsUserAlreadyExistConstraint } from './infrastructure/pipes/user-exists.validation.pipe';
+import { BlogIdExistConstraint } from './infrastructure/pipes/blogId.validation.pipe';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -52,6 +54,8 @@ const usersProviders = [
   UsersDevicesService,
   UsersDevicesRepository,
 ];
+
+const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
 @Module({
   imports: [
     MongooseModule.forRoot(SETTINGS.DB.mongoURI),
@@ -100,6 +104,7 @@ const usersProviders = [
     ...postsProviders,
     ...blogsProviders,
     ...usersProviders,
+    ...validationConstraints,
     DbService,
     LikesQueryRepository,
     JwtAdapter,
