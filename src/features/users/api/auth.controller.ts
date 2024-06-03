@@ -27,7 +27,7 @@ import {
 } from './models/input/auth.input.models';
 import { UserInfo } from '../domain/users.types';
 import { CreateUserModel } from '../api/models/input/users.input.models';
-import { Public } from '../domain/decorators/public.decorator';
+import { Public } from '../../../infrastructure/decorators/public.decorator';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 
 interface CustomRequest extends Request {
@@ -47,7 +47,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signIn(
     @Body() inputModel: SignInInputModel,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string,
   ) {

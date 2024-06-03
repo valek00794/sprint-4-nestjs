@@ -18,7 +18,7 @@ import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { CreatePostModel } from './models/input/posts.input.model';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { PostsService } from '../app/posts.service';
-import { Public } from 'src/features/users/domain/decorators/public.decorator';
+import { Public } from 'src/infrastructure/decorators/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 @Public()
 @Controller(SETTINGS.PATH.posts)

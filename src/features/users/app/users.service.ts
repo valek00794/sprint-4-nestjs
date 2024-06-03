@@ -12,9 +12,9 @@ import { add } from 'date-fns/add';
 import { User, UserDocument } from '../infrastructure/users/users.schema';
 import { UsersRepository } from '../infrastructure/users/users.repository';
 import { CreateUserModel } from '../api/models/input/users.input.models';
-import { emailManager } from 'src/features/users/domain/managers/email-manager';
-import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt.adapter';
+import { emailManager } from 'src/features/common/managers/email-manager';
 import { PasswordRecoveryInputModel } from '../api/models/input/auth.input.models';
+import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter';
 
 @Injectable()
 export class UsersService {

@@ -1,4 +1,4 @@
-import { emailAdapter } from '../../../../infrastructure/adapters/email.adapter';
+import { emailAdapter } from '../../../infrastructure/adapters/email/email.adapter';
 
 export const emailManager = {
   async sendEmailConfirmationMessage(email: string, code: string) {

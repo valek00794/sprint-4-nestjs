@@ -11,8 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns/add';
 
 import { UsersRepository } from '../infrastructure/users/users.repository';
-import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt.adapter';
-import { emailManager } from '../domain/managers/email-manager';
+import { emailManager } from '../../common/managers/email-manager';
 import { ResultStatus, SETTINGS } from 'src/settings/settings';
 import { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
 import { UserDeviceInfoType } from '../domain/users.types';
@@ -21,6 +20,7 @@ import { Types } from 'mongoose';
 import type { SignInInputModel } from '../api/models/input/auth.input.models';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import type { UserDocument } from '../infrastructure/users/users.schema';
+import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter';
 
 @Injectable()
 export class AuthService {

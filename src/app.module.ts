@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, RequestMethod, type MiddlewareConsumer, type NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
@@ -43,6 +43,14 @@ import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
 import { JwtAdapter } from './infrastructure/adapters/jwt/jwt-adapter';
 import { IsUserAlreadyExistConstraint } from './infrastructure/pipes/user-exists.validation.pipe';
 import { BlogIdExistConstraint } from './infrastructure/pipes/blogId.validation.pipe';
+import {
+  ApiRequests,
+  ApiRequestsSchema,
+} from './infrastructure/middlewares/apiLoggerMiddleware/apiRequests.schema';
+import {
+  ApiRequestsCounterMiddleware,
+  ApiRequestsLogMiddleware,
+} from './infrastructure/middlewares/apiLoggerMiddleware/apiRequestsLog.middleware';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -88,6 +96,10 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
         name: Like.name,
         schema: LikeSchema,
       },
+      {
+        name: ApiRequests.name,
+        schema: ApiRequestsSchema,
+      },
     ]),
     JwtModule.register({
       global: true,
@@ -114,4 +126,14 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(ApiRequestsLogMiddleware, ApiRequestsCounterMiddleware)
+      .exclude(
+        { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/me', method: RequestMethod.GET },
+      )
+      .forRoutes(AuthController);
+  }
+}

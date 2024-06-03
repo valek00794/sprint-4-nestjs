@@ -24,7 +24,7 @@ import { BlogsService } from '../app/blogs.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query-repository';
 
 import { PostsService } from 'src/features/posts/app/posts.service';
-import { Public } from 'src/features/users/domain/decorators/public.decorator';
+import { Public } from 'src/infrastructure/decorators/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 @Public()
 @Controller(SETTINGS.PATH.blogs)
