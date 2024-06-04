@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
+import { Module, RequestMethod, type MiddlewareConsumer, type NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
 
 import { BlogsController } from './features/blogs/api/blogs.controller';
 import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository';
-import { SETTINGS } from './settings';
+import { SETTINGS } from './settings/settings';
 import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.query-repository';
 import { Blog, BlogsSchema } from './features/blogs/infrastructure/blogs.schema';
-import { ClearDbController } from './features/common/clear-db.controller';
-import { DbService } from './features/common/db.service';
 import { PostsController } from './features/posts/api/posts.controller';
 import { PostsRepository } from './features/posts/infrastructure/posts.repository';
 import { PostsQueryRepository } from './features/posts/infrastructure/posts.query-repository';
@@ -21,13 +21,49 @@ import {
   User,
   UserEmailConfirmationInfo,
   UserEmailConfirmationInfoSchema,
+  UsersRecoveryPasssword,
   UsersSchema,
-} from './features/users/infrastructure/Users.schema';
-import { UsersRepository } from './features/users/infrastructure/users.repository';
-import { UsersQueryRepository } from './features/users/infrastructure/users.query-repository';
+  usersRecoveryPassswordSchema,
+} from './features/users/infrastructure/users/users.schema';
+import { UsersRepository } from './features/users/infrastructure/users/users.repository';
+import { UsersQueryRepository } from './features/users/infrastructure/users/users.query-repository';
 import { LikesQueryRepository } from './features/likes/infrastructure/likeStatus.query-repository';
 import { Like, LikeSchema } from './features/likes/infrastructure/likeStatus.schema';
+import { ClearDbController } from './features/common/api/clear-db.controller';
+import { DbService } from './features/common/app/db.service';
+import {
+  UsersDevices,
+  UsersDevicesSchema,
+} from './features/users/infrastructure/devices/usersDevices.schema';
+import { AuthController } from './features/users/api/auth.controller';
+import { AuthService } from './features/users/app/auth.service';
+import { UsersDevicesRepository } from './features/users/infrastructure/devices/usersDevices-repository';
+import { UsersDevicesService } from './features/users/app/userDevices.service';
+import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
+import { JwtAdapter } from './infrastructure/adapters/jwt/jwt-adapter';
+import { IsUserAlreadyExistConstraint } from './infrastructure/pipes/user-exists.validation.pipe';
+import { BlogIdExistConstraint } from './infrastructure/pipes/blogId.validation.pipe';
+import {
+  ApiRequests,
+  ApiRequestsSchema,
+} from './infrastructure/middlewares/apiLoggerMiddleware/apiRequests.schema';
+import {
+  ApiRequestsCounterMiddleware,
+  ApiRequestsLogMiddleware,
+} from './infrastructure/middlewares/apiLoggerMiddleware/apiRequestsLog.middleware';
 
+const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
+const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
+const usersProviders = [
+  UsersService,
+  UsersRepository,
+  UsersQueryRepository,
+  AuthService,
+  UsersDevicesService,
+  UsersDevicesRepository,
+];
+
+const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
 @Module({
   imports: [
     MongooseModule.forRoot(SETTINGS.DB.mongoURI),
@@ -45,28 +81,59 @@ import { Like, LikeSchema } from './features/likes/infrastructure/likeStatus.sch
         schema: UsersSchema,
       },
       {
+        name: UsersRecoveryPasssword.name,
+        schema: usersRecoveryPassswordSchema,
+      },
+      {
         name: UserEmailConfirmationInfo.name,
         schema: UserEmailConfirmationInfoSchema,
+      },
+      {
+        name: UsersDevices.name,
+        schema: UsersDevicesSchema,
       },
       {
         name: Like.name,
         schema: LikeSchema,
       },
+      {
+        name: ApiRequests.name,
+        schema: ApiRequestsSchema,
+      },
     ]),
+    JwtModule.register({
+      global: true,
+    }),
   ],
-  controllers: [BlogsController, ClearDbController, PostsController, UsersController],
+  controllers: [
+    BlogsController,
+    ClearDbController,
+    PostsController,
+    UsersController,
+    AuthController,
+  ],
   providers: [
-    BlogsService,
-    BlogsRepository,
-    BlogsQueryRepository,
+    ...postsProviders,
+    ...blogsProviders,
+    ...usersProviders,
+    ...validationConstraints,
     DbService,
-    PostsService,
-    PostsRepository,
-    PostsQueryRepository,
-    UsersService,
-    UsersRepository,
-    UsersQueryRepository,
     LikesQueryRepository,
+    JwtAdapter,
+    {
+      provide: APP_GUARD,
+      useClass: AuthBearerGuard,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(ApiRequestsLogMiddleware, ApiRequestsCounterMiddleware)
+      .exclude(
+        { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/me', method: RequestMethod.GET },
+      )
+      .forRoutes(AuthController);
+  }
+}

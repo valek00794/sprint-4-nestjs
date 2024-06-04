@@ -16,21 +16,15 @@ export class PostsService {
   ) {}
 
   async createPost(inputModel: CreatePostModel, blogId?: string): Promise<PostDocument> {
-    if (blogId && !Types.ObjectId.isValid(blogId)) {
-      throw new NotFoundException('Invalid blogId');
-    }
     const getBlogId = blogId && Types.ObjectId.isValid(blogId) ? blogId : inputModel.blogId;
     const blog = await this.blogsRepository.findBlog(getBlogId);
-    if (!blog) {
-      throw new NotFoundException('Blog not found');
-    }
     const newPosts = new this.postModel({
       title: inputModel.title,
       shortDescription: inputModel.shortDescription,
       content: inputModel.content,
       createdAt: new Date().toISOString(),
       blogId: new Types.ObjectId(getBlogId),
-      blogName: blog.name,
+      blogName: blog!.name,
     });
 
     return await this.postsRepository.createPost(newPosts);

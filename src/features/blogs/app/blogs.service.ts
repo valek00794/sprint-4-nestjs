@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { Blog, BlogDocument } from '../infrastructure/blogs.schema';
-import { CreateBlogModel } from '../api/models/input/blogs.input.model';
+import { CreateBlogInputModel } from '../api/models/input/blogs.input.model';
 
 @Injectable()
 export class BlogsService {
@@ -12,7 +12,7 @@ export class BlogsService {
     @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
   ) {}
 
-  async createBlog(inputModel: CreateBlogModel) {
+  async createBlog(inputModel: CreateBlogInputModel) {
     const newBlog = new this.blogModel({
       name: inputModel.name,
       description: inputModel.description,
@@ -22,7 +22,7 @@ export class BlogsService {
     });
     return await this.blogsRepository.createBlog(newBlog);
   }
-  async updateBlog(inputModel: CreateBlogModel, id: string): Promise<boolean> {
+  async updateBlog(inputModel: CreateBlogInputModel, id: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Invalid ID');
     }

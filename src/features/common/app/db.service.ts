@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogDocument } from '../blogs/infrastructure/blogs.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Post, type PostDocument } from '../posts/infrastructure/posts.schema';
-import { User, type UserDocument } from '../users/infrastructure/Users.schema';
-
+import { Blog, BlogDocument } from 'src/features/blogs/infrastructure/blogs.schema';
+import { Post, PostDocument } from 'src/features/posts/infrastructure/posts.schema';
+import { User, UserDocument } from 'src/features/users/infrastructure/users/users.schema';
 @Injectable()
 export class DbService {
   constructor(
