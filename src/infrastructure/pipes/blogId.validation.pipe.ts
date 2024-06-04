@@ -4,6 +4,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
+
 import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.query-repository';
 
 @ValidatorConstraint({ async: true })

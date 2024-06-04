@@ -15,6 +15,7 @@ import { CreateUserModel } from '../api/models/input/users.input.models';
 import { emailManager } from 'src/features/common/managers/email-manager';
 import { PasswordRecoveryInputModel } from '../api/models/input/auth.input.models';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter';
+import { FieldError } from 'src/settings/exception.filter.types';
 
 @Injectable()
 export class UsersService {
@@ -102,7 +103,9 @@ export class UsersService {
       );
     } catch (error) {
       console.error(error);
-      throw new BadRequestException('Error sending confirmation email');
+      throw new BadRequestException([
+        new FieldError('Error sending confirmation email', 'email sender'),
+      ]);
     }
     const userId = user!._id!.toString();
     return await this.usersRepository.updatePasswordRecoveryInfo(userId, {
@@ -118,15 +121,21 @@ export class UsersService {
       passwordRecoveryModel.recoveryCode,
     );
     if (recoveryInfo === null) {
-      throw new BadRequestException('User with current recovery code not found');
+      throw new BadRequestException([
+        new FieldError('User with current recovery code not found', 'recovery code'),
+      ]);
     }
 
     if (recoveryInfo !== null) {
       if (recoveryInfo.recoveryCode !== passwordRecoveryModel.recoveryCode) {
-        throw new BadRequestException('Recovery code does not match');
+        throw new BadRequestException([
+          new FieldError('Recovery code does not match', 'recovery code'),
+        ]);
       }
       if (recoveryInfo.expirationDate < new Date()) {
-        throw new BadRequestException('Recovery code has expired, needs to be requested again');
+        throw new BadRequestException([
+          new FieldError('Recovery code has expired, needs to be requested again', 'recovery code'),
+        ]);
       }
     }
 

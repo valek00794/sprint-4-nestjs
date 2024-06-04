@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Post, PostDocument } from './posts.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -18,16 +18,20 @@ export class PostsQueryRepository {
     protected likesQueryRepository: LikesQueryRepository,
   ) {}
 
-  async getPosts(query?: SearchQueryParametersType, blogId?: string, userId?: string) {
+  async getPosts(
+    query?: SearchQueryParametersType,
+    blogId?: string,
+    userId?: string,
+  ): Promise<false | Paginator<PostView[]>> {
     if (blogId && !Types.ObjectId.isValid(blogId)) {
-      throw new NotFoundException('Invalid ID');
+      return false;
     }
     let blog;
     if (blogId) {
       blog = await this.blogModel.findById(blogId);
     }
     if (!blog && blogId) {
-      throw new NotFoundException('Blog not found');
+      return false;
     }
     const sanitizationQuery = getSanitizationQuery(query);
     let findOptions: Record<string, any> = {};

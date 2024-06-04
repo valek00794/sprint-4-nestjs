@@ -1,26 +1,24 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
   UnauthorizedException,
-  HttpStatus,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns/add';
 
 import { UsersRepository } from '../infrastructure/users/users.repository';
 import { emailManager } from '../../common/managers/email-manager';
-import { ResultStatus, SETTINGS } from 'src/settings/settings';
+import { SETTINGS } from 'src/settings/settings';
 import { UsersDevicesRepository } from '../infrastructure/devices/usersDevices-repository';
 import { UserDeviceInfoType } from '../domain/users.types';
 import { JWTTokensOutType } from 'src/infrastructure/adapters/jwt/jwt-types';
-import { Types } from 'mongoose';
 import type { SignInInputModel } from '../api/models/input/auth.input.models';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import type { UserDocument } from '../infrastructure/users/users.schema';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter';
+import { FieldError } from 'src/settings/exception.filter.types';
 
 @Injectable()
 export class AuthService {
@@ -41,19 +39,27 @@ export class AuthService {
   async confirmEmail(code: string): Promise<UserDocument | null> {
     const user = await this.usersRepository.findUserByConfirmationCode(code);
     if (user === null) {
-      throw new NotFoundException('User not found');
+      throw new BadRequestException([
+        { message: 'User with verification code not found', field: 'code' },
+      ]);
     }
     const userConfirmationInfo = user.emailConfirmation;
 
     if (user !== null && userConfirmationInfo !== null) {
       if (userConfirmationInfo.isConfirmed) {
-        throw new BadRequestException('User with current confirmation code already confirmed');
+        throw new BadRequestException([
+          { message: 'Verification code does not match', field: 'code' },
+        ]);
       }
       if (userConfirmationInfo.confirmationCode !== code) {
-        throw new BadRequestException('Verification code does not match');
+        throw new BadRequestException([
+          { message: 'Verification code does not match', field: 'code' },
+        ]);
       }
       if (userConfirmationInfo.expirationDate < new Date()) {
-        throw new BadRequestException('Verification code has expired, needs to be requested again');
+        throw new BadRequestException([
+          { message: 'Verification code has expired, needs to be requested again', field: 'code' },
+        ]);
       }
     }
     return await this.usersRepository.updateConfirmation(user!._id.toString());
@@ -62,11 +68,13 @@ export class AuthService {
   async resentConfirmEmail(email: string): Promise<UserDocument | null> {
     const user = await this.usersRepository.findUserByLoginOrEmail(email);
     if (user === null) {
-      throw new NotFoundException('User with current email not found');
+      throw new BadRequestException([new FieldError('User with current email not found', 'email')]);
     }
     const userConfirmationInfo = user.emailConfirmation;
     if (userConfirmationInfo !== null && userConfirmationInfo.isConfirmed) {
-      throw new BadRequestException('User with current email already confirmed');
+      throw new BadRequestException([
+        new FieldError('User with current email already confirmed', 'email'),
+      ]);
     }
 
     const newUserConfirmationInfo = {
@@ -124,7 +132,7 @@ export class AuthService {
 
     return userDeviceInfo;
   }
-
+  /*
   async renewTokens(oldRefreshToken: string): Promise<JWTTokensOutType | null> {
     const userVerifyInfo = await this.checkUserByRefreshToken(oldRefreshToken);
     if (userVerifyInfo === null) {
@@ -136,7 +144,7 @@ export class AuthService {
     );
     return tokens;
   }
-
+  
   async logoutUser(oldRefreshToken: string): Promise<null> {
     const userVerifyInfo = await this.checkUserByRefreshToken(oldRefreshToken);
     if (userVerifyInfo === null) {
@@ -144,5 +152,5 @@ export class AuthService {
     }
     await this.usersDevicesRepository.deleteUserDevicebyId(userVerifyInfo.deviceId);
     throw new HttpException(ResultStatus.NoContent, HttpStatus.NO_CONTENT);
-  }
+  }*/
 }

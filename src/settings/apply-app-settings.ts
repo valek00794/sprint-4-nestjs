@@ -2,6 +2,7 @@ import { BadRequestException, INestApplication, ValidationPipe } from '@nestjs/c
 import type { APIErrorResult } from './exception.filter.types';
 import { useContainer } from 'class-validator';
 import { AppModule } from 'src/app.module';
+import { HttpExceptionFilter } from 'src/infrastructure/exception.filter';
 
 export const applyAppSettings = (app: INestApplication) => {
   app.enableCors();
@@ -20,9 +21,10 @@ export const applyAppSettings = (app: INestApplication) => {
             });
           }
         });
-        throw new BadRequestException(errorsForResponse);
+        throw new BadRequestException(errorsForResponse.errorsMessages);
       },
     }),
   );
+  app.useGlobalFilters(new HttpExceptionFilter());
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 };

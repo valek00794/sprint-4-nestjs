@@ -41,6 +41,7 @@ export class BlogsQueryRepository {
     const blog = await this.blogModel.findById(id);
     return blog ? this.mapToOutput(blog) : null;
   }
+
   mapToOutput(blog: BlogDocument): BlogView {
     return new BlogView(
       blog._id,
