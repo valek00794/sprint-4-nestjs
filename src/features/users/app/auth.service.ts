@@ -33,7 +33,7 @@ export class AuthService {
     if (user === null) throw new UnauthorizedException();
     const isAuth = await bcryptArapter.checkPassword(inputModel.password, user.passwordHash);
     if (!isAuth) throw new UnauthorizedException();
-    return await this.jwtAdapter.createJWTs(user._id!);
+    return await this.jwtAdapter.createJWTs(user._id!, user.login);
   }
 
   async confirmEmail(code: string): Promise<UserDocument | null> {

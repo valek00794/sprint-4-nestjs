@@ -27,8 +27,8 @@ import {
 } from './features/users/infrastructure/users/users.schema';
 import { UsersRepository } from './features/users/infrastructure/users/users.repository';
 import { UsersQueryRepository } from './features/users/infrastructure/users/users.query-repository';
-import { LikesQueryRepository } from './features/likes/infrastructure/likeStatus.query-repository';
-import { Like, LikeSchema } from './features/likes/infrastructure/likeStatus.schema';
+import { LikesQueryRepository } from './features/likes/infrastructure/likes.query-repository';
+import { Like, LikeSchema } from './features/likes/infrastructure/likes.schema';
 import { ClearDbController } from './features/common/api/clear-db.controller';
 import { DbService } from './features/common/app/db.service';
 import {
@@ -41,8 +41,8 @@ import { UsersDevicesRepository } from './features/users/infrastructure/devices/
 import { UsersDevicesService } from './features/users/app/userDevices.service';
 import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
 import { JwtAdapter } from './infrastructure/adapters/jwt/jwt-adapter';
-import { IsUserAlreadyExistConstraint } from './infrastructure/pipes/user-exists.validation.pipe';
-import { BlogIdExistConstraint } from './infrastructure/pipes/blogId.validation.pipe';
+import { IsUserAlreadyExistConstraint } from './infrastructure/decorators/user-exists.decorator';
+import { BlogIdExistConstraint } from './infrastructure/decorators/blogId.validation.decorator';
 import {
   ApiRequests,
   ApiRequestsSchema,
@@ -51,9 +51,19 @@ import {
   ApiRequestsCounterMiddleware,
   ApiRequestsLogMiddleware,
 } from './infrastructure/middlewares/apiLoggerMiddleware/apiRequestsLog.middleware';
+import { CommentsService } from './features/comments/app/comments.service';
+import { CommentsRepository } from './features/comments/infrastructure/comments.repository';
+import { CommentsQueryRepository } from './features/comments/infrastructure/comments.query-repository';
+import { CommentsSchema, Comment } from './features/comments/infrastructure/comments.schema';
+import { LikesRepository } from './features/likes/infrastructure/likeS.repository';
+import { LikesService } from './features/likes/app/likes.service';
+import { CommentsController } from './features/comments/api/comments.controller';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
+const commentsProviders = [CommentsService, CommentsRepository, CommentsQueryRepository];
+const likesProviders = [LikesService, LikesRepository, LikesQueryRepository];
+
 const usersProviders = [
   UsersService,
   UsersRepository,
@@ -93,6 +103,10 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
         schema: UsersDevicesSchema,
       },
       {
+        name: Comment.name,
+        schema: CommentsSchema,
+      },
+      {
         name: Like.name,
         schema: LikeSchema,
       },
@@ -111,14 +125,16 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
     PostsController,
     UsersController,
     AuthController,
+    CommentsController,
   ],
   providers: [
     ...postsProviders,
     ...blogsProviders,
     ...usersProviders,
+    ...commentsProviders,
+    ...likesProviders,
     ...validationConstraints,
     DbService,
-    LikesQueryRepository,
     JwtAdapter,
     {
       provide: APP_GUARD,

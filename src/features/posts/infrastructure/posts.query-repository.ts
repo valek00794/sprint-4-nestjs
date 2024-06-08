@@ -7,8 +7,8 @@ import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { PostView } from '../api/models/output/posts.output.model';
 import { ExtendedLikesInfo, LikeStatus } from 'src/features/likes/domain/likes.types';
-import { LikesQueryRepository } from 'src/features/likes/infrastructure/likeStatus.query-repository';
 import { Blog, BlogDocument } from 'src/features/blogs/infrastructure/blogs.schema';
+import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.query-repository';
 
 @Injectable()
 export class PostsQueryRepository {

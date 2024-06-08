@@ -25,14 +25,9 @@ import {
   type EmailInputModel,
   type ConirmationCodeInputModel,
 } from './models/input/auth.input.models';
-import { UserInfo } from '../domain/users.types';
 import { CreateUserModel } from '../api/models/input/users.input.models';
 import { Public } from '../../../infrastructure/decorators/public.decorator';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-
-interface CustomRequest extends Request {
-  user?: UserInfo;
-}
 
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
@@ -97,7 +92,7 @@ export class AuthController {
   @UseGuards(AuthBearerGuard)
   @Get('/me')
   @HttpCode(HttpStatus.OK)
-  async getAuthInfo(@Req() req: CustomRequest) {
+  async getAuthInfo(@Req() req: Request) {
     const user = await this.usersQueryRepository.findUserById(req.user!.userId);
     if (!user) throw new UnauthorizedException();
     return user;

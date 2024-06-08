@@ -1,5 +1,5 @@
 import { IsEmail, Length, Matches } from 'class-validator';
-import { IsUserAlreadyExist } from 'src/infrastructure/pipes/user-exists.validation.pipe';
+import { IsUserAlreadyExist } from 'src/infrastructure/decorators/user-exists.decorator';
 
 export const VALIDATE_PHARAMS = {
   password: {

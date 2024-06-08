@@ -9,7 +9,7 @@ import {
   NewestLike,
   LikesInfo,
 } from '../domain/likes.types';
-import { Like, LikeDocument } from './likeStatus.schema';
+import { Like, LikeDocument } from './likes.schema';
 
 @Injectable()
 export class LikesQueryRepository {
@@ -21,7 +21,7 @@ export class LikesQueryRepository {
     const likesInfoView = new LikesInfoView(
       likesInfo.filter((like) => like.status === LikeStatus.Like).length,
       likesInfo.filter((like) => like.status === LikeStatus.Dislike).length,
-      likesInfo.find((like) => like.authorId.toHexString() === userId)?.status || LikeStatus.None,
+      likesInfo.find((like) => like.authorId.toString() === userId)?.status || LikeStatus.None,
     );
     return likesInfoView;
   }

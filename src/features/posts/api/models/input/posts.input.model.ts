@@ -1,5 +1,5 @@
 import { IsNotEmpty, MaxLength } from 'class-validator';
-import { IsBlogIdExist } from 'src/infrastructure/pipes/blogId.validation.pipe';
+import { IsBlogIdExist } from 'src/infrastructure/decorators/blogId.validation.decorator';
 
 const VALIDATE_PHARAMS = {
   titleMaxLength: 30,

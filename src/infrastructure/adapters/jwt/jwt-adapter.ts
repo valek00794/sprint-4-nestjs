@@ -11,9 +11,9 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class JwtAdapter {
   constructor(private jwtService: JwtService) {}
-  async createJWTs(userId: ObjectId, deviceId?: string): Promise<JWTTokensOutType> {
+  async createJWTs(userId: ObjectId, login: string, deviceId?: string): Promise<JWTTokensOutType> {
     const accessToken = await this.jwtService.signAsync(
-      { userId },
+      { userId, login },
       {
         secret: SETTINGS.JWT.AT_SECRET,
         expiresIn: SETTINGS.JWT.AT_EXPIRES_TIME,
