@@ -44,7 +44,7 @@ export class BlogsController {
   }
 
   @Get()
-  async getBlogs(@Query() query: SearchQueryParametersType) {
+  async getBlogs(@Query() query?: SearchQueryParametersType) {
     return await this.blogsQueryRepository.getBlogs(query);
   }
 
