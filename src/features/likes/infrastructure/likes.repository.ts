@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { LikeStatus, LikesInfo } from '../domain/likes.types';
+import { LikesInfo } from '../domain/likes.types';
 import { Like, LikeDocument } from './likes.schema';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class LikesRepository {
     parrentId: string,
     authorId: string,
     authorLogin: string,
-    status: LikeStatus,
+    status: string,
   ): Promise<LikesInfo | null> {
     return await this.LikeStatusModel.findOneAndUpdate(
       { parrentId, authorId, authorLogin },

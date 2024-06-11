@@ -58,7 +58,7 @@ export class PostsQueryRepository {
       .skip((sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize)
       .limit(sanitizationQuery.pageSize);
 
-    const PostsCount = await this.postModel.countDocuments(findOptions);
+    const postsCount = await this.postModel.countDocuments(findOptions);
 
     const postsItems = await Promise.all(
       posts.map(async (post) => {
@@ -71,7 +71,7 @@ export class PostsQueryRepository {
     return new Paginator<PostView[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
-      PostsCount,
+      postsCount,
       postsItems,
     );
   }

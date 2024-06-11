@@ -11,21 +11,19 @@ import {
   UseGuards,
   NotFoundException,
   HttpCode,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 
-import {
-  CreateBlogInputModel,
-  type CreatePostForBlogModel,
-} from './models/input/blogs.input.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { BlogsService } from '../app/blogs.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query-repository';
-
 import { PostsService } from 'src/features/posts/app/posts.service';
-import { Public } from 'src/infrastructure/decorators/public.decorator';
+import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
+import { CreateBlogInputModel, CreatePostForBlogModel } from './models/input/blogs.input.model';
 @Public()
 @Controller(SETTINGS.PATH.blogs)
 export class BlogsController {
@@ -76,8 +74,12 @@ export class BlogsController {
 
   @Get(':blogId/posts')
   @HttpCode(HttpStatus.OK)
-  async getPostOfBlog(@Query() query: SearchQueryParametersType, @Param('blogId') blogId: string) {
-    const posts = await this.postsQueryRepository.getPosts(query, blogId);
+  async getPostOfBlog(
+    @Param('blogId') blogId: string,
+    @Req() req: Request,
+    @Query() query?: SearchQueryParametersType,
+  ) {
+    const posts = await this.postsQueryRepository.getPosts(query, blogId, req.user?.userId);
     if (!posts) {
       throw new NotFoundException('Blog not found');
     }
@@ -87,7 +89,10 @@ export class BlogsController {
   @UseGuards(AuthBasicGuard)
   @Post(':blogId/posts')
   @HttpCode(HttpStatus.CREATED)
-  async createPost(@Body() inputModel: CreatePostForBlogModel, @Param('blogId') blogId: string) {
+  async createPostForBlog(
+    @Body() inputModel: CreatePostForBlogModel,
+    @Param('blogId') blogId: string,
+  ) {
     const blog = await this.blogsQueryRepository.findBlog(blogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');

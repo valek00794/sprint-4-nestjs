@@ -16,10 +16,11 @@ import { Request } from 'express';
 import { SETTINGS } from 'src/settings/settings';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-import type { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
+import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
 import { LikesService } from 'src/features/likes/app/likes.service';
-import type { CreateCommentModel } from './models/input/comments.input.model';
+import { CreateCommentModel } from './models/input/comments.input.model';
 import { CommentsService } from '../app/comments.service';
+import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 
 @Controller(SETTINGS.PATH.comments)
 export class CommentsController {
@@ -28,10 +29,10 @@ export class CommentsController {
     protected likesService: LikesService,
     protected commentsService: CommentsService,
   ) {}
-
+  @Public()
   @Get(':id')
-  async getComment(@Param('id') id: string) {
-    return await this.commentsQueryRepository.findComment(id);
+  async getComment(@Param('id') id: string, @Req() req: Request) {
+    return await this.commentsQueryRepository.findComment(id, req.user?.userId);
   }
 
   @UseGuards(AuthBearerGuard)
@@ -46,9 +47,9 @@ export class CommentsController {
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    await this.likesService.changeLikeStatus(
+    return await this.likesService.changeLikeStatus(
       commentId,
-      inputModel.likeStatus,
+      inputModel,
       req.user!.userId,
       req.user!.login,
     );

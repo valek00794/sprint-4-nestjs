@@ -18,7 +18,7 @@ import type { SignInInputModel } from '../api/models/input/auth.input.models';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import type { UserDocument } from '../infrastructure/users/users.schema';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter';
-import { FieldError } from 'src/settings/exception.filter.types';
+import { FieldError } from 'src/infrastructure/exception.filter.types';
 
 @Injectable()
 export class AuthService {

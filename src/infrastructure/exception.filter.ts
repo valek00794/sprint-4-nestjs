@@ -1,7 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import type { APIErrorResult } from 'src/settings/exception.filter.types';
+import type { APIErrorResult } from 'src/infrastructure/exception.filter.types';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {

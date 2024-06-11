@@ -1,7 +1,8 @@
-import { IsNotEmpty } from 'class-validator';
-import type { LikeStatus } from '../../domain/likes.types';
-
+import { IsDefined, IsIn, IsOptional } from 'class-validator';
+import { LikeStatus } from '../../domain/likes.types';
 export class LikeStatusInputModel {
-  @IsNotEmpty()
+  @IsDefined()
+  @IsIn(Object.values(LikeStatus))
+  @IsOptional()
   likeStatus: LikeStatus;
 }

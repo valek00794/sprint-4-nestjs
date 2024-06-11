@@ -6,6 +6,7 @@ import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.reposit
 import { PostsRepository } from '../infrastructure/posts.repository';
 import { Post, PostDocument } from '../infrastructure/posts.schema';
 import { CreatePostModel } from '../api/models/input/posts.input.model';
+import { CreatePostForBlogModel } from 'src/features/blogs/api/models/input/blogs.input.model';
 
 @Injectable()
 export class PostsService {
@@ -15,7 +16,10 @@ export class PostsService {
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
   ) {}
 
-  async createPost(inputModel: CreatePostModel, blogId?: string): Promise<PostDocument> {
+  async createPost(
+    inputModel: CreatePostModel | CreatePostForBlogModel,
+    blogId?: string,
+  ): Promise<PostDocument> {
     const getBlogId = blogId && Types.ObjectId.isValid(blogId) ? blogId : inputModel.blogId;
     const blog = await this.blogsRepository.findBlog(getBlogId);
     const newPosts = new this.postModel({

@@ -18,7 +18,7 @@ import { UsersService } from '../app/users.service';
 import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
-import { Public } from '../../../infrastructure/decorators/public.decorator';
+import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
 
 @Public()
 @UseGuards(AuthBasicGuard)

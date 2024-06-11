@@ -41,8 +41,8 @@ import { UsersDevicesRepository } from './features/users/infrastructure/devices/
 import { UsersDevicesService } from './features/users/app/userDevices.service';
 import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
 import { JwtAdapter } from './infrastructure/adapters/jwt/jwt-adapter';
-import { IsUserAlreadyExistConstraint } from './infrastructure/decorators/user-exists.decorator';
-import { BlogIdExistConstraint } from './infrastructure/decorators/blogId.validation.decorator';
+import { IsUserAlreadyExistConstraint } from './infrastructure/decorators/validate/user-exists.decorator';
+import { BlogIdExistConstraint } from './infrastructure/decorators/validate/blogId.decorator';
 import {
   ApiRequests,
   ApiRequestsSchema,
@@ -58,6 +58,7 @@ import { CommentsSchema, Comment } from './features/comments/infrastructure/comm
 import { LikesRepository } from './features/likes/infrastructure/likeS.repository';
 import { LikesService } from './features/likes/app/likes.service';
 import { CommentsController } from './features/comments/api/comments.controller';
+import { UserIdFromJWT } from './infrastructure/middlewares/apiLoggerMiddleware/userIdFromJWT.middleware';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -73,7 +74,7 @@ const usersProviders = [
   UsersDevicesRepository,
 ];
 
-const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
+export const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
 @Module({
   imports: [
     MongooseModule.forRoot(SETTINGS.DB.mongoURI),
@@ -150,6 +151,12 @@ export class AppModule implements NestModule {
         { path: 'auth/login', method: RequestMethod.POST },
         { path: 'auth/me', method: RequestMethod.GET },
       )
-      .forRoutes(AuthController);
+      .forRoutes(AuthController)
+      .apply(UserIdFromJWT)
+      .forRoutes(
+        { path: 'blogs/:blogId/posts', method: RequestMethod.GET },
+        { path: 'comments/:id', method: RequestMethod.GET },
+        { path: 'posts/*', method: RequestMethod.GET },
+      );
   }
 }

@@ -26,7 +26,7 @@ import {
   type ConirmationCodeInputModel,
 } from './models/input/auth.input.models';
 import { CreateUserModel } from '../api/models/input/users.input.models';
-import { Public } from '../../../infrastructure/decorators/public.decorator';
+import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 
 @Controller(SETTINGS.PATH.auth)

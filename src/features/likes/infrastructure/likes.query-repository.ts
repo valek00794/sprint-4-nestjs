@@ -27,14 +27,16 @@ export class LikesQueryRepository {
   }
 
   mapExtendedLikesInfo(likesInfo: LikesInfo[], userId?: string): ExtendedLikesInfo {
+    const lastLikesCount = 3;
     const newestLikes = likesInfo
       .filter((like) => like.status === LikeStatus.Like)
       .sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
-      .slice(0, 3);
-    const mappedLikesInfo = this.mapLikesInfo(likesInfo, userId);
+      .slice(0, lastLikesCount);
     const newestLikesView = newestLikes.map(
       (like) => new NewestLike(like.addedAt, like.authorId.toString(), like.authorLogin),
     );
+    const mappedLikesInfo = this.mapLikesInfo(likesInfo, userId);
+
     return new ExtendedLikesInfo(
       mappedLikesInfo.likesCount,
       mappedLikesInfo.dislikesCount,

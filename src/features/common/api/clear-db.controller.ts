@@ -3,7 +3,7 @@ import { Response } from 'express';
 
 import { SETTINGS } from 'src/settings/settings';
 import { DbService } from '../app/db.service';
-import { Public } from 'src/infrastructure/decorators/public.decorator';
+import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 
 @Public()
 @Controller(SETTINGS.PATH.clearDb)

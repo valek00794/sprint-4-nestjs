@@ -17,17 +17,17 @@ import { Request } from 'express';
 
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
-import { CreatePostModel } from './models/input/posts.input.model';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { PostsService } from '../app/posts.service';
-import { Public } from 'src/infrastructure/decorators/public.decorator';
+import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
-import type { CreateCommentModel } from 'src/features/comments/api/models/input/comments.input.model';
+import { CreateCommentModel } from 'src/features/comments/api/models/input/comments.input.model';
 import { CommentsService } from 'src/features/comments/app/comments.service';
 import { CommentsQueryRepository } from 'src/features/comments/infrastructure/comments.query-repository';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-import type { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
+import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
 import { LikesService } from 'src/features/likes/app/likes.service';
+import { CreatePostModel } from './models/input/posts.input.model';
 
 @Controller(SETTINGS.PATH.posts)
 export class PostsController {
@@ -47,13 +47,13 @@ export class PostsController {
   }
   @Public()
   @Get()
-  async getPosts(@Query() query: SearchQueryParametersType) {
-    return await this.postsQueryRepository.getPosts(query);
+  async getPosts(@Query() query: SearchQueryParametersType, @Req() req: Request) {
+    return await this.postsQueryRepository.getPosts(query, undefined, req.user?.userId);
   }
   @Public()
   @Get(':id')
-  async getPost(@Param('id') id: string) {
-    const post = await this.postsQueryRepository.findPost(id);
+  async getPost(@Param('id') id: string, @Req() req: Request) {
+    const post = await this.postsQueryRepository.findPost(id, req.user?.userId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -123,11 +123,6 @@ export class PostsController {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    await this.likesService.changeLikeStatus(
-      postId,
-      inputModel.likeStatus,
-      req.user!.userId,
-      req.user!.login,
-    );
+    await this.likesService.changeLikeStatus(postId, inputModel, req.user!.userId, req.user!.login);
   }
 }

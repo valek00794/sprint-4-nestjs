@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { Types } from 'mongoose';
 
 import type { CommentsDocument } from '../infrastructure/comments.schema';
-import type { CreateCommentModel } from '../api/models/input/comments.input.model';
+import { CreateCommentModel } from '../api/models/input/comments.input.model';
 import { CommentatorInfo } from '../domain/comments.types';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';

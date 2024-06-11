@@ -15,7 +15,7 @@ import { CreateUserModel } from '../api/models/input/users.input.models';
 import { emailManager } from 'src/features/common/managers/email-manager';
 import { PasswordRecoveryInputModel } from '../api/models/input/auth.input.models';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter';
-import { FieldError } from 'src/settings/exception.filter.types';
+import { FieldError } from 'src/infrastructure/exception.filter.types';
 
 @Injectable()
 export class UsersService {

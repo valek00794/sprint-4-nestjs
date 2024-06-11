@@ -10,6 +10,7 @@ import { UsersRepository } from 'src/features/users/infrastructure/users/users.r
 export class IsUserAlreadyExistConstraint implements ValidatorConstraintInterface {
   constructor(private readonly userRepository: UsersRepository) {}
   async validate(loginOrEmail: any) {
+    if (typeof loginOrEmail !== 'string') return false;
     const user = await this.userRepository.findUserByLoginOrEmail(loginOrEmail);
     if (user) return false;
     return true;
