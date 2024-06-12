@@ -203,6 +203,7 @@ export class AppModule implements NestModule {
         { path: 'blogs/:blogId/posts', method: RequestMethod.GET },
         { path: 'comments/:id', method: RequestMethod.GET },
         { path: 'posts/*', method: RequestMethod.GET },
+        { path: 'posts', method: RequestMethod.GET },
       );
   }
 }

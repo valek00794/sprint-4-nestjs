@@ -80,7 +80,7 @@ export class BlogsController {
 
   @Get(':blogId/posts')
   @HttpCode(HttpStatus.OK)
-  async getPostOfBlog(
+  async getPostsOfBlog(
     @Param('blogId') blogId: string,
     @Req() req: Request,
     @Query() query?: SearchQueryParametersType,

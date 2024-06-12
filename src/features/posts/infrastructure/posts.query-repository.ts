@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { SearchQueryParametersType } from '../../domain/query.types';
-import { getSanitizationQuery, isValidMongoId, stringToObjectId } from 'src/features/utils';
+import { getSanitizationQuery, isValidMongoId } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { PostView } from '../api/models/output/posts.output.model';
 import { ExtendedLikesInfo, LikeStatus } from 'src/features/likes/domain/likes.types';
@@ -14,8 +14,8 @@ import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.qu
 @Injectable()
 export class PostsQueryRepository {
   constructor(
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
-    @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
+    @InjectModel(Post.name) private PostModel: Model<PostDocument>,
+    @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
     protected likesQueryRepository: LikesQueryRepository,
   ) {}
 
@@ -29,37 +29,33 @@ export class PostsQueryRepository {
     }
     let blog;
     if (blogId) {
-      blog = await this.blogModel.findById(blogId);
+      blog = await this.BlogModel.findById(blogId);
     }
     if (!blog && blogId) {
       return false;
     }
     const sanitizationQuery = getSanitizationQuery(query);
     let findOptions: Record<string, any> = {};
-
     if (sanitizationQuery.searchNameTerm !== null) {
       findOptions = {
         name: { $regex: sanitizationQuery.searchNameTerm, $options: 'i' },
       };
     }
-
     if (blogId) {
       if (findOptions.hasOwnProperty('name')) {
         findOptions = {
-          $and: [findOptions, { blogId: stringToObjectId(blogId) }],
+          $and: [findOptions, { blogId }],
         };
       } else {
-        findOptions.blogId = stringToObjectId(blogId);
+        findOptions.blogId = blogId;
       }
     }
-
-    const posts = await this.postModel
-      .find(findOptions)
+    const posts = await this.PostModel.find(findOptions)
       .sort({ [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection })
       .skip((sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize)
       .limit(sanitizationQuery.pageSize);
 
-    const postsCount = await this.postModel.countDocuments(findOptions);
+    const postsCount = await this.PostModel.countDocuments(findOptions);
 
     const postsItems = await Promise.all(
       posts.map(async (post) => {
@@ -81,7 +77,7 @@ export class PostsQueryRepository {
     if (!isValidMongoId(id)) {
       return null;
     }
-    const post = await this.postModel.findById(id);
+    const post = await this.PostModel.findById(id);
     if (!post) {
       return null;
     }
