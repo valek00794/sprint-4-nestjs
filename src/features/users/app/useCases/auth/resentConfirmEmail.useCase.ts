@@ -3,13 +3,13 @@ import { BadRequestException, ServiceUnavailableException } from '@nestjs/common
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns/add';
 
-import { EmailInputModel } from 'src/features/users/api/models/input/auth.input.models';
+import { PasswordRecoveryEmailInputModel } from 'src/features/users/api/models/input/auth.input.models';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
 import { FieldError } from 'src/infrastructure/exception.filter.types';
 import { emailManager } from 'src/features/common/managers/email-manager';
 
 export class ResentConfirmEmailCommand {
-  constructor(public inputModel: EmailInputModel) {}
+  constructor(public inputModel: PasswordRecoveryEmailInputModel) {}
 }
 
 @CommandHandler(ResentConfirmEmailCommand)

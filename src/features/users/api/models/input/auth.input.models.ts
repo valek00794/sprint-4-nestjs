@@ -11,7 +11,7 @@ export class SignInInputModel {
   password: string;
 }
 
-export class PasswordRecoveryInputModel {
+export class ConfirmPasswordRecoveryInputModel {
   @Trim()
   @Length(VALIDATE_PHARAMS.password.minLength, VALIDATE_PHARAMS.password.maxLength)
   newPassword: string;
@@ -20,7 +20,7 @@ export class PasswordRecoveryInputModel {
   recoveryCode: string;
 }
 
-export class EmailInputModel {
+export class PasswordRecoveryEmailInputModel {
   @Trim()
   @IsEmail()
   email: string;

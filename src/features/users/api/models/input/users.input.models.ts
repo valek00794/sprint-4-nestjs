@@ -14,7 +14,7 @@ export const VALIDATE_PHARAMS = {
   },
 };
 
-export class CreateUserModel {
+export class CreateUserInputModel {
   @Trim()
   @Length(VALIDATE_PHARAMS.login.minLength, VALIDATE_PHARAMS.login.maxLength)
   @Matches(VALIDATE_PHARAMS.login.pattern)

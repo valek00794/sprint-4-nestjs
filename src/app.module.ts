@@ -72,6 +72,10 @@ import { ResentConfirmEmailUseCase } from './features/users/app/useCases/auth/re
 import { CheckUserByRefreshTokenUseCase } from './features/users/app/useCases/auth/checkUserByRefreshToken.useCase';
 import { RenewTokensUseCase } from './features/users/app/useCases/auth/renewTokens.useCase';
 import { LogoutUserUseCase } from './features/users/app/useCases/auth/logoutUser.useCase';
+import { SignUpUserUseCase } from './features/users/app/useCases/users/signUpUser.useCase';
+import { PasswordRecoveryUseCase } from './features/users/app/useCases/users/passwordRecovery.useCase';
+import { CreateUserUseCase } from './features/users/app/useCases/users/createUser.useCase';
+import { ConfirmPasswordRecoveryUseCase } from './features/users/app/useCases/users/confirmPasswordRecovery.useCase';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -90,6 +94,13 @@ const authUseCases = [
   CheckUserByRefreshTokenUseCase,
   RenewTokensUseCase,
   LogoutUserUseCase,
+];
+
+const usersCases = [
+  SignUpUserUseCase,
+  PasswordRecoveryUseCase,
+  CreateUserUseCase,
+  ConfirmPasswordRecoveryUseCase,
 ];
 
 const usersProviders = [
@@ -169,6 +180,7 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
     ...likesUseCases,
     ...userDevicesUseCases,
     ...authUseCases,
+    ...usersCases,
     DbService,
     JwtAdapter,
     {
