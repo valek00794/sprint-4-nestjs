@@ -59,6 +59,9 @@ import { LikesRepository } from './features/likes/infrastructure/likeS.repositor
 import { LikesService } from './features/likes/app/likes.service';
 import { CommentsController } from './features/comments/api/comments.controller';
 import { UserIdFromJWT } from './infrastructure/middlewares/apiLoggerMiddleware/userIdFromJWT.middleware';
+import { CqrsModule } from '@nestjs/cqrs';
+import { CreateBlogUseCase } from './features/blogs/app/useCases/createBlog.useCase';
+import { UpdateBlogUseCase } from './features/blogs/app/useCases/updateBlog.useCase';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -75,8 +78,11 @@ const usersProviders = [
 ];
 
 export const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
+const blogsUseCases = [CreateBlogUseCase, UpdateBlogUseCase];
+
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forRoot(SETTINGS.DB.mongoURI),
     MongooseModule.forFeature([
       {
@@ -135,6 +141,7 @@ export const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistC
     ...commentsProviders,
     ...likesProviders,
     ...validationConstraints,
+    ...blogsUseCases,
     DbService,
     JwtAdapter,
     {

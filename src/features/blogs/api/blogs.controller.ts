@@ -14,6 +14,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { CommandBus } from '@nestjs/cqrs';
 
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { SETTINGS } from 'src/settings/settings';
@@ -24,6 +25,9 @@ import { PostsService } from 'src/features/posts/app/posts.service';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 import { CreateBlogInputModel, CreatePostForBlogModel } from './models/input/blogs.input.model';
+import { CreateBlogCommand } from '../app/useCases/createBlog.useCase';
+import { UpdateBlogCommand } from '../app/useCases/updateBlog.useCase';
+
 @Public()
 @Controller(SETTINGS.PATH.blogs)
 export class BlogsController {
@@ -32,12 +36,13 @@ export class BlogsController {
     protected postsService: PostsService,
     protected blogsQueryRepository: BlogsQueryRepository,
     protected postsQueryRepository: PostsQueryRepository,
+    private commandBus: CommandBus,
   ) {}
 
   @UseGuards(AuthBasicGuard)
   @Post()
   async createBlog(@Body() inputModel: CreateBlogInputModel) {
-    const createdBlog = await this.blogsService.createBlog(inputModel);
+    const createdBlog = await this.commandBus.execute(new CreateBlogCommand(inputModel));
     return this.blogsQueryRepository.mapToOutput(createdBlog);
   }
 
@@ -59,7 +64,7 @@ export class BlogsController {
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Body() inputModel: CreateBlogInputModel, @Param('id') id: string) {
-    await this.blogsService.updateBlog(inputModel, id);
+    await this.commandBus.execute(new UpdateBlogCommand(inputModel, id));
   }
 
   @UseGuards(AuthBasicGuard)
