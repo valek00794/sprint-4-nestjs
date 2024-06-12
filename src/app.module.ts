@@ -36,7 +36,6 @@ import {
   UsersDevicesSchema,
 } from './features/users/infrastructure/devices/usersDevices.schema';
 import { AuthController } from './features/users/api/auth.controller';
-import { AuthService } from './features/users/app/auth.service';
 import { UsersDevicesRepository } from './features/users/infrastructure/devices/usersDevices-repository';
 import { UsersDevicesService } from './features/users/app/userDevices.service';
 import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
@@ -65,6 +64,14 @@ import { CreateBlogUseCase } from './features/blogs/app/useCases/createBlog.useC
 import { DeleteCommentUseCase } from './features/comments/app/useCases/deleteComment.useCase';
 import { UpdateCommentUseCase } from './features/comments/app/useCases/updateComment.useCase';
 import { ChangeLikeStatusUseCase } from './features/likes/app/useCases/changeLikeStatus.useCase';
+import { AddUserDeviceUseCase } from './features/users/app/useCases/userDevices/addUserDevice.useCase';
+import { UpdateUserDeviceUseCase } from './features/users/app/useCases/userDevices/updateUserDevice.useCase';
+import { SignInUseCase } from './features/users/app/useCases/auth/signIn.useCase';
+import { ConfirmEmailUseCase } from './features/users/app/useCases/auth/confirmEmail.useCase';
+import { ResentConfirmEmailUseCase } from './features/users/app/useCases/auth/resentConfirmEmail.useCase';
+import { CheckUserByRefreshTokenUseCase } from './features/users/app/useCases/auth/checkUserByRefreshToken.useCase';
+import { RenewTokensUseCase } from './features/users/app/useCases/auth/renewTokens.useCase';
+import { LogoutUserUseCase } from './features/users/app/useCases/auth/logoutUser.useCase';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -75,12 +82,20 @@ const blogsUseCases = [CreateBlogUseCase, UpdateBlogUseCase];
 const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
 const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteCommentUseCase];
 const likesUseCases = [ChangeLikeStatusUseCase];
+const userDevicesUseCases = [AddUserDeviceUseCase, UpdateUserDeviceUseCase];
+const authUseCases = [
+  SignInUseCase,
+  ConfirmEmailUseCase,
+  ResentConfirmEmailUseCase,
+  CheckUserByRefreshTokenUseCase,
+  RenewTokensUseCase,
+  LogoutUserUseCase,
+];
 
 const usersProviders = [
   UsersService,
   UsersRepository,
   UsersQueryRepository,
-  AuthService,
   UsersDevicesService,
   UsersDevicesRepository,
 ];
@@ -152,6 +167,8 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
     ...postsUseCases,
     ...commentsUseCases,
     ...likesUseCases,
+    ...userDevicesUseCases,
+    ...authUseCases,
     DbService,
     JwtAdapter,
     {

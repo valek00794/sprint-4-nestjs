@@ -13,9 +13,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
+import { CommandBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
-import { AuthService } from '../app/auth.service';
 import { UsersService } from '../app/users.service';
 import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { UsersDevicesService } from '../app/userDevices.service';
@@ -28,14 +28,18 @@ import {
 import { CreateUserModel } from '../api/models/input/users.input.models';
 import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
+import { AddUserDeviceCommand } from '../app/useCases/userDevices/addUserDevice.useCase';
+import { SignInCommand } from '../app/useCases/auth/signIn.useCase';
+import { ConfirmEmailCommand } from '../app/useCases/auth/confirmEmail.useCase';
+import { ResentConfirmEmailCommand } from '../app/useCases/auth/resentConfirmEmail.useCase';
 
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
   constructor(
-    protected authService: AuthService,
     protected usersService: UsersService,
     protected usersDevicesService: UsersDevicesService,
     protected usersQueryRepository: UsersQueryRepository,
+    private commandBus: CommandBus,
   ) {}
   @Public()
   @Post('/login')
@@ -46,8 +50,8 @@ export class AuthController {
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string,
   ) {
-    const tokens = await this.authService.signIn(inputModel);
-    await this.usersDevicesService.addUserDevice(tokens.refreshToken, userAgent, ip);
+    const tokens = await this.commandBus.execute(new SignInCommand(inputModel));
+    await this.commandBus.execute(new AddUserDeviceCommand(tokens.refreshToken, userAgent, ip));
     res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: true });
     return {
       accessToken: tokens.accessToken,
@@ -72,7 +76,7 @@ export class AuthController {
   @Post('/registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
   async signUpConfimation(@Body() inputModel: ConirmationCodeInputModel) {
-    await this.authService.confirmEmail(inputModel.code);
+    await this.commandBus.execute(new ConfirmEmailCommand(inputModel));
   }
 
   @Public()
@@ -86,7 +90,7 @@ export class AuthController {
   @Post('/registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async signUpEmailResending(@Body() inputModel: EmailInputModel) {
-    await this.authService.resentConfirmEmail(inputModel.email);
+    await this.commandBus.execute(new ResentConfirmEmailCommand(inputModel));
   }
 
   @UseGuards(AuthBearerGuard)
