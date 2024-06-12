@@ -1,19 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Comment, CommentsDocument } from './comments.schema';
+import { Comment, CommentDocument } from './comments.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 import { LikeStatus, type LikesInfoView } from 'src/features/likes/domain/likes.types';
 import { CommentOutputModel } from '../api/models/output/comments.output.model';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { Paginator } from 'src/features/domain/result.types';
-import { getSanitizationQuery } from 'src/features/utils';
+import { getSanitizationQuery, isValidMongoId, stringToObjectId } from 'src/features/utils';
 import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.query-repository';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
-    @InjectModel(Comment.name) private CommentsModel: Model<CommentsDocument>,
+    @InjectModel(Comment.name) private CommentsModel: Model<CommentDocument>,
     protected likesQueryRepository: LikesQueryRepository,
   ) {}
 
@@ -25,7 +25,7 @@ export class CommentsQueryRepository {
     const sanitizationQuery = getSanitizationQuery(query);
     let findOptions = {};
     if (postId) {
-      findOptions = { postId: new Types.ObjectId(postId) };
+      findOptions = { postId: stringToObjectId(postId) };
     }
 
     const comments = await this.CommentsModel.find(findOptions)
@@ -52,7 +52,7 @@ export class CommentsQueryRepository {
   }
 
   async findComment(id: string, userId?: string) {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isValidMongoId(id)) {
       throw new NotFoundException('Invalid ID');
     }
     const comment = await this.CommentsModel.findById(id);
@@ -68,7 +68,7 @@ export class CommentsQueryRepository {
     return comment && outputComment ? outputComment : false;
   }
 
-  mapToOutput(comment: CommentsDocument, likesInfo?: LikesInfoView): CommentOutputModel {
+  mapToOutput(comment: CommentDocument, likesInfo?: LikesInfoView): CommentOutputModel {
     return new CommentOutputModel(
       comment._id!,
       comment.content,

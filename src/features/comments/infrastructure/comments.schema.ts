@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, type Types } from 'mongoose';
 import { CommentatorInfo } from '../domain/comments.types';
 
-export type CommentsDocument = HydratedDocument<Comment>;
+export type CommentDocument = HydratedDocument<Comment>;
 
 @Schema()
 export class Comment {

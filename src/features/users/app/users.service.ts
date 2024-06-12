@@ -5,7 +5,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns/add';
 
@@ -16,6 +16,7 @@ import { emailManager } from 'src/features/common/managers/email-manager';
 import { PasswordRecoveryInputModel } from '../api/models/input/auth.input.models';
 import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter';
 import { FieldError } from 'src/infrastructure/exception.filter.types';
+import { isValidMongoId } from 'src/features/utils';
 
 @Injectable()
 export class UsersService {
@@ -70,7 +71,7 @@ export class UsersService {
   }
 
   async updateUserPassword(userId: string, password: string): Promise<boolean> {
-    if (!Types.ObjectId.isValid(userId)) {
+    if (!isValidMongoId(userId)) {
       throw new NotFoundException('User not found');
     }
     const passwordHash = await bcryptArapter.generateHash(password);
@@ -78,7 +79,7 @@ export class UsersService {
   }
 
   async deleteUserById(id: string): Promise<boolean> {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isValidMongoId(id)) {
       throw new NotFoundException('User not found');
     }
     return await this.usersRepository.deleteUserById(id);

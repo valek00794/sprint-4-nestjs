@@ -7,7 +7,7 @@ const VALIDATE_PHARAMS = {
     maxLength: 300,
   },
 };
-export class CreateCommentModel {
+export class CreateCommentInputModel {
   @Trim()
   @IsNotEmpty()
   @Length(VALIDATE_PHARAMS.content.minLength, VALIDATE_PHARAMS.content.maxLength)

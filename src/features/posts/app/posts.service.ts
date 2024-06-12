@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Types } from 'mongoose';
 
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 import { PostsRepository } from '../infrastructure/posts.repository';
+import { isValidMongoId } from 'src/features/utils';
 
 @Injectable()
 export class PostsService {
@@ -12,7 +12,7 @@ export class PostsService {
   ) {}
 
   async deletePost(id: string): Promise<boolean> {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isValidMongoId(id)) {
       throw new NotFoundException('Invalid post id');
     }
     return await this.postsRepository.deletePost(id);

@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Types } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 
 import { CreatePostModel } from '../../api/models/input/posts.input.model';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
+import { isValidMongoId } from 'src/features/utils';
 
 export class UpdatePostCommand {
   constructor(
@@ -21,7 +21,7 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
   ) {}
 
   async execute(command: UpdatePostCommand) {
-    if (!Types.ObjectId.isValid(command.id)) {
+    if (!isValidMongoId(command.id)) {
       throw new NotFoundException('Invalid post id');
     }
     const post = await this.postsRepository.findPost(command.id);

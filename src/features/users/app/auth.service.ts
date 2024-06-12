@@ -139,7 +139,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     const tokens = await this.jwtAdapter.createJWTs(
-      new Types.ObjectId(userVerifyInfo.userId),
+      stringToObjectId(userVerifyInfo.userId),
       userVerifyInfo.deviceId,
     );
     return tokens;

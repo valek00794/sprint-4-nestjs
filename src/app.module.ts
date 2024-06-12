@@ -2,6 +2,7 @@ import { Module, RequestMethod, type MiddlewareConsumer, type NestModule } from 
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
+import { CqrsModule } from '@nestjs/cqrs';
 
 import { BlogsController } from './features/blogs/api/blogs.controller';
 import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository';
@@ -16,7 +17,6 @@ import { BlogsService } from './features/blogs/app/blogs.service';
 import { PostsService } from './features/posts/app/posts.service';
 import { UsersController } from './features/users/api/users.controller';
 import { UsersService } from './features/users/app/users.service';
-
 import {
   User,
   UserEmailConfirmationInfo,
@@ -44,32 +44,37 @@ import { JwtAdapter } from './infrastructure/adapters/jwt/jwt-adapter';
 import { IsUserAlreadyExistConstraint } from './infrastructure/decorators/validate/user-exists.decorator';
 import { BlogIdExistConstraint } from './infrastructure/decorators/validate/blogId.decorator';
 import {
-  ApiRequests,
+  ApiRequest,
   ApiRequestsSchema,
 } from './infrastructure/middlewares/apiLoggerMiddleware/apiRequests.schema';
 import {
   ApiRequestsCounterMiddleware,
   ApiRequestsLogMiddleware,
 } from './infrastructure/middlewares/apiLoggerMiddleware/apiRequestsLog.middleware';
-import { CommentsService } from './features/comments/app/comments.service';
 import { CommentsRepository } from './features/comments/infrastructure/comments.repository';
 import { CommentsQueryRepository } from './features/comments/infrastructure/comments.query-repository';
 import { CommentsSchema, Comment } from './features/comments/infrastructure/comments.schema';
 import { LikesRepository } from './features/likes/infrastructure/likeS.repository';
-import { LikesService } from './features/likes/app/likes.service';
 import { CommentsController } from './features/comments/api/comments.controller';
 import { UserIdFromJWT } from './infrastructure/middlewares/apiLoggerMiddleware/userIdFromJWT.middleware';
-import { CqrsModule } from '@nestjs/cqrs';
-
 import { UpdateBlogUseCase } from './features/blogs/app/useCases/updateBlog.useCase';
 import { CreatePostUseCase } from './features/posts/app/useCases/createPost.useCase';
-import { CreateBlogUseCase } from './features/blogs/app/useCases/createBlog.useCase';
 import { UpdatePostUseCase } from './features/posts/app/useCases/updatePost.useCase';
+import { CreateCommentUseCase } from './features/comments/app/useCases/createComment.useCase';
+import { CreateBlogUseCase } from './features/blogs/app/useCases/createBlog.useCase';
+import { DeleteCommentUseCase } from './features/comments/app/useCases/deleteComment.useCase';
+import { UpdateCommentUseCase } from './features/comments/app/useCases/updateComment.useCase';
+import { ChangeLikeStatusUseCase } from './features/likes/app/useCases/changeLikeStatus.useCase';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
-const commentsProviders = [CommentsService, CommentsRepository, CommentsQueryRepository];
-const likesProviders = [LikesService, LikesRepository, LikesQueryRepository];
+const commentsProviders = [CommentsRepository, CommentsQueryRepository];
+const likesProviders = [LikesRepository, LikesQueryRepository];
+
+const blogsUseCases = [CreateBlogUseCase, UpdateBlogUseCase];
+const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
+const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteCommentUseCase];
+const likesUseCases = [ChangeLikeStatusUseCase];
 
 const usersProviders = [
   UsersService,
@@ -80,9 +85,7 @@ const usersProviders = [
   UsersDevicesRepository,
 ];
 
-export const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
-const blogsUseCases = [CreateBlogUseCase, UpdateBlogUseCase];
-const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
+const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
 
 @Module({
   imports: [
@@ -122,7 +125,7 @@ const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
         schema: LikeSchema,
       },
       {
-        name: ApiRequests.name,
+        name: ApiRequest.name,
         schema: ApiRequestsSchema,
       },
     ]),
@@ -147,6 +150,8 @@ const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
     ...validationConstraints,
     ...blogsUseCases,
     ...postsUseCases,
+    ...commentsUseCases,
+    ...likesUseCases,
     DbService,
     JwtAdapter,
     {

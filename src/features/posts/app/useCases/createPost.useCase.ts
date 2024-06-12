@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Types } from 'mongoose';
 
 import { CreatePostForBlogModel } from 'src/features/blogs/api/models/input/blogs.input.model';
 import { CreatePostModel } from '../../api/models/input/posts.input.model';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
+import { isValidMongoId } from 'src/features/utils';
 
 export class CreatePostCommand {
   constructor(
@@ -22,9 +22,7 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
 
   async execute(command: CreatePostCommand) {
     const getBlogId =
-      command.blogId && Types.ObjectId.isValid(command.blogId)
-        ? command.blogId
-        : command.inputModel.blogId;
+      command.blogId && isValidMongoId(command.blogId) ? command.blogId : command.inputModel.blogId;
     const blog = await this.blogsRepository.findBlog(getBlogId);
     const newPosts = {
       title: command.inputModel.title,

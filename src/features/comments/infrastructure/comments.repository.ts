@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Comment, CommentsDocument } from './comments.schema';
+import { Comment, CommentDocument } from './comments.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 @Injectable()
 export class CommentsRepository {
-  constructor(@InjectModel(Comment.name) private CommentModel: Model<CommentsDocument>) {}
+  constructor(@InjectModel(Comment.name) private CommentModel: Model<CommentDocument>) {}
 
-  async createComment(newComment: Comment): Promise<CommentsDocument> {
+  async createComment(newComment: Comment): Promise<CommentDocument> {
     const comment = new this.CommentModel(newComment);
     await comment.save();
     return comment;
@@ -25,7 +25,7 @@ export class CommentsRepository {
     return deleteResult ? true : false;
   }
 
-  async findComment(id: string): Promise<CommentsDocument | null> {
+  async findComment(id: string): Promise<CommentDocument | null> {
     return await this.CommentModel.findById(id);
   }
 }

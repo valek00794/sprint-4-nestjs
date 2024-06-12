@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 import { UserViewModel } from '../../api/models/output/users.output.models';
 import { Paginator } from 'src/features/domain/result.types';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
-import { getSanitizationQuery } from 'src/features/utils';
+import { getSanitizationQuery, isValidMongoId } from 'src/features/utils';
 import { UserInfo } from '../../domain/users.types';
 import { User, UserDocument } from './users.schema';
 
@@ -14,7 +14,7 @@ export class UsersQueryRepository {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findUserById(id: string): Promise<UserInfo | false> {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isValidMongoId(id)) {
       return false;
     }
     const user = await this.userModel.findById(id);

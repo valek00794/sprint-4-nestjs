@@ -12,22 +12,23 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { CommandBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
-import { LikesService } from 'src/features/likes/app/likes.service';
-import { CreateCommentModel } from './models/input/comments.input.model';
-import { CommentsService } from '../app/comments.service';
+import { CreateCommentInputModel } from './models/input/comments.input.model';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
+import { UpdateCommentCommand } from '../app/useCases/updateComment.useCase';
+import { DeleteCommentCommand } from '../app/useCases/deleteComment.useCase';
+import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
 
 @Controller(SETTINGS.PATH.comments)
 export class CommentsController {
   constructor(
     protected commentsQueryRepository: CommentsQueryRepository,
-    protected likesService: LikesService,
-    protected commentsService: CommentsService,
+    private commandBus: CommandBus,
   ) {}
   @Public()
   @Get(':id')
@@ -47,11 +48,8 @@ export class CommentsController {
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    return await this.likesService.changeLikeStatus(
-      commentId,
-      inputModel,
-      req.user!.userId,
-      req.user!.login,
+    await this.commandBus.execute(
+      new ChangeLikeStatusCommand(commentId, inputModel, req.user!.userId, req.user!.login),
     );
   }
 
@@ -59,7 +57,7 @@ export class CommentsController {
   @Put(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async createCommentForPost(
-    @Body() inputModel: CreateCommentModel,
+    @Body() inputModel: CreateCommentInputModel,
     @Param('commentId') commentId: string,
     @Req() req: Request,
   ) {
@@ -67,11 +65,8 @@ export class CommentsController {
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    await this.commentsService.updateComment(
-      inputModel,
-      comment,
-      req.user!.userId,
-      req.user!.login,
+    await this.commandBus.execute(
+      new UpdateCommentCommand(inputModel, comment, req.user!.userId, req.user!.login),
     );
   }
 
@@ -83,6 +78,8 @@ export class CommentsController {
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    await this.commentsService.deleteComment(comment, req.user!.userId, req.user!.login);
+    await this.commandBus.execute(
+      new DeleteCommentCommand(comment, req.user!.userId, req.user!.login),
+    );
   }
 }
