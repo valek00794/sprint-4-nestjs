@@ -25,8 +25,9 @@ import { PostsService } from 'src/features/posts/app/posts.service';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 import { CreateBlogInputModel, CreatePostForBlogModel } from './models/input/blogs.input.model';
-import { CreateBlogCommand } from '../app/useCases/createBlog.useCase';
 import { UpdateBlogCommand } from '../app/useCases/updateBlog.useCase';
+import { CreatePostCommand } from 'src/features/posts/app/useCases/createPost.useCase';
+import { CreateBlogCommand } from '../app/useCases/createBlog.useCase';
 
 @Public()
 @Controller(SETTINGS.PATH.blogs)
@@ -102,7 +103,7 @@ export class BlogsController {
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
-    const createdPost = await this.postsService.createPost(inputModel, blogId);
+    const createdPost = await this.commandBus.execute(new CreatePostCommand(inputModel, blogId));
     return this.postsQueryRepository.mapToOutput(createdPost);
   }
 }

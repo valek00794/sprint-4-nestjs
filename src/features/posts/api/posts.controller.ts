@@ -28,6 +28,9 @@ import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
 import { LikesService } from 'src/features/likes/app/likes.service';
 import { CreatePostModel } from './models/input/posts.input.model';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreatePostCommand } from '../app/useCases/createPost.useCase';
+import { UpdatePostCommand } from '../app/useCases/updatePost.useCase';
 
 @Controller(SETTINGS.PATH.posts)
 export class PostsController {
@@ -37,12 +40,13 @@ export class PostsController {
     protected postsQueryRepository: PostsQueryRepository,
     protected commentsQueryRepository: CommentsQueryRepository,
     protected likesService: LikesService,
+    private commandBus: CommandBus,
   ) {}
   @Public()
   @UseGuards(AuthBasicGuard)
   @Post()
   async createPost(@Body() inputModel: CreatePostModel) {
-    const createdPost = await this.postsService.createPost(inputModel);
+    const createdPost = await this.commandBus.execute(new CreatePostCommand(inputModel));
     return this.postsQueryRepository.mapToOutput(createdPost);
   }
   @Public()
@@ -64,7 +68,7 @@ export class PostsController {
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(@Body() inputModel: CreatePostModel, @Param('id') id: string) {
-    await this.postsService.updatePost(inputModel, id);
+    await this.commandBus.execute(new UpdatePostCommand(inputModel, id));
   }
   @Public()
   @UseGuards(AuthBasicGuard)
