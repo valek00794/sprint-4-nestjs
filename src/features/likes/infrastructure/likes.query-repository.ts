@@ -9,7 +9,7 @@ import {
   NewestLike,
   LikesInfo,
 } from '../domain/likes.types';
-import { Like, LikeDocument } from './likeStatus.schema';
+import { Like, LikeDocument } from './likes.schema';
 
 @Injectable()
 export class LikesQueryRepository {
@@ -21,20 +21,22 @@ export class LikesQueryRepository {
     const likesInfoView = new LikesInfoView(
       likesInfo.filter((like) => like.status === LikeStatus.Like).length,
       likesInfo.filter((like) => like.status === LikeStatus.Dislike).length,
-      likesInfo.find((like) => like.authorId.toHexString() === userId)?.status || LikeStatus.None,
+      likesInfo.find((like) => like.authorId.toString() === userId)?.status || LikeStatus.None,
     );
     return likesInfoView;
   }
 
   mapExtendedLikesInfo(likesInfo: LikesInfo[], userId?: string): ExtendedLikesInfo {
+    const lastLikesCount = 3;
     const newestLikes = likesInfo
       .filter((like) => like.status === LikeStatus.Like)
       .sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
-      .slice(0, 3);
-    const mappedLikesInfo = this.mapLikesInfo(likesInfo, userId);
+      .slice(0, lastLikesCount);
     const newestLikesView = newestLikes.map(
       (like) => new NewestLike(like.addedAt, like.authorId.toString(), like.authorLogin),
     );
+    const mappedLikesInfo = this.mapLikesInfo(likesInfo, userId);
+
     return new ExtendedLikesInfo(
       mappedLikesInfo.likesCount,
       mappedLikesInfo.dislikesCount,

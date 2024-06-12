@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Blog, BlogDocument } from './blogs.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
+
 import { SearchQueryParametersType } from '../../domain/query.types';
-import { getSanitizationQuery } from 'src/features/utils';
+import { getSanitizationQuery, isValidMongoId } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { BlogView } from '../api/models/output/blogs.output.model';
 
@@ -35,7 +36,7 @@ export class BlogsQueryRepository {
   }
 
   async findBlog(id: string): Promise<BlogView | null> {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isValidMongoId(id)) {
       return null;
     }
     const blog = await this.blogModel.findById(id);

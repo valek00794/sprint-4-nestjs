@@ -1,13 +1,15 @@
 import { BadRequestException, INestApplication, ValidationPipe } from '@nestjs/common';
-import type { APIErrorResult } from './exception.filter.types';
 import { useContainer } from 'class-validator';
 import { AppModule } from 'src/app.module';
 import { HttpExceptionFilter } from 'src/infrastructure/exception.filter';
+import { APIErrorResult } from 'src/infrastructure/exception.filter.types';
 
 export const applyAppSettings = (app: INestApplication) => {
   app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
+      transform: true,
+      stopAtFirstError: true,
       exceptionFactory: (errors) => {
         const errorsForResponse: APIErrorResult = { errorsMessages: [] };
         errors.forEach((e) => {

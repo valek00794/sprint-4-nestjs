@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type ApiRequestsDocument = HydratedDocument<ApiRequests>;
+export type ApiRequestDocument = HydratedDocument<ApiRequest>;
 
 @Schema()
-export class ApiRequests {
+export class ApiRequest {
   @Prop({ type: String, required: true })
   IP: string;
 
@@ -15,4 +15,4 @@ export class ApiRequests {
   date: Date;
 }
 
-export const ApiRequestsSchema = SchemaFactory.createForClass(ApiRequests);
+export const ApiRequestsSchema = SchemaFactory.createForClass(ApiRequest);

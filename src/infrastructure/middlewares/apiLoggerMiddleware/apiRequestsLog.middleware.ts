@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 
-import { ApiRequests, ApiRequestsDocument } from './apiRequests.schema';
+import { ApiRequest, ApiRequestDocument } from './apiRequests.schema';
 import { ResultStatus } from 'src/settings/settings';
 
 const REQUESTS_LOG_SETTING = {
@@ -14,7 +14,7 @@ const REQUESTS_LOG_SETTING = {
 @Injectable()
 export class ApiRequestsLogMiddleware implements NestMiddleware {
   constructor(
-    @InjectModel(ApiRequests.name) private apiRequestsModel: Model<ApiRequestsDocument>,
+    @InjectModel(ApiRequest.name) private apiRequestsModel: Model<ApiRequestDocument>,
   ) {}
 
   use(request: Request, response: Response, next: NextFunction): void {
@@ -34,7 +34,7 @@ export class ApiRequestsLogMiddleware implements NestMiddleware {
 @Injectable()
 export class ApiRequestsCounterMiddleware implements NestMiddleware {
   constructor(
-    @InjectModel(ApiRequests.name) private apiRequestsModel: Model<ApiRequestsDocument>,
+    @InjectModel(ApiRequest.name) private apiRequestsModel: Model<ApiRequestDocument>,
   ) {}
 
   async use(request: Request, response: Response, next: NextFunction): Promise<void> {

@@ -16,7 +16,7 @@ export const emailAdapter = {
         pass: process.env.PASS_SENDER,
       },
       tls: {
-        rejectUnauthorized: false, // отключение проверки сертификата
+        rejectUnauthorized: false,
       },
     });
 

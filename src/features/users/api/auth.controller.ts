@@ -13,34 +13,32 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
+import { CommandBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
-import { AuthService } from '../app/auth.service';
-import { UsersService } from '../app/users.service';
 import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
-import { UsersDevicesService } from '../app/userDevices.service';
 import {
   SignInInputModel,
-  PasswordRecoveryInputModel,
-  type EmailInputModel,
+  ConfirmPasswordRecoveryInputModel,
+  type PasswordRecoveryEmailInputModel,
   type ConirmationCodeInputModel,
 } from './models/input/auth.input.models';
-import { UserInfo } from '../domain/users.types';
-import { CreateUserModel } from '../api/models/input/users.input.models';
-import { Public } from '../../../infrastructure/decorators/public.decorator';
+import { CreateUserInputModel } from '../api/models/input/users.input.models';
+import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-
-interface CustomRequest extends Request {
-  user?: UserInfo;
-}
+import { AddUserDeviceCommand } from '../app/useCases/userDevices/addUserDevice.useCase';
+import { SignInCommand } from '../app/useCases/auth/signIn.useCase';
+import { ConfirmEmailCommand } from '../app/useCases/auth/confirmEmail.useCase';
+import { ResentConfirmEmailCommand } from '../app/useCases/auth/resentConfirmEmail.useCase';
+import { SignUpUserCommand } from '../app/useCases/users/signUpUser.useCase';
+import { PasswordRecoveryCommand } from '../app/useCases/users/passwordRecovery.useCase';
+import { ConfirmPasswordRecoveryCommand } from '../app/useCases/users/confirmPasswordRecovery.useCase';
 
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
   constructor(
-    protected authService: AuthService,
-    protected usersService: UsersService,
-    protected usersDevicesService: UsersDevicesService,
     protected usersQueryRepository: UsersQueryRepository,
+    private commandBus: CommandBus,
   ) {}
   @Public()
   @Post('/login')
@@ -51,8 +49,8 @@ export class AuthController {
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string,
   ) {
-    const tokens = await this.authService.signIn(inputModel);
-    await this.usersDevicesService.addUserDevice(tokens.refreshToken, userAgent, ip);
+    const tokens = await this.commandBus.execute(new SignInCommand(inputModel));
+    await this.commandBus.execute(new AddUserDeviceCommand(tokens.refreshToken, userAgent, ip));
     res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: true });
     return {
       accessToken: tokens.accessToken,
@@ -62,42 +60,42 @@ export class AuthController {
   @Public()
   @Post('/password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async passwordRecovery(@Body() inputModel: EmailInputModel) {
-    await this.usersService.passwordRecovery(inputModel.email);
+  async passwordRecovery(@Body() inputModel: PasswordRecoveryEmailInputModel) {
+    await this.commandBus.execute(new PasswordRecoveryCommand(inputModel));
   }
 
   @Public()
   @Post('/new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async confirmPasswordRecovery(@Body() passwordRecoveryModel: PasswordRecoveryInputModel) {
-    await this.usersService.confirmPasswordRecovery(passwordRecoveryModel);
+  async confirmPasswordRecovery(@Body() inputModel: ConfirmPasswordRecoveryInputModel) {
+    await this.commandBus.execute(new ConfirmPasswordRecoveryCommand(inputModel));
   }
 
   @Public()
   @Post('/registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
   async signUpConfimation(@Body() inputModel: ConirmationCodeInputModel) {
-    await this.authService.confirmEmail(inputModel.code);
+    await this.commandBus.execute(new ConfirmEmailCommand(inputModel));
   }
 
   @Public()
   @Post('/registration')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async signUp(@Body() inputModel: CreateUserModel) {
-    await this.usersService.signUpUser(inputModel);
+  async signUp(@Body() inputModel: CreateUserInputModel) {
+    await await this.commandBus.execute(new SignUpUserCommand(inputModel));
   }
 
   @Public()
   @Post('/registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async signUpEmailResending(@Body() inputModel: EmailInputModel) {
-    await this.authService.resentConfirmEmail(inputModel.email);
+  async signUpEmailResending(@Body() inputModel: PasswordRecoveryEmailInputModel) {
+    await this.commandBus.execute(new ResentConfirmEmailCommand(inputModel));
   }
 
   @UseGuards(AuthBearerGuard)
   @Get('/me')
   @HttpCode(HttpStatus.OK)
-  async getAuthInfo(@Req() req: CustomRequest) {
+  async getAuthInfo(@Req() req: Request) {
     const user = await this.usersQueryRepository.findUserById(req.user!.userId);
     if (!user) throw new UnauthorizedException();
     return user;

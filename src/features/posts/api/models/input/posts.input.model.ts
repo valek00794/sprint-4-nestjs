@@ -1,5 +1,6 @@
-import { IsNotEmpty, MaxLength } from 'class-validator';
-import { IsBlogIdExist } from 'src/infrastructure/pipes/blogId.validation.pipe';
+import { IsDefined, IsNotEmpty, MaxLength } from 'class-validator';
+import { Trim } from 'src/infrastructure/decorators/transform/trim.decorator';
+import { IsBlogIdExist } from 'src/infrastructure/decorators/validate/blogId.decorator';
 
 const VALIDATE_PHARAMS = {
   titleMaxLength: 30,
@@ -8,15 +9,23 @@ const VALIDATE_PHARAMS = {
 };
 
 export class CreatePostModel {
+  @IsDefined()
+  @Trim()
   @IsNotEmpty()
   @MaxLength(VALIDATE_PHARAMS.titleMaxLength)
   title: string;
+  @IsDefined()
+  @Trim()
   @IsNotEmpty()
   @MaxLength(VALIDATE_PHARAMS.shortDescriptionMaxLength)
   shortDescription: string;
+  @IsDefined()
+  @Trim()
   @IsNotEmpty()
   @MaxLength(VALIDATE_PHARAMS.contentMaxLength)
   content: string;
+  @IsDefined()
+  @Trim()
   @IsBlogIdExist({
     message: 'BlogId not found',
   })

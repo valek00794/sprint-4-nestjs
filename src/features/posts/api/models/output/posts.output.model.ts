@@ -10,6 +10,6 @@ export class PostView {
     public blogId: Types.ObjectId,
     public blogName: string,
     public createdAt: string,
-    public extendedLikesInfo?: ExtendedLikesInfo,
+    public extendedLikesInfo: ExtendedLikesInfo,
   ) {}
 }

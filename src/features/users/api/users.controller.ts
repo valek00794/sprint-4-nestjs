@@ -11,14 +11,16 @@ import {
   HttpCode,
   NotFoundException,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
-import { CreateUserModel } from './models/input/users.input.models';
+import { CreateUserInputModel } from './models/input/users.input.models';
 import { UsersService } from '../app/users.service';
 import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
-import { Public } from '../../../infrastructure/decorators/public.decorator';
+import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
+import { CreateUserCommand } from '../app/useCases/users/createUser.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)
@@ -27,11 +29,12 @@ export class UsersController {
   constructor(
     protected usersService: UsersService,
     protected usersQueryRepository: UsersQueryRepository,
+    private commandBus: CommandBus,
   ) {}
 
   @Post()
-  async createUser(@Body() inputModel: CreateUserModel) {
-    const createdUser = await this.usersService.createUser(inputModel);
+  async createUser(@Body() inputModel: CreateUserInputModel) {
+    const createdUser = await this.commandBus.execute(new CreateUserCommand(inputModel));
     return this.usersQueryRepository.mapToOutput(createdUser);
   }
 

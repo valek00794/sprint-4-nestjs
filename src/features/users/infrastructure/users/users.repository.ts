@@ -18,7 +18,7 @@ export class UsersRepository {
     private usersRecoveryPassswordModel: Model<UsersRecoveryPassswordDocument>,
   ) {}
 
-  async createUser(newUser: UserDocument) {
+  async createUser(newUser) {
     const user = new this.userModel(newUser);
     await user.save();
     return user;
