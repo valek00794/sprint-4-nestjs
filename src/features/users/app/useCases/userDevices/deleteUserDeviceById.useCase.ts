@@ -27,7 +27,7 @@ export class DeleteUserDeviceByIdUseCase implements ICommandHandler<DeleteUserDe
     }
     const device = await this.usersDevicesRepository.getUserDeviceById(command.deviceId);
     if (!device) {
-      throw new NotFoundException('Device not found');
+      throw new NotFoundException();
     }
     if (userVerifyInfo.userId !== device.userId) {
       throw new ForbiddenException();

@@ -4,6 +4,7 @@ import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { stringToObjectId } from 'src/features/utils';
 import { CheckUserByRefreshTokenCommand } from './checkUserByRefreshToken.useCase';
 import { JWTTokensOutType } from 'src/infrastructure/adapters/jwt/jwt-types';
+import { UpdateUserDeviceCommand } from '../userDevices/updateUserDevice.useCase';
 
 export class RenewTokensCommand {
   constructor(public refreshToken: string) {}
@@ -22,6 +23,9 @@ export class RenewTokensUseCase implements ICommandHandler<RenewTokensCommand> {
     const tokens = await this.jwtAdapter.createJWTs(
       stringToObjectId(userVerifyInfo.userId),
       userVerifyInfo.deviceId,
+    );
+    await this.commandBus.execute(
+      new UpdateUserDeviceCommand(command.refreshToken, tokens.refreshToken),
     );
     return tokens;
   }

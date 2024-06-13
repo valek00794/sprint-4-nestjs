@@ -13,9 +13,7 @@ const REQUESTS_LOG_SETTING = {
 
 @Injectable()
 export class ApiRequestsLogMiddleware implements NestMiddleware {
-  constructor(
-    @InjectModel(ApiRequest.name) private apiRequestsModel: Model<ApiRequestDocument>,
-  ) {}
+  constructor(@InjectModel(ApiRequest.name) private apiRequestsModel: Model<ApiRequestDocument>) {}
 
   use(request: Request, response: Response, next: NextFunction): void {
     const { ip, path } = request;
@@ -33,9 +31,7 @@ export class ApiRequestsLogMiddleware implements NestMiddleware {
 
 @Injectable()
 export class ApiRequestsCounterMiddleware implements NestMiddleware {
-  constructor(
-    @InjectModel(ApiRequest.name) private apiRequestsModel: Model<ApiRequestDocument>,
-  ) {}
+  constructor(@InjectModel(ApiRequest.name) private apiRequestsModel: Model<ApiRequestDocument>) {}
 
   async use(request: Request, response: Response, next: NextFunction): Promise<void> {
     const { ip, path } = request;

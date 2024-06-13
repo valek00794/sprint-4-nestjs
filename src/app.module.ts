@@ -76,6 +76,8 @@ import { SignUpUserUseCase } from './features/users/app/useCases/users/signUpUse
 import { PasswordRecoveryUseCase } from './features/users/app/useCases/users/passwordRecovery.useCase';
 import { CreateUserUseCase } from './features/users/app/useCases/users/createUser.useCase';
 import { ConfirmPasswordRecoveryUseCase } from './features/users/app/useCases/users/confirmPasswordRecovery.useCase';
+import { UsersDevicesController } from './features/users/api/usersDevices.controller';
+import { DeleteUserDeviceByIdUseCase } from './features/users/app/useCases/userDevices/deleteUserDeviceById.useCase';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -86,7 +88,11 @@ const blogsUseCases = [CreateBlogUseCase, UpdateBlogUseCase];
 const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
 const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteCommentUseCase];
 const likesUseCases = [ChangeLikeStatusUseCase];
-const userDevicesUseCases = [AddUserDeviceUseCase, UpdateUserDeviceUseCase];
+const userDevicesUseCases = [
+  AddUserDeviceUseCase,
+  UpdateUserDeviceUseCase,
+  DeleteUserDeviceByIdUseCase,
+];
 const authUseCases = [
   SignInUseCase,
   ConfirmEmailUseCase,
@@ -96,7 +102,7 @@ const authUseCases = [
   LogoutUserUseCase,
 ];
 
-const usersCases = [
+const usersUseCases = [
   SignUpUserUseCase,
   PasswordRecoveryUseCase,
   CreateUserUseCase,
@@ -166,6 +172,7 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
     UsersController,
     AuthController,
     CommentsController,
+    UsersDevicesController,
   ],
   providers: [
     ...postsProviders,
@@ -180,7 +187,7 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
     ...likesUseCases,
     ...userDevicesUseCases,
     ...authUseCases,
-    ...usersCases,
+    ...usersUseCases,
     DbService,
     JwtAdapter,
     {
@@ -194,7 +201,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(ApiRequestsLogMiddleware, ApiRequestsCounterMiddleware)
       .exclude(
-        { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/logout', method: RequestMethod.POST },
+        { path: 'auth/refresh-token', method: RequestMethod.POST },
         { path: 'auth/me', method: RequestMethod.GET },
       )
       .forRoutes(AuthController)

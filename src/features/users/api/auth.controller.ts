@@ -33,6 +33,8 @@ import { ResentConfirmEmailCommand } from '../app/useCases/auth/resentConfirmEma
 import { SignUpUserCommand } from '../app/useCases/users/signUpUser.useCase';
 import { PasswordRecoveryCommand } from '../app/useCases/users/passwordRecovery.useCase';
 import { ConfirmPasswordRecoveryCommand } from '../app/useCases/users/confirmPasswordRecovery.useCase';
+import { RenewTokensCommand } from '../app/useCases/auth/renewTokens.useCase';
+import { LogoutUserCommand } from '../app/useCases/auth/logoutUser.useCase';
 
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
@@ -92,12 +94,32 @@ export class AuthController {
     await this.commandBus.execute(new ResentConfirmEmailCommand(inputModel));
   }
 
+  @Public()
+  @Post('/refresh-token')
+  @HttpCode(HttpStatus.OK)
+  async renewTokens(@Req() req: Request, @Res() res: Response) {
+    const result = await this.commandBus.execute(new RenewTokensCommand(req.cookies.refreshToken));
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: true });
+    return {
+      accessToken: result.accessToken,
+    };
+  }
+
+  @Public()
+  @Post('/logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    console.log(req.cookies.refreshToken);
+    res.clearCookie('refreshToken');
+    await this.commandBus.execute(new LogoutUserCommand(req.cookies.refreshToken));
+  }
+
   @UseGuards(AuthBearerGuard)
   @Get('/me')
   @HttpCode(HttpStatus.OK)
   async getAuthInfo(@Req() req: Request) {
     const user = await this.usersQueryRepository.findUserById(req.user!.userId);
-    if (!user) throw new UnauthorizedException();
+    if (!req.user || !req.user.userId || !user) throw new UnauthorizedException();
     return user;
   }
 }
