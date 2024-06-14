@@ -97,7 +97,7 @@ export class AuthController {
   @Public()
   @Post('/refresh-token')
   @HttpCode(HttpStatus.OK)
-  async renewTokens(@Req() req: Request, @Res() res: Response) {
+  async renewTokens(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const result = await this.commandBus.execute(new RenewTokensCommand(req.cookies.refreshToken));
     res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: true });
     return {
@@ -109,7 +109,6 @@ export class AuthController {
   @Post('/logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    console.log(req.cookies.refreshToken);
     res.clearCookie('refreshToken');
     await this.commandBus.execute(new LogoutUserCommand(req.cookies.refreshToken));
   }

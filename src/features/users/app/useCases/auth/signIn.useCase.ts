@@ -24,6 +24,6 @@ export class SignInUseCase implements ICommandHandler<SignInCommand> {
       user.passwordHash,
     );
     if (!isAuth) throw new UnauthorizedException();
-    return await this.jwtAdapter.createJWTs(user._id!, user.login);
+    return await this.jwtAdapter.createJWTs(user._id.toString());
   }
 }

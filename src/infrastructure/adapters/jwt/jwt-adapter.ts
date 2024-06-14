@@ -1,25 +1,22 @@
 import { Injectable } from '@nestjs/common';
-
-import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
+import { JwtService } from '@nestjs/jwt';
 
 import { JWTTokensOutType } from './jwt-types';
 import { SETTINGS } from 'src/settings/settings';
 import type { UserDeviceInfoType } from 'src/features/users/domain/users.types';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAdapter {
   constructor(private jwtService: JwtService) {}
-  async createJWTs(userId: ObjectId, login: string, deviceId?: string): Promise<JWTTokensOutType> {
+  async createJWTs(userId: string, deviceId?: string): Promise<JWTTokensOutType> {
     const accessToken = await this.jwtService.signAsync(
-      { userId, login },
+      { userId },
       {
         secret: SETTINGS.JWT.AT_SECRET,
         expiresIn: SETTINGS.JWT.AT_EXPIRES_TIME,
       },
     );
-
     const getDeviceId = deviceId ? deviceId : uuidv4();
 
     const refreshToken = await this.jwtService.signAsync(

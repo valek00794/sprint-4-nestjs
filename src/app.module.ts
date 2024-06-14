@@ -78,6 +78,7 @@ import { CreateUserUseCase } from './features/users/app/useCases/users/createUse
 import { ConfirmPasswordRecoveryUseCase } from './features/users/app/useCases/users/confirmPasswordRecovery.useCase';
 import { UsersDevicesController } from './features/users/api/usersDevices.controller';
 import { DeleteUserDeviceByIdUseCase } from './features/users/app/useCases/userDevices/deleteUserDeviceById.useCase';
+import { UsersDevicesQueryRepository } from './features/users/infrastructure/devices/usersDevices-query-repository';
 
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
@@ -114,6 +115,7 @@ const usersProviders = [
   UsersRepository,
   UsersQueryRepository,
   UsersDevicesService,
+  UsersDevicesQueryRepository,
   UsersDevicesRepository,
 ];
 

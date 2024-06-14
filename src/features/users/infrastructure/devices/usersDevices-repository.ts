@@ -17,15 +17,15 @@ export class UsersDevicesRepository {
   }
 
   async updateUserDevice(
-    userVerifyInfo: UserDeviceInfoType,
+    userVerifyInfoByOldToken: UserDeviceInfoType,
     newLastActiveDate: string,
     newExpiryDate: string,
   ) {
     return await this.usersDevicesModel.updateOne(
       {
-        deviceId: userVerifyInfo.deviceId,
-        userId: userVerifyInfo.userId,
-        lastActiveDate: new Date(userVerifyInfo!.iat! * 1000).toISOString(),
+        deviceId: userVerifyInfoByOldToken.deviceId,
+        userId: userVerifyInfoByOldToken.userId,
+        lastActiveDate: new Date(userVerifyInfoByOldToken!.iat! * 1000).toISOString(),
       },
       {
         $set: {
@@ -44,11 +44,11 @@ export class UsersDevicesRepository {
     });
   }
 
-  async deleteUserDevicebyId(deviceId: string) {
+  async deleteUserDevicebyDeviceId(deviceId: string) {
     return await this.usersDevicesModel.deleteOne({ deviceId });
   }
 
-  async getUserDeviceById(deviceId: string): Promise<UsersDevicesDocument | null> {
+  async getUserDeviceByDeviceId(deviceId: string): Promise<UsersDevicesDocument | null> {
     return await this.usersDevicesModel.findOne({ deviceId });
   }
 

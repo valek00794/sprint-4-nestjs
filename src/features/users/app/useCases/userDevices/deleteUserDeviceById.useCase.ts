@@ -25,13 +25,13 @@ export class DeleteUserDeviceByIdUseCase implements ICommandHandler<DeleteUserDe
     if (userVerifyInfo === null) {
       throw new UnauthorizedException();
     }
-    const device = await this.usersDevicesRepository.getUserDeviceById(command.deviceId);
+    const device = await this.usersDevicesRepository.getUserDeviceByDeviceId(command.deviceId);
     if (!device) {
       throw new NotFoundException();
     }
     if (userVerifyInfo.userId !== device.userId) {
       throw new ForbiddenException();
     }
-    return await this.usersDevicesRepository.deleteUserDevicebyId(command.deviceId);
+    return await this.usersDevicesRepository.deleteUserDevicebyDeviceId(command.deviceId);
   }
 }

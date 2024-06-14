@@ -17,7 +17,7 @@ export class LogoutUserUseCase implements ICommandHandler<LogoutUserCommand> {
     const userVerifyInfo = await this.commandBus.execute(
       new CheckUserByRefreshTokenCommand(command.refreshToken),
     );
-    await this.usersDevicesRepository.deleteUserDevicebyId(userVerifyInfo.deviceId);
+    await this.usersDevicesRepository.deleteUserDevicebyDeviceId(userVerifyInfo.deviceId);
     return true;
   }
 }

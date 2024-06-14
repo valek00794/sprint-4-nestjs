@@ -6,18 +6,26 @@ import { SETTINGS } from 'src/settings/settings';
 import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
 import { UsersDevicesService } from '../app/userDevices.service';
 import { DeleteUserDeviceByIdCommand } from '../app/useCases/userDevices/deleteUserDeviceById.useCase';
+import { CheckUserByRefreshTokenCommand } from '../app/useCases/auth/checkUserByRefreshToken.useCase';
+import { UsersDevicesQueryRepository } from '../infrastructure/devices/usersDevices-query-repository';
 
 @Public()
 @Controller(SETTINGS.PATH.devices)
 export class UsersDevicesController {
   constructor(
     protected usersDevicesService: UsersDevicesService,
+    protected usersDevicesQueryRepository: UsersDevicesQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
   @Get()
   async getActiveDevicesByUser(@Req() req: Request) {
-    return await this.usersDevicesService.getActiveDevicesByUser(req.cookies.refreshToken);
+    const userVerifyInfo = await this.commandBus.execute(
+      new CheckUserByRefreshTokenCommand(req.cookies.refreshToken),
+    );
+    return await this.usersDevicesQueryRepository.getAllActiveDevicesByUser(
+      userVerifyInfo.userId.toString(),
+    );
   }
 
   @Delete()

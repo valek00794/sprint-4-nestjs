@@ -30,7 +30,7 @@ export class CheckUserByRefreshTokenUseCase
     }
 
     const isUserExists = await this.usersRepository.findUserById(userVerifyInfo!.userId);
-    const deviceSession = await this.usersDevicesRepository.getUserDeviceById(
+    const deviceSession = await this.usersDevicesRepository.getUserDeviceByDeviceId(
       userVerifyInfo.deviceId,
     );
     if (
