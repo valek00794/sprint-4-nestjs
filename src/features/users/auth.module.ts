@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { UsersDevicesController } from './api/usersDevices.controller';
 import { AuthController } from './api/auth.controller';
@@ -26,6 +27,7 @@ import {
   usersRecoveryPassswordSchema,
 } from './infrastructure/users/users.schema';
 import { UsersQueryRepository } from './infrastructure/users/users.query-repository';
+import { APP_GUARD } from '@nestjs/core';
 
 const usersDevicesUseCases = [
   AddUserDeviceUseCase,
@@ -65,6 +67,12 @@ const usersDevicesProviders = [
         schema: UsersDevicesSchema,
       },
     ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
   ],
   controllers: [AuthController, UsersDevicesController],
   providers: [
@@ -74,6 +82,10 @@ const usersDevicesProviders = [
     ...usersDevicesUseCases,
     UsersRepository,
     UsersQueryRepository,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AuthModule {}

@@ -35,6 +35,7 @@ import { PasswordRecoveryCommand } from '../app/useCases/users/passwordRecovery.
 import { ConfirmPasswordRecoveryCommand } from '../app/useCases/users/confirmPasswordRecovery.useCase';
 import { RenewTokensCommand } from '../app/useCases/auth/renewTokens.useCase';
 import { LogoutUserCommand } from '../app/useCases/auth/logoutUser.useCase';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
@@ -94,6 +95,7 @@ export class AuthController {
     await this.commandBus.execute(new ResentConfirmEmailCommand(inputModel));
   }
 
+  @SkipThrottle()
   @Public()
   @Post('/refresh-token')
   @HttpCode(HttpStatus.OK)
@@ -104,7 +106,7 @@ export class AuthController {
       accessToken: result.accessToken,
     };
   }
-
+  @SkipThrottle()
   @Public()
   @Post('/logout')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -113,6 +115,7 @@ export class AuthController {
     await this.commandBus.execute(new LogoutUserCommand(req.cookies.refreshToken));
   }
 
+  @SkipThrottle()
   @UseGuards(AuthBearerGuard)
   @Get('/me')
   @HttpCode(HttpStatus.OK)

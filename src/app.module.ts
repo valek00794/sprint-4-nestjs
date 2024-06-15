@@ -12,19 +12,10 @@ import {
   UsersSchema,
   usersRecoveryPassswordSchema,
 } from './features/users/infrastructure/users/users.schema';
-import { AuthController } from './features/users/api/auth.controller';
 import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
 import { IsUserAlreadyExistConstraint } from './infrastructure/decorators/validate/user-exists.decorator';
 import { BlogIdExistConstraint } from './infrastructure/decorators/validate/blogId.decorator';
-import {
-  ApiRequest,
-  ApiRequestsSchema,
-} from './infrastructure/middlewares/apiLoggerMiddleware/apiRequests.schema';
-import {
-  ApiRequestsCounterMiddleware,
-  ApiRequestsLogMiddleware,
-} from './infrastructure/middlewares/apiLoggerMiddleware/apiRequestsLog.middleware';
-import { UserIdFromJWT } from './infrastructure/middlewares/apiLoggerMiddleware/userIdFromJWT.middleware';
+import { UserIdFromJWT } from './infrastructure/middlewares/userIdFromJWT.middleware';
 import { BlogsModule } from './features/blogs/blogs.module';
 import { AuthModule } from './features/users/auth.module';
 import { UsersModule } from './features/users/users.module';
@@ -54,10 +45,6 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
         name: UsersRecoveryPasssword.name,
         schema: usersRecoveryPassswordSchema,
       },
-      {
-        name: ApiRequest.name,
-        schema: ApiRequestsSchema,
-      },
     ]),
     JwtModule.register({
       global: true,
@@ -77,13 +64,6 @@ const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstrai
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(ApiRequestsLogMiddleware, ApiRequestsCounterMiddleware)
-      .exclude(
-        { path: 'auth/logout', method: RequestMethod.POST },
-        { path: 'auth/refresh-token', method: RequestMethod.POST },
-        { path: 'auth/me', method: RequestMethod.GET },
-      )
-      .forRoutes(AuthController)
       .apply(UserIdFromJWT)
       .forRoutes(
         { path: 'blogs/:blogId/posts', method: RequestMethod.GET },

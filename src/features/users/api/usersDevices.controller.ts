@@ -1,6 +1,7 @@
 import { Controller, Delete, Get, Param, HttpStatus, HttpCode, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { CommandBus } from '@nestjs/cqrs';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { SETTINGS } from 'src/settings/settings';
 import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
@@ -9,6 +10,7 @@ import { DeleteUserDeviceByIdCommand } from '../app/useCases/userDevices/deleteU
 import { CheckUserByRefreshTokenCommand } from '../app/useCases/auth/checkUserByRefreshToken.useCase';
 import { UsersDevicesQueryRepository } from '../infrastructure/devices/usersDevices-query-repository';
 
+@SkipThrottle()
 @Public()
 @Controller(SETTINGS.PATH.devices)
 export class UsersDevicesController {

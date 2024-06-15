@@ -18,10 +18,6 @@ import {
 } from '../users/infrastructure/devices/usersDevices.schema';
 import { CommentsSchema, Comment } from '../comments/infrastructure/comments.schema';
 import { Like, LikeSchema } from '../likes/infrastructure/likes.schema';
-import {
-  ApiRequest,
-  ApiRequestsSchema,
-} from 'src/infrastructure/middlewares/apiLoggerMiddleware/apiRequests.schema';
 
 @Module({
   imports: [
@@ -57,10 +53,6 @@ import {
       {
         name: Like.name,
         schema: LikeSchema,
-      },
-      {
-        name: ApiRequest.name,
-        schema: ApiRequestsSchema,
       },
     ]),
   ],
