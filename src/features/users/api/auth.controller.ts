@@ -23,7 +23,7 @@ import {
   type PasswordRecoveryEmailInputModel,
   type ConirmationCodeInputModel,
 } from './models/input/auth.input.models';
-import { CreateUserInputModel } from '../api/models/input/users.input.models';
+import { CreateUserInputModel } from './models/input/users.input.models';
 import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { AddUserDeviceCommand } from '../app/useCases/userDevices/addUserDevice.useCase';
