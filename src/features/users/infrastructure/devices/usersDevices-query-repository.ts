@@ -1,31 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
-import { UsersDevices, type UsersDevicesDocument } from './usersDevices.schema';
 import { UsersDevicesOutput } from '../../api/models/output/usersDevices.output.models';
+import { UsersDevices } from './usersDevices.entity';
 
 @Injectable()
 export class UsersDevicesQueryRepository {
-  constructor(
-    @InjectModel(UsersDevices.name) private usersDevicesModel: Model<UsersDevicesDocument>,
-  ) {}
-  async getAllActiveDevicesByUser(userId: string): Promise<UsersDevicesOutput[]> {
-    const userDevices = await this.usersDevicesModel.find({ userId });
-    return userDevices.map((device) => this.mapToOutput(device));
-  }
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async getUserDeviceById(deviceId: string): Promise<UsersDevicesOutput | null> {
-    const deviceSession = await this.usersDevicesModel.findOne({ deviceId });
-    return deviceSession ? this.mapToOutput(deviceSession) : null;
-  }
+  // async getAllActiveDevicesByUser(userId: string): Promise<UsersDevicesOutput[]> {
+  //   const userDevices = await this.usersDevicesModel.find({ userId });
+  //   return userDevices.map((device) => this.mapToOutput(device));
+  // }
 
-  mapToOutput(userDevice: UsersDevicesDocument): UsersDevicesOutput {
-    return new UsersDevicesOutput(
-      userDevice.ip,
-      userDevice.title,
-      userDevice.deviceId,
-      userDevice.lastActiveDate,
-    );
-  }
+  // async getUserDeviceById(deviceId: string): Promise<UsersDevicesOutput | null> {
+  //   const deviceSession = await this.usersDevicesModel.findOne({ deviceId });
+  //   return deviceSession ? this.mapToOutput(deviceSession) : null;
+  // }
+
+  // mapToOutput(userDevice: UsersDevices): UsersDevicesOutput {
+  //   return new UsersDevicesOutput(
+  //     userDevice.ip,
+  //     userDevice.title,
+  //     userDevice.deviceId,
+  //     userDevice.lastActiveDate,
+  //   );
+  // }
 }

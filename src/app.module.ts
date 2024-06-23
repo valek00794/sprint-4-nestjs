@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { SETTINGS } from './settings/settings';
 import { AuthBearerGuard } from './infrastructure/guards/auth-bearer.guards';
@@ -20,6 +21,16 @@ const modules = [BlogsModule, AuthModule, UsersModule, ConstraintsModule, Testin
     ...modules,
     CqrsModule,
     MongooseModule.forRoot(SETTINGS.DB.mongoURI),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: '127.0.0.1',
+      port: 5432,
+      username: 'postgres',
+      password: 'sa',
+      database: 'test',
+      autoLoadEntities: false,
+      synchronize: false,
+    }),
     JwtModule.register({
       global: true,
     }),

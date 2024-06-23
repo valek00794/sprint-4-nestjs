@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { MongooseModule } from '@nestjs/mongoose';
 
 import { UsersController } from './api/users.controller';
 import { UsersRepository } from './infrastructure/users/users.repository';
@@ -10,13 +9,9 @@ import { SignUpUserUseCase } from './app/useCases/users/signUpUser.useCase';
 import { PasswordRecoveryUseCase } from './app/useCases/users/passwordRecovery.useCase';
 import { CreateUserUseCase } from './app/useCases/users/createUser.useCase';
 import { ConfirmPasswordRecoveryUseCase } from './app/useCases/users/confirmPasswordRecovery.useCase';
-import {
-  User,
-  UsersRecoveryPasssword,
-  UsersSchema,
-  usersRecoveryPassswordSchema,
-} from './infrastructure/users/users.schema';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User, UsersRecoveryPasssword } from './infrastructure/users/users.entity';
 
 const usersUseCases = [
   SignUpUserUseCase,
@@ -28,19 +23,7 @@ const usersUseCases = [
 const usersProviders = [UsersService, UsersRepository, UsersQueryRepository];
 
 @Module({
-  imports: [
-    CqrsModule,
-    MongooseModule.forFeature([
-      {
-        name: User.name,
-        schema: UsersSchema,
-      },
-      {
-        name: UsersRecoveryPasssword.name,
-        schema: usersRecoveryPassswordSchema,
-      },
-    ]),
-  ],
+  imports: [CqrsModule, TypeOrmModule.forFeature([User, UsersRecoveryPasssword])],
   controllers: [UsersController],
   providers: [JwtAdapter, ...usersProviders, ...usersUseCases],
 })
