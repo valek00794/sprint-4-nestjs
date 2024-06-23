@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
 import { SETTINGS } from 'src/settings/settings';
@@ -26,11 +26,11 @@ export class CheckUserByRefreshTokenUseCase
       SETTINGS.JWT.RT_SECRET,
     );
     if (!command.refreshToken || userVerifyInfo === null) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException();
     }
 
     const isUserExists = await this.usersRepository.findUserById(userVerifyInfo!.userId);
-    const deviceSession = await this.usersDevicesRepository.getUserDeviceById(
+    const deviceSession = await this.usersDevicesRepository.getUserDeviceByDeviceId(
       userVerifyInfo.deviceId,
     );
     if (
@@ -38,7 +38,7 @@ export class CheckUserByRefreshTokenUseCase
       !deviceSession ||
       new Date(userVerifyInfo!.iat! * 1000).toISOString() !== deviceSession?.lastActiveDate
     ) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException();
     }
 
     const userDeviceInfo: UserDeviceInfoType = {

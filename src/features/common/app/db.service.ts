@@ -15,10 +15,7 @@ import {
 } from 'src/features/users/infrastructure/devices/usersDevices.schema';
 import { Comment, CommentDocument } from 'src/features/comments/infrastructure/comments.schema';
 import { Like, LikeDocument } from 'src/features/likes/infrastructure/likes.schema';
-import {
-  ApiRequest,
-  ApiRequestDocument,
-} from 'src/infrastructure/middlewares/apiLoggerMiddleware/apiRequests.schema';
+
 @Injectable()
 export class DbService {
   constructor(
@@ -30,7 +27,6 @@ export class DbService {
     @InjectModel(UsersRecoveryPasssword.name)
     private UsersRecoveryPassswordModel: Model<UsersRecoveryPassswordDocument>,
     @InjectModel(UsersDevices.name) private UsersDevicesModel: Model<UsersDevicesDocument>,
-    @InjectModel(ApiRequest.name) private ApiRequestModel: Model<ApiRequestDocument>,
   ) {}
   async clearDb() {
     await this.BlogsModel.deleteMany({});
@@ -40,7 +36,6 @@ export class DbService {
     await this.LikeModel.deleteMany({});
     await this.UsersDevicesModel.deleteMany({});
     await this.UsersRecoveryPassswordModel.deleteMany({});
-    await this.ApiRequestModel.deleteMany({});
     return true;
   }
 }

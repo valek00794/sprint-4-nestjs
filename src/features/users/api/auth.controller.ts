@@ -23,7 +23,7 @@ import {
   type PasswordRecoveryEmailInputModel,
   type ConirmationCodeInputModel,
 } from './models/input/auth.input.models';
-import { CreateUserInputModel } from '../api/models/input/users.input.models';
+import { CreateUserInputModel } from './models/input/users.input.models';
 import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { AddUserDeviceCommand } from '../app/useCases/userDevices/addUserDevice.useCase';
@@ -33,6 +33,9 @@ import { ResentConfirmEmailCommand } from '../app/useCases/auth/resentConfirmEma
 import { SignUpUserCommand } from '../app/useCases/users/signUpUser.useCase';
 import { PasswordRecoveryCommand } from '../app/useCases/users/passwordRecovery.useCase';
 import { ConfirmPasswordRecoveryCommand } from '../app/useCases/users/confirmPasswordRecovery.useCase';
+import { RenewTokensCommand } from '../app/useCases/auth/renewTokens.useCase';
+import { LogoutUserCommand } from '../app/useCases/auth/logoutUser.useCase';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
@@ -92,12 +95,33 @@ export class AuthController {
     await this.commandBus.execute(new ResentConfirmEmailCommand(inputModel));
   }
 
+  @SkipThrottle()
+  @Public()
+  @Post('/refresh-token')
+  @HttpCode(HttpStatus.OK)
+  async renewTokens(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const result = await this.commandBus.execute(new RenewTokensCommand(req.cookies.refreshToken));
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: true });
+    return {
+      accessToken: result.accessToken,
+    };
+  }
+  @SkipThrottle()
+  @Public()
+  @Post('/logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refreshToken');
+    await this.commandBus.execute(new LogoutUserCommand(req.cookies.refreshToken));
+  }
+
+  @SkipThrottle()
   @UseGuards(AuthBearerGuard)
   @Get('/me')
   @HttpCode(HttpStatus.OK)
   async getAuthInfo(@Req() req: Request) {
     const user = await this.usersQueryRepository.findUserById(req.user!.userId);
-    if (!user) throw new UnauthorizedException();
+    if (!req.user || !req.user.userId || !user) throw new UnauthorizedException();
     return user;
   }
 }
