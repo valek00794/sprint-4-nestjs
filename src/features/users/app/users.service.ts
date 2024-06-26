@@ -8,18 +8,15 @@ import { isValidMongoId } from 'src/features/utils';
 export class UsersService {
   constructor(protected usersRepository: UsersRepository) {}
 
-  // async updateUserPassword(userId: string, password: string): Promise<boolean> {
-  //   if (!isValidMongoId(userId)) {
-  //     throw new NotFoundException('User not found');
-  //   }
-  //   const passwordHash = await bcryptArapter.generateHash(password);
-  //   return await this.usersRepository.updateUserPassword(userId, passwordHash);
-  // }
+  async updateUserPassword(userId: string, password: string): Promise<boolean> {
+    if (!isValidMongoId(userId)) {
+      throw new NotFoundException('User not found');
+    }
+    const passwordHash = await bcryptArapter.generateHash(password);
+    return await this.usersRepository.updateUserPassword(userId, passwordHash);
+  }
 
-  // async deleteUserById(id: string): Promise<boolean> {
-  //   if (!isValidMongoId(id)) {
-  //     throw new NotFoundException('User not found');
-  //   }
-  //   return await this.usersRepository.deleteUserById(id);
-  // }
+  async deleteUserById(id: string): Promise<boolean> {
+    return await this.usersRepository.deleteUserById(id);
+  }
 }

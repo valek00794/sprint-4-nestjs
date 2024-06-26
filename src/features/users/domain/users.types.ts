@@ -16,8 +16,8 @@ export type UserDeviceInfoType = {
 export type UsersDevicesType = {
   deviceId: string;
   title: string;
-  userId?: string;
   ip: string;
+  userId?: string;
   lastActiveDate?: string;
   expiryDate?: string;
 };

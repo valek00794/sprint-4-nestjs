@@ -9,22 +9,24 @@ import { UsersDevices } from './usersDevices.entity';
 export class UsersDevicesQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  // async getAllActiveDevicesByUser(userId: string): Promise<UsersDevicesOutput[]> {
-  //   const userDevices = await this.usersDevicesModel.find({ userId });
-  //   return userDevices.map((device) => this.mapToOutput(device));
-  // }
+  async getAllActiveDevicesByUser(userId: string): Promise<UsersDevicesOutput[]> {
+    const query = `SELECT * FROM users_devices WHERE UserId = '${userId}'`;
+    const userDevices = await this.dataSource.query(query);
+    return userDevices.map((device) => this.mapToOutput(device));
+  }
 
-  // async getUserDeviceById(deviceId: string): Promise<UsersDevicesOutput | null> {
-  //   const deviceSession = await this.usersDevicesModel.findOne({ deviceId });
-  //   return deviceSession ? this.mapToOutput(deviceSession) : null;
-  // }
+  async getUserDeviceByDeviceId(deviceId: string): Promise<UsersDevicesOutput | null> {
+    const query = `SELECT * FROM users_devices WHERE DeviceId = '${deviceId}'`;
+    const deviceSession = await this.dataSource.query(query);
+    return deviceSession[0] ? this.mapToOutput(deviceSession) : null;
+  }
 
-  // mapToOutput(userDevice: UsersDevices): UsersDevicesOutput {
-  //   return new UsersDevicesOutput(
-  //     userDevice.ip,
-  //     userDevice.title,
-  //     userDevice.deviceId,
-  //     userDevice.lastActiveDate,
-  //   );
-  // }
+  mapToOutput(userDevice: UsersDevices): UsersDevicesOutput {
+    return new UsersDevicesOutput(
+      userDevice.ip,
+      userDevice.title,
+      userDevice.deviceId,
+      userDevice.lastActiveDate,
+    );
+  }
 }

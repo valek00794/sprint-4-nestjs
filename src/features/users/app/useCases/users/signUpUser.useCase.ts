@@ -26,25 +26,25 @@ export class SignUpUserUseCase implements ICommandHandler<SignUpUserCommand> {
       email: command.inputModel.email,
       passwordHash,
       createdAt: new Date().toISOString(),
-      emailConfirmation: {
-        confirmationCode: uuidv4(),
-        expirationDate: add(new Date(), {
-          hours: 1,
-        }),
-        isConfirmed: false,
-      },
     };
-    const createdUser = await this.usersRepository.createUser(signUpData);
+    const emailConfirmation = {
+      confirmationCode: uuidv4(),
+      expirationDate: add(signUpData.createdAt, {
+        hours: 1,
+      }).toISOString(),
+      isConfirmed: false,
+    };
+    const createdUser = await this.usersRepository.createUser(signUpData, emailConfirmation);
 
-    if (signUpData.emailConfirmation) {
+    if (emailConfirmation) {
       try {
         await emailManager.sendEmailConfirmationMessage(
           signUpData.email,
-          signUpData.emailConfirmation.confirmationCode,
+          emailConfirmation.confirmationCode,
         );
       } catch (error) {
         console.error(error);
-        this.usersRepository.deleteUserById(createdUser._id!.toString());
+        this.usersRepository.deleteUserById(createdUser.id!.toString());
         throw new ServiceUnavailableException('Error sending confirmation email');
       }
     }

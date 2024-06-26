@@ -12,15 +12,15 @@ export class ConfirmEmailCommand {
 export class ConfirmEmailUseCase implements ICommandHandler<ConfirmEmailCommand> {
   constructor(protected usersRepository: UsersRepository) {}
   async execute(command: ConfirmEmailCommand) {
-    const user = await this.usersRepository.findUserByConfirmationCode(command.inputModel.code);
-    if (user === null) {
+    const userConfirmationInfo = await this.usersRepository.findUserConfirmationInfoByCode(
+      command.inputModel.code,
+    );
+    if (userConfirmationInfo === null) {
       throw new BadRequestException([
         { message: 'User with verification code not found', field: 'code' },
       ]);
     }
-    const userConfirmationInfo = user.emailConfirmation;
-
-    if (user !== null && userConfirmationInfo !== null) {
+    if (userConfirmationInfo !== null) {
       if (userConfirmationInfo.isConfirmed) {
         throw new BadRequestException([
           { message: 'Verification code does not match', field: 'code' },
@@ -37,6 +37,6 @@ export class ConfirmEmailUseCase implements ICommandHandler<ConfirmEmailCommand>
         ]);
       }
     }
-    return await this.usersRepository.updateConfirmation(user!._id.toString());
+    return await this.usersRepository.updateConfirmation(userConfirmationInfo.userId);
   }
 }
