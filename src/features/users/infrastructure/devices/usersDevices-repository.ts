@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
-import { UsersDevices, type UsersDevicesDocument } from './usersDevices.schema';
 import { UserDeviceInfoType, UsersDevicesType } from '../../domain/users.types';
 
 @Injectable()
 export class UsersDevicesRepository {
-  constructor(
-    @InjectModel(UsersDevices.name) private usersDevicesModel: Model<UsersDevicesDocument>,
-  ) {}
-  async addUserDevice(device: UsersDevicesType): Promise<UsersDevicesDocument> {
-    const newDevice = new this.usersDevicesModel(device);
-    await newDevice.save();
-    return newDevice;
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  async addUserDevice(device: UsersDevicesType) {
+    const query = `
+      INSERT INTO "usersDevices"  ("DeviceId", "Title", "Ip", "UserId", "LastActiveDate", "ExpiryDate")
+      VALUES ('${device.deviceId}', '${device.title}', '${device.ip}', '${device.userId}', '${device.lastActiveDate}', '${device.expiryDate}')
+    `;
+    await this.dataSource.query(query);
+    return device;
   }
 
   async updateUserDevice(
@@ -21,38 +21,51 @@ export class UsersDevicesRepository {
     newLastActiveDate: string,
     newExpiryDate: string,
   ) {
-    return await this.usersDevicesModel.updateOne(
-      {
-        deviceId: userVerifyInfoByOldToken.deviceId,
-        userId: userVerifyInfoByOldToken.userId,
-        lastActiveDate: new Date(userVerifyInfoByOldToken!.iat! * 1000).toISOString(),
-      },
-      {
-        $set: {
-          lastActiveDate: newLastActiveDate,
-          expiryDate: newExpiryDate,
-        },
-      },
-    );
+    const query = `
+      UPDATE "usersDevices" 
+      SET "LastActiveDate" = '${newLastActiveDate}', "ExpiryDate" = '${newExpiryDate}'
+      WHERE "DeviceId" = '${userVerifyInfoByOldToken.deviceId}'
+      AND "UserId" = '${userVerifyInfoByOldToken.userId}'
+      AND "LastActiveDate" = '${new Date(userVerifyInfoByOldToken!.iat! * 1000).toISOString()}'
+    `;
+
+    return await this.dataSource.query(query);
   }
 
   async deleteUserDevices(userVerifyInfo: UserDeviceInfoType) {
-    return await this.usersDevicesModel.deleteMany({
-      userId: userVerifyInfo.userId,
-      deviceId: { $ne: userVerifyInfo.deviceId },
-      lastActiveDate: { $ne: new Date(userVerifyInfo!.iat! * 1000).toISOString() },
-    });
+    const query = `
+      DELETE FROM "usersDevices" 
+      WHERE "UserId" = '${userVerifyInfo.userId}'
+      AND "DeviceId" != '${userVerifyInfo.deviceId}'
+      AND "LastActiveDate" != '${new Date(userVerifyInfo.iat! * 1000).toISOString()}'
+    `;
+
+    return await this.dataSource.query(query);
   }
 
   async deleteUserDevicebyDeviceId(deviceId: string) {
-    return await this.usersDevicesModel.deleteOne({ deviceId });
+    const query = `DELETE FROM "usersDevices"  WHERE "DeviceId" = '${deviceId}'`;
+    return await this.dataSource.query(query);
   }
 
-  async getUserDeviceByDeviceId(deviceId: string): Promise<UsersDevicesDocument | null> {
-    return await this.usersDevicesModel.findOne({ deviceId });
+  async getUserDeviceByDeviceId(deviceId: string) {
+    const query = `
+      SELECT "DeviceId" as "deviceId", "Title" as "title", "Ip" as "ip", 
+            "UserId" as "userId", "LastActiveDate" as "lastActiveDate", "ExpiryDate" as "expiryDate"
+      FROM "usersDevices"  
+      WHERE "DeviceId" = '${deviceId}'
+    `;
+    const result = await this.dataSource.query(query);
+    return result.length !== 0 ? result[0] : null;
   }
 
-  async getAllActiveDevicesByUser(userId: string): Promise<UsersDevicesDocument[]> {
-    return await this.usersDevicesModel.find({ userId });
+  async getAllActiveDevicesByUser(userId: string) {
+    const query = `
+      SELECT "DeviceId" as "deviceId", "Title" as "title", "Ip" as "ip", 
+        "UserId" as "userId", "LastActiveDate" as "lastActiveDate", "ExpiryDate" as "expiryDate"
+      FROM "usersDevices"  
+      WHERE "UserId" = '${userId}'
+    `;
+    return await this.dataSource.query(query);
   }
 }

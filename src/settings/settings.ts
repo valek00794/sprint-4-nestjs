@@ -8,6 +8,7 @@ export const SETTINGS = {
     posts: '/posts',
     blogs: '/blogs',
     users: '/users',
+    usersSa: '/sa/users',
     auth: '/auth',
     devices: '/security/devices',
     comments: '/comments',

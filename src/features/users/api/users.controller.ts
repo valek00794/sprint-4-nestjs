@@ -24,7 +24,7 @@ import { CreateUserCommand } from '../app/useCases/users/createUser.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)
-@Controller(SETTINGS.PATH.users)
+@Controller(SETTINGS.PATH.usersSa)
 export class UsersController {
   constructor(
     protected usersService: UsersService,

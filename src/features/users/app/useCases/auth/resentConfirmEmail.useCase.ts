@@ -20,7 +20,9 @@ export class ResentConfirmEmailUseCase implements ICommandHandler<ResentConfirmE
     if (user === null) {
       throw new BadRequestException([new FieldError('User with current email not found', 'email')]);
     }
-    const userConfirmationInfo = user.emailConfirmation;
+    const userConfirmationInfo = await this.usersRepository.findUserConfirmationInfoByUserId(
+      user.id,
+    );
     if (userConfirmationInfo !== null && userConfirmationInfo.isConfirmed) {
       throw new BadRequestException([
         new FieldError('User with current email already confirmed', 'email'),
@@ -31,7 +33,7 @@ export class ResentConfirmEmailUseCase implements ICommandHandler<ResentConfirmE
       confirmationCode: uuidv4(),
       expirationDate: add(new Date(), {
         hours: 1,
-      }),
+      }).toISOString(),
       isConfirmed: false,
     };
 
@@ -42,13 +44,10 @@ export class ResentConfirmEmailUseCase implements ICommandHandler<ResentConfirmE
       );
     } catch (error) {
       console.error(error);
-      this.usersRepository.deleteUserById(user!._id!.toString());
+      this.usersRepository.deleteUserById(user!.id);
       throw new ServiceUnavailableException('Error sending confirmation email');
     }
 
-    return await this.usersRepository.updateConfirmationInfo(
-      user._id!.toString(),
-      newUserConfirmationInfo,
-    );
+    return await this.usersRepository.updateConfirmationInfo(user.id, newUserConfirmationInfo);
   }
 }

@@ -38,7 +38,7 @@ export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecovery
         new FieldError('Error sending confirmation email', 'email sender'),
       ]);
     }
-    const userId = user!._id!.toString();
+    const userId = user!.id!.toString();
     return await this.usersRepository.updatePasswordRecoveryInfo(userId, {
       ...newUserRecoveryPasswordInfo,
       userId,

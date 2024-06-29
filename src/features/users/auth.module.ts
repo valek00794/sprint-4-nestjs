@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 
 import { UsersDevicesController } from './api/usersDevices.controller';
 import { AuthController } from './api/auth.controller';
@@ -18,16 +19,14 @@ import { UsersDevicesService } from './app/userDevices.service';
 import { UsersDevicesQueryRepository } from './infrastructure/devices/usersDevices-query-repository';
 import { UsersDevicesRepository } from './infrastructure/devices/usersDevices-repository';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
-import { UsersDevices, UsersDevicesSchema } from './infrastructure/devices/usersDevices.schema';
 import { UsersRepository } from './infrastructure/users/users.repository';
+import { UsersQueryRepository } from './infrastructure/users/users.query-repository';
 import {
   User,
+  UserEmailConfirmationInfo,
   UsersRecoveryPasssword,
-  UsersSchema,
-  usersRecoveryPassswordSchema,
-} from './infrastructure/users/users.schema';
-import { UsersQueryRepository } from './infrastructure/users/users.query-repository';
-import { APP_GUARD } from '@nestjs/core';
+} from './infrastructure/users/users.entity';
+import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
 
 const usersDevicesUseCases = [
   AddUserDeviceUseCase,
@@ -53,19 +52,11 @@ const usersDevicesProviders = [
 @Module({
   imports: [
     CqrsModule,
-    MongooseModule.forFeature([
-      {
-        name: User.name,
-        schema: UsersSchema,
-      },
-      {
-        name: UsersRecoveryPasssword.name,
-        schema: usersRecoveryPassswordSchema,
-      },
-      {
-        name: UsersDevices.name,
-        schema: UsersDevicesSchema,
-      },
+    TypeOrmModule.forFeature([
+      User,
+      UsersRecoveryPasssword,
+      UserEmailConfirmationInfo,
+      UsersDevices,
     ]),
     ThrottlerModule.forRoot([
       {

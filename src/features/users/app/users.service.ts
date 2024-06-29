@@ -17,9 +17,6 @@ export class UsersService {
   }
 
   async deleteUserById(id: string): Promise<boolean> {
-    if (!isValidMongoId(id)) {
-      throw new NotFoundException('User not found');
-    }
     return await this.usersRepository.deleteUserById(id);
   }
 }

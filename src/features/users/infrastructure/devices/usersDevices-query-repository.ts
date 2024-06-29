@@ -1,26 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
-import { UsersDevices, type UsersDevicesDocument } from './usersDevices.schema';
 import { UsersDevicesOutput } from '../../api/models/output/usersDevices.output.models';
+import { UsersDevices } from './usersDevices.entity';
 
 @Injectable()
 export class UsersDevicesQueryRepository {
-  constructor(
-    @InjectModel(UsersDevices.name) private usersDevicesModel: Model<UsersDevicesDocument>,
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+
   async getAllActiveDevicesByUser(userId: string): Promise<UsersDevicesOutput[]> {
-    const userDevices = await this.usersDevicesModel.find({ userId });
+    const query = `
+    SELECT "DeviceId" as "deviceId", "Title" as "title", "Ip" as "ip", 
+      "UserId" as "userId", "LastActiveDate" as "lastActiveDate", "ExpiryDate" as "expiryDate" 
+    FROM "usersDevices" 
+    WHERE "UserId" = '${userId}'
+      `;
+    const userDevices = await this.dataSource.query(query);
     return userDevices.map((device) => this.mapToOutput(device));
   }
 
-  async getUserDeviceById(deviceId: string): Promise<UsersDevicesOutput | null> {
-    const deviceSession = await this.usersDevicesModel.findOne({ deviceId });
-    return deviceSession ? this.mapToOutput(deviceSession) : null;
+  async getUserDeviceByDeviceId(deviceId: string): Promise<UsersDevicesOutput | null> {
+    const query = `SELECT * FROM "usersDevices" WHERE "DeviceId" = '${deviceId}'`;
+    const deviceSession = await this.dataSource.query(query);
+    return deviceSession[0] ? this.mapToOutput(deviceSession) : null;
   }
 
-  mapToOutput(userDevice: UsersDevicesDocument): UsersDevicesOutput {
+  mapToOutput(userDevice: UsersDevices): UsersDevicesOutput {
     return new UsersDevicesOutput(
       userDevice.ip,
       userDevice.title,
