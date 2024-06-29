@@ -49,13 +49,23 @@ export class UsersDevicesRepository {
   }
 
   async getUserDeviceByDeviceId(deviceId: string) {
-    const query = `SELECT * FROM "usersDevices"  WHERE "DeviceId" = '${deviceId}'`;
+    const query = `
+      SELECT "DeviceId" as "deviceId", "Title" as "title", "Ip" as "ip", 
+            "UserId" as "userId", "LastActiveDate" as "lastActiveDate", "ExpiryDate" as "expiryDate"
+      FROM "usersDevices"  
+      WHERE "DeviceId" = '${deviceId}'
+    `;
     const result = await this.dataSource.query(query);
     return result.length !== 0 ? result[0] : null;
   }
 
   async getAllActiveDevicesByUser(userId: string) {
-    const query = `SELECT * FROM "usersDevices"  WHERE "UserId" = '${userId}'`;
+    const query = `
+      SELECT "DeviceId" as "deviceId", "Title" as "title", "Ip" as "ip", 
+        "UserId" as "userId", "LastActiveDate" as "lastActiveDate", "ExpiryDate" as "expiryDate"
+      FROM "usersDevices"  
+      WHERE "UserId" = '${userId}'
+    `;
     return await this.dataSource.query(query);
   }
 }

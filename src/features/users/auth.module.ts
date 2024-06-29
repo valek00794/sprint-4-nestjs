@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 
 import { UsersDevicesController } from './api/usersDevices.controller';
 import { AuthController } from './api/auth.controller';
@@ -20,7 +21,6 @@ import { UsersDevicesRepository } from './infrastructure/devices/usersDevices-re
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { UsersRepository } from './infrastructure/users/users.repository';
 import { UsersQueryRepository } from './infrastructure/users/users.query-repository';
-import { APP_GUARD } from '@nestjs/core';
 import {
   User,
   UserEmailConfirmationInfo,
@@ -58,12 +58,12 @@ const usersDevicesProviders = [
       UserEmailConfirmationInfo,
       UsersDevices,
     ]),
-    // ThrottlerModule.forRoot([
-    //   {
-    //     ttl: 10000,
-    //     limit: 5,
-    //   },
-    // ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
   ],
   controllers: [AuthController, UsersDevicesController],
   providers: [
@@ -73,10 +73,10 @@ const usersDevicesProviders = [
     ...usersDevicesUseCases,
     UsersRepository,
     UsersQueryRepository,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AuthModule {}

@@ -36,7 +36,8 @@ export class CheckUserByRefreshTokenUseCase
     if (
       !isUserExists ||
       !deviceSession ||
-      new Date(userVerifyInfo!.iat! * 1000).toISOString() !== deviceSession?.lastActiveDate
+      new Date(userVerifyInfo!.iat! * 1000).toISOString() !==
+        deviceSession?.lastActiveDate.toISOString()
     ) {
       throw new UnauthorizedException();
     }

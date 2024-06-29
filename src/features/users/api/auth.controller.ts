@@ -36,7 +36,6 @@ import { ConfirmPasswordRecoveryCommand } from '../app/useCases/users/confirmPas
 import { RenewTokensCommand } from '../app/useCases/auth/renewTokens.useCase';
 import { LogoutUserCommand } from '../app/useCases/auth/logoutUser.useCase';
 import { SkipThrottle } from '@nestjs/throttler';
-@SkipThrottle()
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
   constructor(

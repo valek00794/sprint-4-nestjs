@@ -29,7 +29,7 @@ export class DeleteUserDeviceByIdUseCase implements ICommandHandler<DeleteUserDe
     if (!device) {
       throw new NotFoundException();
     }
-    if (userVerifyInfo.userId !== device.userId) {
+    if (userVerifyInfo.userId !== device.userId.toString()) {
       throw new ForbiddenException();
     }
     return await this.usersDevicesRepository.deleteUserDevicebyDeviceId(command.deviceId);

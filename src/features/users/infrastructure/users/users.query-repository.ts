@@ -14,9 +14,15 @@ export class UsersQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findUserById(id: string): Promise<UserInfo | false> {
-    const query = 'SELECT * FROM users WHERE "Id" = $1;';
+    const query = `
+    SELECT "Id" as "id", "Email" as "email", "Login" as "login"
+      FROM users 
+      WHERE "Id" = $1;
+    `;
     const user = await this.dataSource.query(query, [id]);
-    return user ? new UserInfo(user.email, user.login, id) : false;
+    return user.length !== 0
+      ? new UserInfo(user[0].id.toString(), user[0].login, user[0].email)
+      : false;
   }
 
   async findUserByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
