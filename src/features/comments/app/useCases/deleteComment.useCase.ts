@@ -22,15 +22,16 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
   ) {}
 
   async execute(command: DeleteCommentCommand) {
-    const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
-    if (
-      command.comment.commentatorInfo.userId !== commentatorInfo.userId &&
-      command.comment.commentatorInfo.userLogin !== commentatorInfo.userLogin
-    ) {
-      throw new ForbiddenException('User not author of comment');
-    }
-    const deleteResult = await this.commentsRepository.deleteComment(command.comment.id.toString());
-    if (!deleteResult) throw new NotFoundException();
-    return true;
+    // const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
+    // if (
+    //   command.comment.commentatorInfo.userId !== commentatorInfo.userId &&
+    //   command.comment.commentatorInfo.userLogin !== commentatorInfo.userLogin
+    // ) {
+    //   throw new ForbiddenException('User not author of comment');
+    // }
+    // const deleteResult = await this.commentsRepository.deleteComment(command.comment.id.toString());
+    // if (!deleteResult) throw new NotFoundException();
+    // return true;
+    return command;
   }
 }

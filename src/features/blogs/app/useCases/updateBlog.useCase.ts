@@ -3,7 +3,6 @@ import { NotFoundException } from '@nestjs/common';
 
 import { CreateBlogInputModel } from '../../api/models/input/blogs.input.model';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
-import { isValidMongoId } from 'src/features/utils';
 
 export class UpdateBlogCommand {
   constructor(
@@ -17,10 +16,10 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
   constructor(protected blogsRepository: BlogsRepository) {}
 
   async execute(command: UpdateBlogCommand) {
-    if (!isValidMongoId(command.id)) {
-      throw new NotFoundException('Invalid ID');
+    if (isNaN(Number(command.id))) {
+      throw new NotFoundException('Blog not found');
     }
-    const blog = await this.blogsRepository.findBlog(command.id);
+    const blog = await this.blogsRepository.findBlog(Number(command.id));
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -28,7 +27,7 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
       name: command.inputModel.name,
       description: command.inputModel.description,
       websiteUrl: command.inputModel.websiteUrl,
-      createdAt: blog!.createdAt,
+      createdAt: new Date(blog.createdAt).toISOString(),
       isMembership: false,
     };
     return await this.blogsRepository.updateBlog(updatedblog, command.id);

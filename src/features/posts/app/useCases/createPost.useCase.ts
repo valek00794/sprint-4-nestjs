@@ -4,8 +4,7 @@ import { CreatePostForBlogModel } from 'src/features/blogs/api/models/input/blog
 import { CreatePostModel } from '../../api/models/input/posts.input.model';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
-import { isValidMongoId } from 'src/features/utils';
-
+import { NotFoundException } from '@nestjs/common';
 export class CreatePostCommand {
   constructor(
     public inputModel: CreatePostModel | CreatePostForBlogModel,
@@ -21,8 +20,10 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
   ) {}
 
   async execute(command: CreatePostCommand) {
-    const getBlogId =
-      command.blogId && isValidMongoId(command.blogId) ? command.blogId : command.inputModel.blogId;
+    const getBlogId = command.blogId ? Number(command.blogId) : Number(command.inputModel.blogId);
+    if (isNaN(getBlogId)) {
+      throw new NotFoundException('Blog not found');
+    }
     const blog = await this.blogsRepository.findBlog(getBlogId);
     const newPosts = {
       title: command.inputModel.title,

@@ -9,7 +9,7 @@ export class User {
   email: string;
   createdAt: string;
   passwordHash: string;
-  id?: number;
+  id?: string;
 }
 
 export class UsersRecoveryPasssword {

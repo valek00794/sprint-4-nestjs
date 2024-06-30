@@ -39,11 +39,3 @@ export const getSanitizationQuery = (
       : defaultSearchQueryParameters.searchNameTerm,
   };
 };
-
-export const isValidMongoId = (id: string) => {
-  return Types.ObjectId.isValid(id);
-};
-
-export const stringToObjectId = (id: string) => {
-  return new Types.ObjectId(id);
-};

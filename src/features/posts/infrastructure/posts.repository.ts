@@ -1,31 +1,61 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-
-import { Model } from 'mongoose';
-import { Post, PostDocument } from './posts.schema';
-import { CreatePostModel } from '../api/models/input/posts.input.model';
-import { CreatePostForBlogModel } from 'src/features/blogs/api/models/input/blogs.input.model';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { Post } from './posts.entity';
 
 @Injectable()
 export class PostsRepository {
-  constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createPost(newPosts: CreatePostModel | CreatePostForBlogModel) {
-    const post = new this.postModel(newPosts);
-    await post.save();
-    return post;
+  async createPost(newPosts: Post) {
+    const query = `
+      INSERT INTO "posts" ("BlogId", "Content", "ShortDescription", "CreatedAt", "Title")
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING "Id" as "id", "BlogId" as "blogId", "Content" as "content", 
+        "ShortDescription" as "shortDescription", "CreatedAt" as "createdAt",  "Title" as "title",
+           (
+            SELECT "Name"
+            FROM "blogs"
+            WHERE "Id" = $1
+          ) as "blogName";
+    `;
+    const post = await this.dataSource.query(query, [
+      newPosts.blogId,
+      newPosts.content,
+      newPosts.shortDescription,
+      newPosts.createdAt,
+      newPosts.title,
+    ]);
+    return post.length !== 0 ? post[0] : null;
   }
-  async findPost(id: string): Promise<PostDocument | null> {
-    return await this.postModel.findById(id);
+  async findPost(postId: string): Promise<Post | null> {
+    const query = `
+      SELECT "Id" as "id", "Title" as "title", "ShortDescription" as "shortDescription", 
+        "Content" as "content", "BlogId" as "blogId",  "CreatedAt" as "createdAt"
+      FROM "posts"
+      WHERE "Id" = $1;
+    `;
+    const post = await this.dataSource.query(query, [postId]);
+    return post.length !== 0 ? post[0] : null;
   }
-  async updatePost(updatedPost: CreatePostModel, id: string): Promise<boolean> {
-    const updatedResult = await this.postModel.findByIdAndUpdate(id, updatedPost, {
-      new: true,
-    });
-    return updatedResult ? true : false;
+  async updatePost(updatedPost: Post, postId: string): Promise<boolean> {
+    const query = `
+    UPDATE "posts"
+      SET "BlogId" = '${updatedPost.blogId}', "Content" = '${updatedPost.content}', "ShortDescription" = '${updatedPost.shortDescription}', 
+        "CreatedAt" = '${updatedPost.createdAt}', "Title" = '${updatedPost.title}'
+      WHERE "Id" = $1
+      RETURNING "Id" as "id", "BlogId" as "blogId", "Content" as "content", 
+        "ShortDescription" as "shortDescription", "CreatedAt" as "createdAt",  "Title" as "title";
+    `;
+    const post = await this.dataSource.query(query, [postId]);
+    return post.length !== 0 ? post[0] : null;
   }
-  async deletePost(id: string): Promise<boolean> {
-    const deleteResult = await this.postModel.findByIdAndDelete(id);
-    return deleteResult ? true : false;
+  async deletePost(postId: string): Promise<Post | null> {
+    const query = `
+      DELETE FROM "posts"
+      WHERE "Id" = $1;
+    `;
+    const post = await this.dataSource.query(query, [postId]);
+    return post.length !== 0 ? post[0] : null;
   }
 }

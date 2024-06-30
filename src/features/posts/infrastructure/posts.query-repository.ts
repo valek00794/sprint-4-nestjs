@@ -1,101 +1,112 @@
 import { Injectable } from '@nestjs/common';
-import { Post, PostDocument } from './posts.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 import { SearchQueryParametersType } from '../../domain/query.types';
-import { getSanitizationQuery, isValidMongoId } from 'src/features/utils';
+import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { PostView } from '../api/models/output/posts.output.model';
 import { ExtendedLikesInfo, LikeStatus } from 'src/features/likes/domain/likes.types';
-import { Blog, BlogDocument } from 'src/features/blogs/infrastructure/blogs.schema';
 import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.query-repository';
+import { Post } from './posts.entity';
+import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.query-repository';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
-    @InjectModel(Post.name) private PostModel: Model<PostDocument>,
-    @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
+    @InjectDataSource() protected dataSource: DataSource,
     protected likesQueryRepository: LikesQueryRepository,
+    protected blogsQueryRepository: BlogsQueryRepository,
   ) {}
 
   async getPosts(
     query?: SearchQueryParametersType,
     blogId?: string,
     userId?: string,
-  ): Promise<false | Paginator<PostView[]>> {
-    if (blogId && !isValidMongoId(blogId)) {
-      return false;
+  ): Promise<null | Paginator<PostView[]>> {
+    if (blogId && isNaN(Number(blogId))) {
+      return null;
     }
     let blog;
     if (blogId) {
-      blog = await this.BlogModel.findById(blogId);
+      blog = await this.blogsQueryRepository.findBlog(Number(blogId));
     }
     if (!blog && blogId) {
-      return false;
+      return null;
     }
     const sanitizationQuery = getSanitizationQuery(query);
-    let findOptions: Record<string, any> = {};
-    if (sanitizationQuery.searchNameTerm !== null) {
-      findOptions = {
-        name: { $regex: sanitizationQuery.searchNameTerm, $options: 'i' },
-      };
-    }
-    if (blogId) {
-      if (findOptions.hasOwnProperty('name')) {
-        findOptions = {
-          $and: [findOptions, { blogId }],
-        };
-      } else {
-        findOptions.blogId = blogId;
-      }
-    }
-    const posts = await this.PostModel.find(findOptions)
-      .sort({ [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection })
-      .skip((sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize)
-      .limit(sanitizationQuery.pageSize);
-
-    const postsCount = await this.PostModel.countDocuments(findOptions);
-
+    const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
+    const queryString = `
+      SELECT 
+        b."Name" as "blogName", 
+        p."Id" as "id", 
+        p."Title" as "title", 
+        p."ShortDescription" as "shortDescription", 
+        p."Content" as "content", 
+        p."BlogId" as "blogId", 
+        p."CreatedAt" as "createdAt"
+      FROM "posts" p
+      JOIN "blogs" b ON p."BlogId" = b."Id"
+      ${blogId ? `WHERE p."BlogId" = ${blogId}` : ''}
+      ORDER BY "${sanitizationQuery.sortBy}"  ${sanitizationQuery.sortDirection}
+      LIMIT ${sanitizationQuery.pageSize} 
+      OFFSET ${offset};
+    `;
+    const posts = await this.dataSource.query<Post[]>(queryString);
+    const countQuery = `
+      SELECT COUNT(*)
+      FROM "posts"
+      ${blogId ? `WHERE "BlogId" = ${blogId}` : ''}
+    `;
+    const postsCount = await this.dataSource.query(countQuery);
     const postsItems = await Promise.all(
       posts.map(async (post) => {
-        const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id);
-        const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
-        return this.mapToOutput(post, mapedlikesInfo);
+        //const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id!);
+        //const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
+        return this.mapToOutput(post);
       }),
     );
 
     return new Paginator<PostView[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
-      postsCount,
+      Number(postsCount[0]?.count || 0),
       postsItems,
     );
   }
 
   async findPost(id: string, userId?: string): Promise<PostView | null> {
-    if (!isValidMongoId(id)) {
-      return null;
+    const query = `
+      SELECT 
+        b."Name" as "blogName", 
+        p."Id" as "id", 
+        p."Title" as "title", 
+        p."ShortDescription" as "shortDescription", 
+        p."Content" as "content", 
+        p."BlogId" as "blogId", 
+        p."CreatedAt" as "createdAt"
+      FROM "posts" p
+      JOIN "blogs" b ON p."BlogId" = b."Id"
+      WHERE p."Id" = $1;
+    `;
+    const post = await this.dataSource.query(query, [id]);
+    if (post.length !== 0) {
+      //const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id);
+      //const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
+      return this.mapToOutput(post[0]);
     }
-    const post = await this.PostModel.findById(id);
-    if (!post) {
-      return null;
-    }
-
-    const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id);
-    const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
-    return this.mapToOutput(post, mapedlikesInfo);
+    return null;
   }
-  mapToOutput(post: PostDocument, extendedLikesInfo?: ExtendedLikesInfo): PostView {
+  mapToOutput(post: Post, extendedLikesInfo?: ExtendedLikesInfo): PostView {
     const extendedLikesInfoView = extendedLikesInfo
       ? extendedLikesInfo
       : new ExtendedLikesInfo(0, 0, LikeStatus.None, []);
     return new PostView(
-      post._id,
+      post.id!.toString(),
       post.title,
       post.shortDescription,
       post.content,
-      post.blogId,
+      post.blogId.toString(),
       post.blogName,
       post.createdAt,
       extendedLikesInfoView,
