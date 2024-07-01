@@ -20,7 +20,7 @@ export class BlogsQueryRepository {
       SELECT "Id" as "id", "Name" as "name", "Description" as "description", 
         "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership"
       FROM "blogs" 
-      ${sanitizationQuery.searchNameTerm ? `WHERE "Name" LIKE '%${sanitizationQuery.searchNameTerm}%'` : ''}
+      ${sanitizationQuery.searchNameTerm ? `WHERE LOWER("Name") LIKE LOWER('%${sanitizationQuery.searchNameTerm}%')` : ''}
       ORDER BY "${sanitizationQuery.sortBy}"  ${sanitizationQuery.sortDirection}
       LIMIT ${sanitizationQuery.pageSize} 
       OFFSET ${offset};
@@ -30,7 +30,7 @@ export class BlogsQueryRepository {
     const countQuery = `
       SELECT COUNT(*)
       FROM "blogs"
-      ${sanitizationQuery.searchNameTerm ? `WHERE "Name" LIKE '%${sanitizationQuery.searchNameTerm}%'` : ''};
+      ${sanitizationQuery.searchNameTerm ? `WHERE LOWER("Name") LIKE LOWER('%${sanitizationQuery.searchNameTerm}%')` : ''};
     `;
     const blogsCount = await this.dataSource.query(countQuery);
 
