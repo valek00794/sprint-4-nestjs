@@ -79,6 +79,6 @@ export class UsersQueryRepository {
   }
 
   mapToOutput(user: User): UserViewModel {
-    return new UserViewModel(user.id!.toString(), user.login, user.email, user.createdAt);
+    return new UserViewModel(user.id!, user.login, user.email, user.createdAt);
   }
 }

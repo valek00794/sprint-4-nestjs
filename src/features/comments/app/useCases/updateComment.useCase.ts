@@ -24,25 +24,26 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
   ) {}
 
   async execute(command: UpdateCommentCommand) {
-    const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
-    if (
-      command.comment.commentatorInfo.userId !== commentatorInfo.userId &&
-      command.comment.commentatorInfo.userLogin !== commentatorInfo.userLogin
-    ) {
-      throw new ForbiddenException('User not author of comment');
-    }
-    const updatedComment = {
-      content: command.inputModel.content,
-      commentatorInfo: {
-        userId: command.comment.commentatorInfo.userId,
-        userLogin: command.comment.commentatorInfo.userLogin,
-      },
-      createdAt: command.comment.createdAt,
-      postId: command.comment.postId,
-    };
-    return await this.commentsRepository.updateComment(
-      updatedComment,
-      command.comment.id.toString(),
-    );
+    // const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
+    // if (
+    //   command.comment.commentatorInfo.userId !== commentatorInfo.userId &&
+    //   command.comment.commentatorInfo.userLogin !== commentatorInfo.userLogin
+    // ) {
+    //   throw new ForbiddenException('User not author of comment');
+    // }
+    // const updatedComment = {
+    //   content: command.inputModel.content,
+    //   commentatorInfo: {
+    //     userId: command.comment.commentatorInfo.userId,
+    //     userLogin: command.comment.commentatorInfo.userLogin,
+    //   },
+    //   createdAt: command.comment.createdAt,
+    //   postId: command.comment.postId,
+    // };
+    // return await this.commentsRepository.updateComment(
+    //   updatedComment,
+    //   command.comment.id.toString(),
+    // );
+    return command;
   }
 }

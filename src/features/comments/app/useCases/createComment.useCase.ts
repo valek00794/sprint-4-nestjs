@@ -5,7 +5,6 @@ import { CreateCommentInputModel } from '../../api/models/input/comments.input.m
 import { CommentatorInfo } from '../../domain/comments.types';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
-import { stringToObjectId } from 'src/features/utils';
 
 export class CreateCommentCommand {
   constructor(
@@ -24,20 +23,21 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
   ) {}
 
   async execute(command: CreateCommentCommand) {
-    const post = await this.postsRepository.findPost(command.postId);
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
+    //   const post = await this.postsRepository.findPost(command.postId);
+    //   if (!post) {
+    //     throw new NotFoundException('Post not found');
+    //   }
 
-    const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
-    const newComment = {
-      content: command.inputModel.content,
-      createdAt: new Date().toISOString(),
-      commentatorInfo: {
-        ...commentatorInfo,
-      },
-      postId: stringToObjectId(command.postId),
-    };
-    return await this.commentsRepository.createComment(newComment);
+    //   const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
+    //   const newComment = {
+    //     content: command.inputModel.content,
+    //     createdAt: new Date().toISOString(),
+    //     commentatorInfo: {
+    //       ...commentatorInfo,
+    //     },
+    //     postId: stringToObjectId(command.postId),
+    //   };
+    //   return await this.commentsRepository.createComment(newComment);
+    return command;
   }
 }

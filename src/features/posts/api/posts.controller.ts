@@ -19,7 +19,6 @@ import { CommandBus } from '@nestjs/cqrs';
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
-import { PostsService } from '../app/posts.service';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 import { CreateCommentInputModel } from 'src/features/comments/api/models/input/comments.input.model';
@@ -27,10 +26,11 @@ import { CommentsQueryRepository } from 'src/features/comments/infrastructure/co
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
 import { CreatePostModel } from './models/input/posts.input.model';
+import { PostsService } from '../app/posts.service';
 import { CreatePostCommand } from '../app/useCases/createPost.useCase';
 import { UpdatePostCommand } from '../app/useCases/updatePost.useCase';
-import { CreateCommentCommand } from 'src/features/comments/app/useCases/createComment.useCase';
-import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
+// import { CreateCommentCommand } from 'src/features/comments/app/useCases/createComment.useCase';
+// import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
 
 @Controller(SETTINGS.PATH.posts)
 export class PostsController {
@@ -47,6 +47,7 @@ export class PostsController {
     const createdPost = await this.commandBus.execute(new CreatePostCommand(inputModel));
     return this.postsQueryRepository.mapToOutput(createdPost);
   }
+
   @Public()
   @Get()
   async getPosts(@Query() query: SearchQueryParametersType, @Req() req: Request) {
@@ -61,6 +62,7 @@ export class PostsController {
     }
     return post;
   }
+
   @Public()
   @UseGuards(AuthBasicGuard)
   @Put(':id')
@@ -68,6 +70,7 @@ export class PostsController {
   async updatePost(@Body() inputModel: CreatePostModel, @Param('id') id: string) {
     await this.commandBus.execute(new UpdatePostCommand(inputModel, id));
   }
+
   @Public()
   @UseGuards(AuthBasicGuard)
   @Delete(':id')
@@ -78,52 +81,53 @@ export class PostsController {
       throw new NotFoundException('Post not found');
     }
   }
-  @UseGuards(AuthBearerGuard)
-  @Post(':postId/comments')
-  async createCommentForPost(
-    @Body() inputModel: CreateCommentInputModel,
-    @Param('postId') postId: string,
-    @Req() req: Request,
-  ) {
-    const comment = await this.commandBus.execute(
-      new CreateCommentCommand(inputModel, postId, req.user!.userId, req.user!.login),
-    );
-    return this.commentsQueryRepository.mapToOutput(comment);
-  }
 
-  @Public()
-  @Get(':postId/comments')
-  async getCommentsForPost(
-    @Param('postId') postId: string,
-    @Req() req: Request,
-    @Query() query: SearchQueryParametersType,
-  ) {
-    const post = await this.postsQueryRepository.findPost(postId);
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
-    const comments = await this.commentsQueryRepository.getComments(
-      postId,
-      query,
-      req.user?.userId,
-    );
-    return comments;
-  }
+  // @UseGuards(AuthBearerGuard)
+  // @Post(':postId/comments')
+  // async createCommentForPost(
+  //   @Body() inputModel: CreateCommentInputModel,
+  //   @Param('postId') postId: string,
+  //   @Req() req: Request,
+  // ) {
+  //   const comment = await this.commandBus.execute(
+  //     new CreateCommentCommand(inputModel, postId, req.user!.userId, req.user!.login),
+  //   );
+  //   return this.commentsQueryRepository.mapToOutput(comment);
+  // }
 
-  @UseGuards(AuthBearerGuard)
-  @Put(':postId/like-status')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async changeCommentLikeStatus(
-    @Body() inputModel: LikeStatusInputModel,
-    @Param('postId') postId: string,
-    @Req() req: Request,
-  ) {
-    const post = await this.postsQueryRepository.findPost(postId);
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
-    await this.commandBus.execute(
-      new ChangeLikeStatusCommand(postId, inputModel, req.user!.userId, req.user!.login),
-    );
-  }
+  // @Public()
+  // @Get(':postId/comments')
+  // async getCommentsForPost(
+  //   @Param('postId') postId: string,
+  //   @Req() req: Request,
+  //   @Query() query: SearchQueryParametersType,
+  // ) {
+  //   const post = await this.postsQueryRepository.findPost(postId);
+  //   if (!post) {
+  //     throw new NotFoundException('Post not found');
+  //   }
+  //   const comments = await this.commentsQueryRepository.getComments(
+  //     postId,
+  //     query,
+  //     req.user?.userId,
+  //   );
+  //   return comments;
+  // }
+
+  // @UseGuards(AuthBearerGuard)
+  // @Put(':postId/like-status')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async changeCommentLikeStatus(
+  //   @Body() inputModel: LikeStatusInputModel,
+  //   @Param('postId') postId: string,
+  //   @Req() req: Request,
+  // ) {
+  //   const post = await this.postsQueryRepository.findPost(postId);
+  //   if (!post) {
+  //     throw new NotFoundException('Post not found');
+  //   }
+  //   await this.commandBus.execute(
+  //     new ChangeLikeStatusCommand(postId, inputModel, req.user!.userId, req.user!.login),
+  //   );
+  // }
 }

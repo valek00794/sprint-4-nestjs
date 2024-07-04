@@ -4,12 +4,12 @@ import { NotFoundException } from '@nestjs/common';
 import { CreatePostModel } from '../../api/models/input/posts.input.model';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
-import { isValidMongoId } from 'src/features/utils';
 
 export class UpdatePostCommand {
   constructor(
     public inputModel: CreatePostModel,
-    public id: string,
+    public postId: string,
+    public blogId?: number,
   ) {}
 }
 
@@ -21,21 +21,27 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
   ) {}
 
   async execute(command: UpdatePostCommand) {
-    if (!isValidMongoId(command.id)) {
-      throw new NotFoundException('Invalid post id');
+    if (isNaN(Number(command.postId))) {
+      throw new NotFoundException('Blog not found');
     }
-    const post = await this.postsRepository.findPost(command.id);
+    const post = await this.postsRepository.findPost(command.postId);
     if (!post) {
       throw new NotFoundException('Post not found');
+    }
+    const getBlogId = command.inputModel.blogId
+      ? Number(command.inputModel.blogId)
+      : command.blogId!;
+    if (isNaN(getBlogId)) {
+      throw new NotFoundException('Blog not found');
     }
     const updatedPost = {
       title: command.inputModel.title,
       shortDescription: command.inputModel.shortDescription,
       content: command.inputModel.content,
-      createdAt: post!.createdAt,
-      blogId: command.inputModel.blogId,
+      createdAt: new Date(post!.createdAt).toISOString(),
+      blogId: getBlogId,
       blogName: post!.blogName,
     };
-    return await this.postsRepository.updatePost(updatedPost, command.id);
+    return await this.postsRepository.updatePost(updatedPost, command.postId);
   }
 }

@@ -1,29 +1,51 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from './blogs.schema';
-import { Model } from 'mongoose';
-import { CreateBlogInputModel } from '../api/models/input/blogs.input.model';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+
+import { Blog } from './blogs.entity';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createBlog(newBlog: CreateBlogInputModel) {
-    const blog = new this.blogModel(newBlog);
-    await blog.save();
-    return blog;
+  async createBlog(newBlog: Blog) {
+    const query = `
+      INSERT INTO "blogs" ("Name", "Description", "WebsiteUrl", "CreatedAt", "IsMembership")
+      VALUES ('${newBlog.name}', '${newBlog.description}', '${newBlog.websiteUrl}', '${newBlog.createdAt}', '${newBlog.isMembership}')
+      RETURNING "Id" as "id", "Name" as "name", "Description" as "description", 
+        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership";
+    `;
+    const blog = await this.dataSource.query(query);
+    return blog.length !== 0 ? blog[0] : null;
   }
-  async findBlog(id: string): Promise<BlogDocument | null> {
-    return await this.blogModel.findById(id);
+  async findBlog(id: number): Promise<Blog | null> {
+    const query = `
+     SELECT "Id" as "id", "Name" as "name", "Description" as "description", 
+        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership"
+      FROM "blogs" 
+      WHERE "Id" = '${id}';
+    `;
+    const blog = await this.dataSource.query(query);
+    return blog.length !== 0 ? blog[0] : null;
   }
   async updateBlog(updatedBlog: Blog, id: string): Promise<boolean> {
-    const updatedResult = await this.blogModel.findByIdAndUpdate(id, updatedBlog, {
-      new: true,
-    });
-    return updatedResult ? true : false;
+    const query = `
+      UPDATE "blogs"
+      SET "Name" = '${updatedBlog.name}', "Description" = '${updatedBlog.description}', "WebsiteUrl" = '${updatedBlog.websiteUrl}', 
+        "CreatedAt" = '${updatedBlog.createdAt}', "IsMembership" = '${updatedBlog.isMembership}'
+      WHERE "Id" = $1
+      RETURNING "Id" as "id", "Name" as "name", "Description" as "description", 
+        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership";
+    `;
+    const blog = await this.dataSource.query(query, [id]);
+    return blog.length !== 0 ? blog[0] : null;
   }
-  async deleteBlog(id: string): Promise<boolean> {
-    const deleteResult = await this.blogModel.findByIdAndDelete(id);
-    return deleteResult ? true : false;
+  async deleteBlog(id: number): Promise<boolean> {
+    const query = `
+      DELETE FROM "blogs"
+      WHERE "Id" = '${id}';
+    `;
+    const blog = await this.dataSource.query(query);
+    return blog.length !== 0 ? blog[0] : null;
   }
 }
