@@ -43,9 +43,9 @@ export class BlogsRepository {
   async deleteBlog(id: number): Promise<boolean> {
     const query = `
       DELETE FROM "blogs"
-      WHERE "Id" = '${id}';
+      WHERE "Id" = $1;
     `;
-    const blog = await this.dataSource.query(query);
-    return blog.length !== 0 ? blog[0] : null;
+    const result = await this.dataSource.query(query, [id]);
+    return result[1] === 1 ? true : false;
   }
 }

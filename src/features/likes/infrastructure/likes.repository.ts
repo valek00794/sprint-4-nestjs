@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
 import { LikesInfo } from '../domain/likes.types';
-import { Like, LikeDocument } from './likes.schema';
 
 @Injectable()
 export class LikesRepository {

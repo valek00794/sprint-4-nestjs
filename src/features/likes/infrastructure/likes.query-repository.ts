@@ -7,8 +7,6 @@ import {
   NewestLike,
   LikesInfo,
 } from '../domain/likes.types';
-import { Like, LikeDocument } from './likes.schema';
-
 @Injectable()
 export class LikesQueryRepository {
   // constructor(@InjectModel(Like.name) private LikeStatusModel: Model<LikeDocument>) {}

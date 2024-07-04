@@ -25,8 +25,7 @@ export class BlogsQueryRepository {
       LIMIT ${sanitizationQuery.pageSize} 
       OFFSET ${offset};
     `;
-    console.log(queryString);
-    const blogs = await this.dataSource.query<Blog[]>(queryString);
+    const blogs = await this.dataSource.query(queryString);
     const countQuery = `
       SELECT COUNT(*)
       FROM "blogs"

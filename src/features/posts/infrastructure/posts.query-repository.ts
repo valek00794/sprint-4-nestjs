@@ -76,6 +76,9 @@ export class PostsQueryRepository {
   }
 
   async findPost(id: string, userId?: string): Promise<PostView | null> {
+    if (isNaN(Number(id))) {
+      return null;
+    }
     const query = `
       SELECT 
         b."Name" as "blogName", 

@@ -22,22 +22,21 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
     protected postsRepository: PostsRepository,
   ) {}
 
-  async execute(command: CreateCommentCommand) {
-    //   const post = await this.postsRepository.findPost(command.postId);
-    //   if (!post) {
-    //     throw new NotFoundException('Post not found');
-    //   }
+  async execute(command: CreateCommentCommand): Promise<number | null> {
+    const post = await this.postsRepository.findPost(command.postId);
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
 
-    //   const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
-    //   const newComment = {
-    //     content: command.inputModel.content,
-    //     createdAt: new Date().toISOString(),
-    //     commentatorInfo: {
-    //       ...commentatorInfo,
-    //     },
-    //     postId: stringToObjectId(command.postId),
-    //   };
-    //   return await this.commentsRepository.createComment(newComment);
-    return command;
+    const commentatorInfo = new CommentatorInfo(Number(command.userId), command.userLogin);
+    const newComment = {
+      content: command.inputModel.content,
+      createdAt: new Date().toISOString(),
+      commentatorInfo: {
+        ...commentatorInfo,
+      },
+      postId: Number(command.postId),
+    };
+    return await this.commentsRepository.createComment(newComment);
   }
 }

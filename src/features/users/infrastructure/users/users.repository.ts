@@ -58,7 +58,7 @@ export class UsersRepository {
   async updateConfirmationInfo(
     userId: string,
     emailConfirmationInfo: UserEmailConfirmationInfo,
-  ): Promise<User | null> {
+  ): Promise<boolean> {
     const query = `
     UPDATE "emailConfirmations"
     SET "ConfirmationCode" = '${emailConfirmationInfo.confirmationCode}',
@@ -67,7 +67,7 @@ export class UsersRepository {
     WHERE "UserId" = '${userId}'
   `;
     const result = await this.dataSource.query(query);
-    return result;
+    return result[1] === 1 ? true : false;
     //
     // if (result.affectedRows > 0) {
     //   const querySelectUser = `

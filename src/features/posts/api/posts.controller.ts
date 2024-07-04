@@ -29,7 +29,7 @@ import { CreatePostModel } from './models/input/posts.input.model';
 import { PostsService } from '../app/posts.service';
 import { CreatePostCommand } from '../app/useCases/createPost.useCase';
 import { UpdatePostCommand } from '../app/useCases/updatePost.useCase';
-// import { CreateCommentCommand } from 'src/features/comments/app/useCases/createComment.useCase';
+import { CreateCommentCommand } from 'src/features/comments/app/useCases/createComment.useCase';
 // import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
 
 @Controller(SETTINGS.PATH.posts)
@@ -82,37 +82,37 @@ export class PostsController {
     }
   }
 
-  // @UseGuards(AuthBearerGuard)
-  // @Post(':postId/comments')
-  // async createCommentForPost(
-  //   @Body() inputModel: CreateCommentInputModel,
-  //   @Param('postId') postId: string,
-  //   @Req() req: Request,
-  // ) {
-  //   const comment = await this.commandBus.execute(
-  //     new CreateCommentCommand(inputModel, postId, req.user!.userId, req.user!.login),
-  //   );
-  //   return this.commentsQueryRepository.mapToOutput(comment);
-  // }
+  @UseGuards(AuthBearerGuard)
+  @Post(':postId/comments')
+  async createCommentForPost(
+    @Body() inputModel: CreateCommentInputModel,
+    @Param('postId') postId: string,
+    @Req() req: Request,
+  ) {
+    const commentId = await this.commandBus.execute(
+      new CreateCommentCommand(inputModel, postId, req.user!.userId, req.user!.login),
+    );
+    return this.commentsQueryRepository.findComment(commentId);
+  }
 
-  // @Public()
-  // @Get(':postId/comments')
-  // async getCommentsForPost(
-  //   @Param('postId') postId: string,
-  //   @Req() req: Request,
-  //   @Query() query: SearchQueryParametersType,
-  // ) {
-  //   const post = await this.postsQueryRepository.findPost(postId);
-  //   if (!post) {
-  //     throw new NotFoundException('Post not found');
-  //   }
-  //   const comments = await this.commentsQueryRepository.getComments(
-  //     postId,
-  //     query,
-  //     req.user?.userId,
-  //   );
-  //   return comments;
-  // }
+  @Public()
+  @Get(':postId/comments')
+  async getCommentsForPost(
+    @Param('postId') postId: string,
+    @Req() req: Request,
+    @Query() query: SearchQueryParametersType,
+  ) {
+    const post = await this.postsQueryRepository.findPost(postId);
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    const comments = await this.commentsQueryRepository.getComments(
+      postId,
+      query,
+      req.user?.userId,
+    );
+    return comments;
+  }
 
   // @UseGuards(AuthBearerGuard)
   // @Put(':postId/like-status')
