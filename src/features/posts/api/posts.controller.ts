@@ -30,7 +30,7 @@ import { PostsService } from '../app/posts.service';
 import { CreatePostCommand } from '../app/useCases/createPost.useCase';
 import { UpdatePostCommand } from '../app/useCases/updatePost.useCase';
 import { CreateCommentCommand } from 'src/features/comments/app/useCases/createComment.useCase';
-// import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
+import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
 
 @Controller(SETTINGS.PATH.posts)
 export class PostsController {
@@ -114,20 +114,20 @@ export class PostsController {
     return comments;
   }
 
-  // @UseGuards(AuthBearerGuard)
-  // @Put(':postId/like-status')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async changeCommentLikeStatus(
-  //   @Body() inputModel: LikeStatusInputModel,
-  //   @Param('postId') postId: string,
-  //   @Req() req: Request,
-  // ) {
-  //   const post = await this.postsQueryRepository.findPost(postId);
-  //   if (!post) {
-  //     throw new NotFoundException('Post not found');
-  //   }
-  //   await this.commandBus.execute(
-  //     new ChangeLikeStatusCommand(postId, inputModel, req.user!.userId, req.user!.login),
-  //   );
-  // }
+  @UseGuards(AuthBearerGuard)
+  @Put(':postId/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async changeCommentLikeStatus(
+    @Body() inputModel: LikeStatusInputModel,
+    @Param('postId') postId: string,
+    @Req() req: Request,
+  ) {
+    const post = await this.postsQueryRepository.findPost(postId);
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    await this.commandBus.execute(
+      new ChangeLikeStatusCommand(postId, req.user!.userId, inputModel),
+    );
+  }
 }

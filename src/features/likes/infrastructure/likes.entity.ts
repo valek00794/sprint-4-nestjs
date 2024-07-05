@@ -1,7 +1,7 @@
-export class Like {
+export class LikeEntity {
   parrentId: number;
   authorId: number;
-  authorLogin: string;
   status: string;
   addedAt: Date;
+  id: number;
 }

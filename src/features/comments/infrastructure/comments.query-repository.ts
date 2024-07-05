@@ -43,9 +43,9 @@ export class CommentsQueryRepository {
     const commentsCount = await this.dataSource.query(countQuery, [postId]);
     const commentsItems = await Promise.all(
       comments.map(async (comment) => {
-        // const likesInfo = await this.likesQueryRepository.getLikesInfo(comment.id);
-        // const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, userId);
-        return this.mapToOutput(comment);
+        const likesInfo = await this.likesQueryRepository.getLikesInfo(Number(comment.id));
+        const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, Number(userId));
+        return this.mapToOutput(comment, mapedlikesInfo);
       }),
     );
     return new Paginator<CommentOutputModel[]>(
@@ -70,9 +70,9 @@ export class CommentsQueryRepository {
     if (comment.length === 0) {
       throw new NotFoundException('Comment not found');
     }
-    // const likesInfo = await this.likesQueryRepository.getLikesInfo(id);
-    // const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, userId);
-    return this.mapToOutput(comment[0]);
+    const likesInfo = await this.likesQueryRepository.getLikesInfo(Number(id));
+    const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, Number(userId));
+    return this.mapToOutput(comment[0], mapedlikesInfo);
   }
 
   mapToOutput(comment: CommentRaw, likesInfo?: LikesInfoView): CommentOutputModel {

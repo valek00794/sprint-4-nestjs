@@ -22,6 +22,7 @@ import { Public } from 'src/infrastructure/decorators/transform/public.decorator
 import { UpdateCommentCommand } from '../app/useCases/updateComment.useCase';
 import { DeleteCommentCommand } from '../app/useCases/deleteComment.useCase';
 import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
+import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
 
 @Controller(SETTINGS.PATH.comments)
 export class CommentsController {
@@ -35,22 +36,22 @@ export class CommentsController {
     return await this.commentsQueryRepository.findComment(id, req.user?.userId);
   }
 
-  // @UseGuards(AuthBearerGuard)
-  // @Put(':commentId/like-status')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async changeCommentLikeStatus(
-  //   @Body() inputModel: LikeStatusInputModel,
-  //   @Param('commentId') commentId: string,
-  //   @Req() req: Request,
-  // ) {
-  //   const comment = await this.commentsQueryRepository.findComment(commentId);
-  //   if (!comment) {
-  //     throw new NotFoundException('Comment not found');
-  //   }
-  //   await this.commandBus.execute(
-  //     new ChangeLikeStatusCommand(commentId, inputModel, req.user!.userId, req.user!.login),
-  //   );
-  // }
+  @UseGuards(AuthBearerGuard)
+  @Put(':commentId/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async changeCommentLikeStatus(
+    @Body() inputModel: LikeStatusInputModel,
+    @Param('commentId') commentId: string,
+    @Req() req: Request,
+  ) {
+    const comment = await this.commentsQueryRepository.findComment(commentId);
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+    await this.commandBus.execute(
+      new ChangeLikeStatusCommand(commentId, req.user!.userId, inputModel),
+    );
+  }
 
   @UseGuards(AuthBearerGuard)
   @Put(':commentId')

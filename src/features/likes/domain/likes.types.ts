@@ -1,5 +1,3 @@
-import type { Types } from 'mongoose';
-
 export enum LikeStatus {
   None = 'None',
   Like = 'Like',
@@ -8,8 +6,8 @@ export enum LikeStatus {
 
 export class LikesInfo {
   constructor(
-    public parrentId: Types.ObjectId,
-    public authorId: Types.ObjectId,
+    public parrentId: number,
+    public authorId: number,
     public authorLogin: string,
     public status: LikeStatus,
     public addedAt: Date,

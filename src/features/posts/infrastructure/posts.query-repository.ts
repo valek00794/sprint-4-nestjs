@@ -61,9 +61,12 @@ export class PostsQueryRepository {
     const postsCount = await this.dataSource.query(countQuery);
     const postsItems = await Promise.all(
       posts.map(async (post) => {
-        //const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id!);
-        //const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
-        return this.mapToOutput(post);
+        const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id!);
+        const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
+          likesInfo,
+          Number(userId),
+        );
+        return this.mapToOutput(post, mapedlikesInfo);
       }),
     );
 
@@ -94,9 +97,12 @@ export class PostsQueryRepository {
     `;
     const post = await this.dataSource.query(query, [id]);
     if (post.length !== 0) {
-      //const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id);
-      //const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
-      return this.mapToOutput(post[0]);
+      const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id);
+      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
+        likesInfo,
+        Number(userId),
+      );
+      return this.mapToOutput(post[0], mapedlikesInfo);
     }
     return null;
   }
