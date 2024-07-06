@@ -28,7 +28,7 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
       throw new NotFoundException('Post not found');
     }
 
-    const commentatorInfo = new CommentatorInfo(Number(command.userId), command.userLogin);
+    const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
     const newComment = {
       content: command.inputModel.content,
       createdAt: new Date().toISOString(),

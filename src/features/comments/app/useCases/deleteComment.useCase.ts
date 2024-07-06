@@ -1,7 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { CommentatorInfo } from '../../domain/comments.types';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
 
@@ -9,7 +8,6 @@ export class DeleteCommentCommand {
   constructor(
     public commentId: string,
     public userId: string,
-    public userLogin: string,
   ) {}
 }
 
@@ -29,11 +27,7 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    const commentatorInfo = new CommentatorInfo(Number(command.userId), command.userLogin);
-    if (
-      comment.userId !== commentatorInfo.userId &&
-      comment.userLogin !== commentatorInfo.userLogin
-    ) {
+    if (comment.userId !== Number(command.userId)) {
       throw new ForbiddenException('User not author of comment');
     }
     const deleteResult = await this.commentsRepository.deleteComment(commentId);

@@ -3,7 +3,7 @@ import type { LikesInfoView } from 'src/features/likes/domain/likes.types';
 
 export class CommentOutputModel {
   constructor(
-    public id: number,
+    public id: string,
     public content: string,
     public commentatorInfo: CommentatorInfo,
     public createdAt: string,

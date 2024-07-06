@@ -1,6 +1,6 @@
 export class CommentatorInfo {
   constructor(
-    public userId: number,
+    public userId: string,
     public userLogin: string,
     public email?: string,
   ) {}

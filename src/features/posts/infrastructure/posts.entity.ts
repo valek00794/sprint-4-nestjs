@@ -1,4 +1,4 @@
-export class Post {
+export class PostEntity {
   blogName: string;
   createdAt: string;
   title: string;

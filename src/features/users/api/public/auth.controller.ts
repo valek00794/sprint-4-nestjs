@@ -14,28 +14,29 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { CommandBus } from '@nestjs/cqrs';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { SETTINGS } from 'src/settings/settings';
-import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
+import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
+import { UsersQueryRepository } from '../../infrastructure/users/users.query-repository';
+import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
+import { ConfirmEmailCommand } from '../../app/useCases/auth/confirmEmail.useCase';
+import { LogoutUserCommand } from '../../app/useCases/auth/logoutUser.useCase';
+import { RenewTokensCommand } from '../../app/useCases/auth/renewTokens.useCase';
+import { ResentConfirmEmailCommand } from '../../app/useCases/auth/resentConfirmEmail.useCase';
+import { SignInCommand } from '../../app/useCases/auth/signIn.useCase';
+import { AddUserDeviceCommand } from '../../app/useCases/userDevices/addUserDevice.useCase';
+import { ConfirmPasswordRecoveryCommand } from '../../app/useCases/users/confirmPasswordRecovery.useCase';
+import { PasswordRecoveryCommand } from '../../app/useCases/users/passwordRecovery.useCase';
+import { SignUpUserCommand } from '../../app/useCases/users/signUpUser.useCase';
 import {
   SignInInputModel,
+  PasswordRecoveryEmailInputModel,
   ConfirmPasswordRecoveryInputModel,
-  type PasswordRecoveryEmailInputModel,
-  type ConirmationCodeInputModel,
-} from './models/input/auth.input.models';
-import { CreateUserInputModel } from './models/input/users.input.models';
-import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
-import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-import { AddUserDeviceCommand } from '../app/useCases/userDevices/addUserDevice.useCase';
-import { SignInCommand } from '../app/useCases/auth/signIn.useCase';
-import { ConfirmEmailCommand } from '../app/useCases/auth/confirmEmail.useCase';
-import { ResentConfirmEmailCommand } from '../app/useCases/auth/resentConfirmEmail.useCase';
-import { SignUpUserCommand } from '../app/useCases/users/signUpUser.useCase';
-import { PasswordRecoveryCommand } from '../app/useCases/users/passwordRecovery.useCase';
-import { ConfirmPasswordRecoveryCommand } from '../app/useCases/users/confirmPasswordRecovery.useCase';
-import { RenewTokensCommand } from '../app/useCases/auth/renewTokens.useCase';
-import { LogoutUserCommand } from '../app/useCases/auth/logoutUser.useCase';
-import { SkipThrottle } from '@nestjs/throttler';
+  ConirmationCodeInputModel,
+} from '../models/input/auth.input.models';
+import { CreateUserInputModel } from '../models/input/users.input.models';
+
 @Controller(SETTINGS.PATH.auth)
 export class AuthController {
   constructor(

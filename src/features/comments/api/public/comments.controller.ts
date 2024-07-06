@@ -15,14 +15,15 @@ import { Request } from 'express';
 import { CommandBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
-import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
+import { CommentsQueryRepository } from '../../infrastructure/comments.query-repository';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-import { CreateCommentInputModel } from './models/input/comments.input.model';
+import { CreateCommentInputModel } from '../models/input/comments.input.model';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
-import { UpdateCommentCommand } from '../app/useCases/updateComment.useCase';
-import { DeleteCommentCommand } from '../app/useCases/deleteComment.useCase';
+import { UpdateCommentCommand } from '../../app/useCases/updateComment.useCase';
+import { DeleteCommentCommand } from '../../app/useCases/deleteComment.useCase';
 import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
 import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
+import { LikesParrentNames } from 'src/features/likes/domain/likes.types';
 
 @Controller(SETTINGS.PATH.comments)
 export class CommentsController {
@@ -49,28 +50,32 @@ export class CommentsController {
       throw new NotFoundException('Comment not found');
     }
     await this.commandBus.execute(
-      new ChangeLikeStatusCommand(commentId, req.user!.userId, inputModel),
+      new ChangeLikeStatusCommand(
+        commentId,
+        LikesParrentNames.Comment,
+        req.user!.userId,
+        inputModel,
+      ),
     );
   }
 
   @UseGuards(AuthBearerGuard)
   @Put(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async createCommentForPost(
+  async updateComment(
     @Body() inputModel: CreateCommentInputModel,
     @Param('commentId') commentId: string,
     @Req() req: Request,
   ) {
+    console.log('put', req.user!.userId, req.user!.login);
     await this.commandBus.execute(
-      new UpdateCommentCommand(inputModel, commentId, req.user!.userId, req.user!.login),
+      new UpdateCommentCommand(inputModel, commentId, req.user!.userId),
     );
   }
   @UseGuards(AuthBearerGuard)
   @Delete(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Param('commentId') commentId: string, @Req() req: Request) {
-    await this.commandBus.execute(
-      new DeleteCommentCommand(commentId, req.user!.userId, req.user!.login),
-    );
+    await this.commandBus.execute(new DeleteCommentCommand(commentId, req.user!.userId));
   }
 }

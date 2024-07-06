@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 
-import { LikeStatus, type LikesInfoView } from 'src/features/likes/domain/likes.types';
+import {
+  LikeStatus,
+  LikesParrentNames,
+  type LikesInfoView,
+} from 'src/features/likes/domain/likes.types';
 import { CommentOutputModel } from '../api/models/output/comments.output.model';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { Paginator } from 'src/features/domain/result.types';
@@ -43,7 +47,10 @@ export class CommentsQueryRepository {
     const commentsCount = await this.dataSource.query(countQuery, [postId]);
     const commentsItems = await Promise.all(
       comments.map(async (comment) => {
-        const likesInfo = await this.likesQueryRepository.getLikesInfo(Number(comment.id));
+        const likesInfo = await this.likesQueryRepository.getLikesInfo(
+          Number(comment.id),
+          LikesParrentNames.Comment,
+        );
         const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, Number(userId));
         return this.mapToOutput(comment, mapedlikesInfo);
       }),
@@ -70,17 +77,20 @@ export class CommentsQueryRepository {
     if (comment.length === 0) {
       throw new NotFoundException('Comment not found');
     }
-    const likesInfo = await this.likesQueryRepository.getLikesInfo(Number(id));
+    const likesInfo = await this.likesQueryRepository.getLikesInfo(
+      Number(id),
+      LikesParrentNames.Comment,
+    );
     const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, Number(userId));
     return this.mapToOutput(comment[0], mapedlikesInfo);
   }
 
   mapToOutput(comment: CommentRaw, likesInfo?: LikesInfoView): CommentOutputModel {
     return new CommentOutputModel(
-      comment.id!,
+      comment.id!.toString(),
       comment.content,
       {
-        userId: comment.userId,
+        userId: comment.userId.toString(),
         userLogin: comment.userLogin,
       },
       comment.createdAt,

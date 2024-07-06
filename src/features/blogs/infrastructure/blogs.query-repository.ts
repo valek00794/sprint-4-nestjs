@@ -6,7 +6,7 @@ import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { BlogView } from '../api/models/output/blogs.output.model';
-import { Blog } from './blogs.entity';
+import { BlogEntity } from './blogs.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -55,7 +55,7 @@ export class BlogsQueryRepository {
     return blog.length !== 0 ? this.mapToOutput(blog[0]) : null;
   }
 
-  mapToOutput(blog: Blog): BlogView {
+  mapToOutput(blog: BlogEntity): BlogView {
     return new BlogView(
       blog.id!.toString(),
       blog.name,

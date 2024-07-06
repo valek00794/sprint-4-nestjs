@@ -7,7 +7,7 @@ import { BlogsRepository } from './infrastructure/blogs.repository';
 import { BlogsQueryRepository } from './infrastructure/blogs.query-repository';
 import { UpdateBlogUseCase } from './app/useCases/updateBlog.useCase';
 import { CreateBlogUseCase } from './app/useCases/createBlog.useCase';
-import { PostsController } from '../posts/api/posts.controller';
+import { PostsController } from '../posts/api/public/posts.controller';
 import { UpdatePostUseCase } from '../posts/app/useCases/updatePost.useCase';
 import { CreatePostUseCase } from '../posts/app/useCases/createPost.useCase';
 import { PostsQueryRepository } from '../posts/infrastructure/posts.query-repository';
@@ -21,7 +21,7 @@ import { CreateCommentUseCase } from '../comments/app/useCases/createComment.use
 import { UpdateCommentUseCase } from '../comments/app/useCases/updateComment.useCase';
 import { DeleteCommentUseCase } from '../comments/app/useCases/deleteComment.useCase';
 import { ChangeLikeStatusUseCase } from '../likes/app/useCases/changeLikeStatus.useCase';
-import { CommentsController } from '../comments/api/comments.controller';
+import { CommentsController } from '../comments/api/public/comments.controller';
 import { BlogsAdminController } from './api/admin/blogs.admin.controller';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];

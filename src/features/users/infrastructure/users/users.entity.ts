@@ -1,18 +1,18 @@
-export class UserEmailConfirmationInfo {
+export class UserEmailConfirmationInfoEntity {
   confirmationCode: string;
   expirationDate: string;
   isConfirmed: boolean;
 }
 
-export class User {
+export class UserEntity {
   login: string;
   email: string;
   createdAt: string;
   passwordHash: string;
-  id?: string;
+  id?: number;
 }
 
-export class UsersRecoveryPasssword {
+export class UsersRecoveryPassswordEntity {
   userId: string;
   expirationDate: Date;
   recoveryCode: string;

@@ -4,8 +4,8 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 
-import { UsersDevicesController } from './api/usersDevices.controller';
-import { AuthController } from './api/auth.controller';
+import { UsersDevicesController } from './api/public/usersDevices.controller';
+import { AuthController } from './api/public/auth.controller';
 import { AddUserDeviceUseCase } from './app/useCases/userDevices/addUserDevice.useCase';
 import { UpdateUserDeviceUseCase } from './app/useCases/userDevices/updateUserDevice.useCase';
 import { DeleteUserDeviceByIdUseCase } from './app/useCases/userDevices/deleteUserDeviceById.useCase';
@@ -22,9 +22,9 @@ import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { UsersRepository } from './infrastructure/users/users.repository';
 import { UsersQueryRepository } from './infrastructure/users/users.query-repository';
 import {
-  User,
-  UserEmailConfirmationInfo,
-  UsersRecoveryPasssword,
+  UserEntity,
+  UserEmailConfirmationInfoEntity,
+  UsersRecoveryPassswordEntity,
 } from './infrastructure/users/users.entity';
 import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
 
@@ -53,9 +53,9 @@ const usersDevicesProviders = [
   imports: [
     CqrsModule,
     TypeOrmModule.forFeature([
-      User,
-      UsersRecoveryPasssword,
-      UserEmailConfirmationInfo,
+      UserEntity,
+      UsersRecoveryPassswordEntity,
+      UserEmailConfirmationInfoEntity,
       UsersDevices,
     ]),
     // ThrottlerModule.forRoot([

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { Post } from '../infrastructure/posts.entity';
+import { PostEntity } from '../infrastructure/posts.entity';
 @Injectable()
 export class PostsService {
   constructor(
@@ -10,7 +10,7 @@ export class PostsService {
     protected blogsRepository: BlogsRepository,
   ) {}
 
-  async deletePost(postId: string): Promise<Post | null> {
+  async deletePost(postId: string): Promise<PostEntity | null> {
     if (isNaN(Number(postId))) {
       return null;
     }

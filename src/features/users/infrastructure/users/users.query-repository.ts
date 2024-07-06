@@ -7,7 +7,7 @@ import { Paginator } from 'src/features/domain/result.types';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { UserInfo } from '../../domain/users.types';
-import { User } from './users.entity';
+import { UserEntity } from './users.entity';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -25,13 +25,13 @@ export class UsersQueryRepository {
       : false;
   }
 
-  async findUserByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
+  async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserEntity | null> {
     const query = `
         SELECT * 
         FROM users 
         WHERE "Email" = $1 OR "Login" = $1;
       `;
-    const user = await this.dataSource.query<User[]>(query, [loginOrEmail]);
+    const user = await this.dataSource.query<UserEntity[]>(query, [loginOrEmail]);
     return user.length !== 0 ? user[0] : null;
   }
 
@@ -62,7 +62,7 @@ export class UsersQueryRepository {
     LIMIT ${sanitizationQuery.pageSize} 
     OFFSET ${offset};
   `;
-    const users = await this.dataSource.query<User[]>(queryString, params);
+    const users = await this.dataSource.query<UserEntity[]>(queryString, params);
     const countQuery = `
     SELECT COUNT(*)
     FROM users
@@ -78,7 +78,7 @@ export class UsersQueryRepository {
     );
   }
 
-  mapToOutput(user: User): UserViewModel {
-    return new UserViewModel(user.id!, user.login, user.email, user.createdAt);
+  mapToOutput(user: UserEntity): UserViewModel {
+    return new UserViewModel(user.id!.toString(), user.login, user.email, user.createdAt);
   }
 }

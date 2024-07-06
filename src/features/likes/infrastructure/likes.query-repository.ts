@@ -7,23 +7,24 @@ import {
   LikeStatus,
   LikesInfoView,
   NewestLike,
-  LikesInfo,
+  LikesParrentNames,
 } from '../domain/likes.types';
+import { LikesEntity } from './likes.entity';
 @Injectable()
 export class LikesQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async getLikesInfo(parrentId: number): Promise<LikesInfo[]> {
+  async getLikesInfo(parrentId: number, parrentName: LikesParrentNames): Promise<LikesEntity[]> {
     const query = `
       SELECT  l."Id" as "id",  l."Status" as "status", l."ParrentId" as "parrentId", l."AuthorId" as "authorId", l."AddedAt" as "addedAt",
         u."Login" as "authorLogin"
-       FROM "likes" l
+       FROM "${parrentName}" l
        JOIN "users" u ON l."AuthorId" = u."Id"
        WHERE "ParrentId" = $1;
      `;
-    return await this.dataSource.query<LikesInfo[]>(query, [parrentId]);
+    return await this.dataSource.query<LikesEntity[]>(query, [parrentId]);
   }
 
-  mapLikesInfo(likesInfo: LikesInfo[], userId?: number): LikesInfoView {
+  mapLikesInfo(likesInfo: LikesEntity[], userId?: number): LikesInfoView {
     const likesInfoView = new LikesInfoView(
       likesInfo.filter((like) => like.status === LikeStatus.Like).length,
       likesInfo.filter((like) => like.status === LikeStatus.Dislike).length,
@@ -32,7 +33,7 @@ export class LikesQueryRepository {
     return likesInfoView;
   }
 
-  mapExtendedLikesInfo(likesInfo: LikesInfo[], userId?: number): ExtendedLikesInfo {
+  mapExtendedLikesInfo(likesInfo: LikesEntity[], userId?: number): ExtendedLikesInfo {
     const lastLikesCount = 3;
     const newestLikes = likesInfo
       .filter((like) => like.status === LikeStatus.Like)

@@ -18,19 +18,20 @@ import { CommandBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
-import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 import { CreateCommentInputModel } from 'src/features/comments/api/models/input/comments.input.model';
 import { CommentsQueryRepository } from 'src/features/comments/infrastructure/comments.query-repository';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
-import { CreatePostModel } from './models/input/posts.input.model';
-import { PostsService } from '../app/posts.service';
-import { CreatePostCommand } from '../app/useCases/createPost.useCase';
-import { UpdatePostCommand } from '../app/useCases/updatePost.useCase';
 import { CreateCommentCommand } from 'src/features/comments/app/useCases/createComment.useCase';
 import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
+import { LikesParrentNames } from 'src/features/likes/domain/likes.types';
+import { PostsService } from '../../app/posts.service';
+import { PostsQueryRepository } from '../../infrastructure/posts.query-repository';
+import { CreatePostCommand } from '../../app/useCases/createPost.useCase';
+import { UpdatePostCommand } from '../../app/useCases/updatePost.useCase';
+import { CreatePostModel } from '../models/input/posts.input.model';
 
 @Controller(SETTINGS.PATH.posts)
 export class PostsController {
@@ -127,7 +128,7 @@ export class PostsController {
       throw new NotFoundException('Post not found');
     }
     await this.commandBus.execute(
-      new ChangeLikeStatusCommand(postId, req.user!.userId, inputModel),
+      new ChangeLikeStatusCommand(postId, LikesParrentNames.Post, req.user!.userId, inputModel),
     );
   }
 }
