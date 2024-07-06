@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import { SearchQueryParametersType } from './domain/query.types';
 
 const defaultSearchQueryParameters = {

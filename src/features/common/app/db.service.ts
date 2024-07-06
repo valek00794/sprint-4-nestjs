@@ -13,6 +13,9 @@ export class DbService {
       DELETE FROM "usersDevices";
       DELETE FROM "blogs";
       DELETE FROM "posts";
+      DELETE FROM "comments";
+      DELETE FROM "commentsLikes";
+      DELETE FROM "postsLikes";
     `;
     await this.dataSource.query(query);
     return true;

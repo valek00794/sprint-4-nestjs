@@ -14,13 +14,13 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
-import { CreateUserInputModel } from './models/input/users.input.models';
-import { UsersService } from '../app/users.service';
-import { UsersQueryRepository } from '../infrastructure/users/users.query-repository';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
-import { Public } from '../../../infrastructure/decorators/transform/public.decorator';
-import { CreateUserCommand } from '../app/useCases/users/createUser.useCase';
+import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
+import { CreateUserCommand } from '../../app/useCases/users/createUser.useCase';
+import { UsersService } from '../../app/users.service';
+import { UsersQueryRepository } from '../../infrastructure/users/users.query-repository';
+import { CreateUserInputModel } from '../models/input/users.input.models';
 
 @Public()
 @UseGuards(AuthBasicGuard)

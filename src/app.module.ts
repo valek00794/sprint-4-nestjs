@@ -1,5 +1,4 @@
 import { Module, RequestMethod, type MiddlewareConsumer, type NestModule } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -20,7 +19,6 @@ const modules = [BlogsModule, AuthModule, UsersModule, ConstraintsModule, Testin
   imports: [
     ...modules,
     CqrsModule,
-    MongooseModule.forRoot(SETTINGS.DB.mongoURI),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: '127.0.0.1',

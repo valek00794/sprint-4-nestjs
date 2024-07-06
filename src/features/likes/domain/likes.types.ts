@@ -1,21 +1,13 @@
-import type { Types } from 'mongoose';
-
 export enum LikeStatus {
   None = 'None',
   Like = 'Like',
   Dislike = 'Dislike',
 }
 
-export class LikesInfo {
-  constructor(
-    public parrentId: Types.ObjectId,
-    public authorId: Types.ObjectId,
-    public authorLogin: string,
-    public status: LikeStatus,
-    public addedAt: Date,
-  ) {}
+export enum LikesParrentNames {
+  Post = 'postsLikes',
+  Comment = 'commentsLikes',
 }
-
 export class LikesInfoView {
   constructor(
     public likesCount: number,

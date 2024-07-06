@@ -6,9 +6,13 @@ import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { PostView } from '../api/models/output/posts.output.model';
-import { ExtendedLikesInfo, LikeStatus } from 'src/features/likes/domain/likes.types';
+import {
+  ExtendedLikesInfo,
+  LikeStatus,
+  LikesParrentNames,
+} from 'src/features/likes/domain/likes.types';
 import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.query-repository';
-import { Post } from './posts.entity';
+import { PostEntity } from './posts.entity';
 import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.query-repository';
 
 @Injectable()
@@ -52,7 +56,7 @@ export class PostsQueryRepository {
       LIMIT ${sanitizationQuery.pageSize} 
       OFFSET ${offset};
     `;
-    const posts = await this.dataSource.query<Post[]>(queryString);
+    const posts = await this.dataSource.query<PostEntity[]>(queryString);
     const countQuery = `
       SELECT COUNT(*)
       FROM "posts"
@@ -61,9 +65,15 @@ export class PostsQueryRepository {
     const postsCount = await this.dataSource.query(countQuery);
     const postsItems = await Promise.all(
       posts.map(async (post) => {
-        //const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id!);
-        //const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
-        return this.mapToOutput(post);
+        const likesInfo = await this.likesQueryRepository.getLikesInfo(
+          post.id!,
+          LikesParrentNames.Post,
+        );
+        const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
+          likesInfo,
+          Number(userId),
+        );
+        return this.mapToOutput(post, mapedlikesInfo);
       }),
     );
 
@@ -76,6 +86,9 @@ export class PostsQueryRepository {
   }
 
   async findPost(id: string, userId?: string): Promise<PostView | null> {
+    if (isNaN(Number(id))) {
+      return null;
+    }
     const query = `
       SELECT 
         b."Name" as "blogName", 
@@ -91,13 +104,19 @@ export class PostsQueryRepository {
     `;
     const post = await this.dataSource.query(query, [id]);
     if (post.length !== 0) {
-      //const likesInfo = await this.likesQueryRepository.getLikesInfo(post.id);
-      //const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(likesInfo, userId);
-      return this.mapToOutput(post[0]);
+      const likesInfo = await this.likesQueryRepository.getLikesInfo(
+        post[0].id,
+        LikesParrentNames.Post,
+      );
+      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
+        likesInfo,
+        Number(userId),
+      );
+      return this.mapToOutput(post[0], mapedlikesInfo);
     }
     return null;
   }
-  mapToOutput(post: Post, extendedLikesInfo?: ExtendedLikesInfo): PostView {
+  mapToOutput(post: PostEntity, extendedLikesInfo?: ExtendedLikesInfo): PostView {
     const extendedLikesInfoView = extendedLikesInfo
       ? extendedLikesInfo
       : new ExtendedLikesInfo(0, 0, LikeStatus.None, []);

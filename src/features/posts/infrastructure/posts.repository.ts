@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { Post } from './posts.entity';
+import { PostEntity } from './posts.entity';
 
 @Injectable()
 export class PostsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createPost(newPosts: Post) {
+  async createPost(newPosts: PostEntity) {
     const query = `
       INSERT INTO "posts" ("BlogId", "Content", "ShortDescription", "CreatedAt", "Title")
       VALUES ($1, $2, $3, $4, $5)
@@ -28,7 +28,7 @@ export class PostsRepository {
     ]);
     return post.length !== 0 ? post[0] : null;
   }
-  async findPost(postId: string): Promise<Post | null> {
+  async findPost(postId: string): Promise<PostEntity | null> {
     const query = `
       SELECT "Id" as "id", "Title" as "title", "ShortDescription" as "shortDescription", 
         "Content" as "content", "BlogId" as "blogId",  "CreatedAt" as "createdAt"
@@ -38,7 +38,7 @@ export class PostsRepository {
     const post = await this.dataSource.query(query, [postId]);
     return post.length !== 0 ? post[0] : null;
   }
-  async updatePost(updatedPost: Post, postId: string): Promise<boolean> {
+  async updatePost(updatedPost: PostEntity, postId: string): Promise<boolean> {
     const query = `
     UPDATE "posts"
       SET "BlogId" = '${updatedPost.blogId}', "Content" = '${updatedPost.content}', "ShortDescription" = '${updatedPost.shortDescription}', 
@@ -50,7 +50,7 @@ export class PostsRepository {
     const post = await this.dataSource.query(query, [postId]);
     return post.length !== 0 ? post[0] : null;
   }
-  async deletePost(postId: string): Promise<Post | null> {
+  async deletePost(postId: string): Promise<PostEntity | null> {
     const query = `
       DELETE FROM "posts"
       WHERE "Id" = $1;
