@@ -25,6 +25,9 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
       throw new NotFoundException('Blog not found');
     }
     const blog = await this.blogsRepository.findBlog(getBlogId);
+    if (!blog) {
+      throw new NotFoundException('Blog not found');
+    }
     const newPosts = {
       title: command.inputModel.title,
       shortDescription: command.inputModel.shortDescription,
