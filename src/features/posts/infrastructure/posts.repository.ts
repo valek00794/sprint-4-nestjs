@@ -50,12 +50,12 @@ export class PostsRepository {
     const post = await this.dataSource.query(query, [postId]);
     return post.length !== 0 ? post[0] : null;
   }
-  async deletePost(postId: string): Promise<PostEntity | null> {
+  async deletePost(postId: string): Promise<boolean> {
     const query = `
       DELETE FROM "posts"
       WHERE "Id" = $1;
     `;
-    const post = await this.dataSource.query(query, [postId]);
-    return post.length !== 0 ? post[0] : null;
+    const result = await this.dataSource.query(query, [postId]);
+    return result[1] === 1 ? true : false;
   }
 }

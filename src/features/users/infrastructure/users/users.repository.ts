@@ -72,17 +72,6 @@ export class UsersRepository {
   `;
     const result = await this.dataSource.query(query);
     return result[1] === 1 ? true : false;
-    //
-    // if (result.affectedRows > 0) {
-    //   const querySelectUser = `
-    //   SELECT * FROM users
-    //   WHERE id = '${userId}'
-    // `;
-    //   const updatedUser = await this.dataSource.query(querySelectUser);
-    //   return updatedUser[0];
-    // } else {
-    //   return null;
-    // }
   }
 
   async updateConfirmation(userId: string): Promise<UserEntity> {

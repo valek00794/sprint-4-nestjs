@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { PostEntity } from '../infrastructure/posts.entity';
 @Injectable()
 export class PostsService {
   constructor(
@@ -10,9 +9,9 @@ export class PostsService {
     protected blogsRepository: BlogsRepository,
   ) {}
 
-  async deletePost(postId: string): Promise<PostEntity | null> {
+  async deletePost(postId: string): Promise<boolean> {
     if (isNaN(Number(postId))) {
-      return null;
+      throw new NotFoundException('Post not found');
     }
     return await this.postsRepository.deletePost(postId);
   }

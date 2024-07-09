@@ -67,7 +67,6 @@ export class CommentsController {
     @Param('commentId') commentId: string,
     @Req() req: Request,
   ) {
-    console.log('put', req.user!.userId, req.user!.login);
     await this.commandBus.execute(
       new UpdateCommentCommand(inputModel, commentId, req.user!.userId),
     );

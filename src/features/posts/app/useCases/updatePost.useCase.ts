@@ -21,17 +21,18 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
   ) {}
 
   async execute(command: UpdatePostCommand) {
-    if (isNaN(Number(command.postId))) {
-      throw new NotFoundException('Blog not found');
+    const getBlogId = command.inputModel.blogId
+      ? Number(command.inputModel.blogId)
+      : command.blogId!;
+    if (isNaN(getBlogId) || isNaN(Number(command.postId))) {
+      throw new NotFoundException('BlogId or PostId syntax error');
     }
     const post = await this.postsRepository.findPost(command.postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    const getBlogId = command.inputModel.blogId
-      ? Number(command.inputModel.blogId)
-      : command.blogId!;
-    if (isNaN(getBlogId)) {
+    const blog = await this.blogsRepository.findBlog(getBlogId);
+    if (!blog) {
       throw new NotFoundException('Blog not found');
     }
     const updatedPost = {
