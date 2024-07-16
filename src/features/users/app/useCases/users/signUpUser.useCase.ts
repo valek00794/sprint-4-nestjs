@@ -26,6 +26,7 @@ export class SignUpUserUseCase implements ICommandHandler<SignUpUserCommand> {
       email: command.inputModel.email,
       passwordHash,
       createdAt: new Date().toISOString(),
+      emailConfirmation: null,
     };
     const emailConfirmation = {
       confirmationCode: uuidv4(),
@@ -44,7 +45,7 @@ export class SignUpUserUseCase implements ICommandHandler<SignUpUserCommand> {
         );
       } catch (error) {
         console.error(error);
-        this.usersRepository.deleteUserById(createdUser.id!.toString());
+        this.usersRepository.deleteUserById(createdUser.id!);
         throw new ServiceUnavailableException('Error sending confirmation email');
       }
     }

@@ -120,7 +120,7 @@ export class AuthController {
   @Get('/me')
   @HttpCode(HttpStatus.OK)
   async getAuthInfo(@Req() req: Request) {
-    const user = await this.usersQueryRepository.findUserById(req.user!.userId);
+    const user = await this.usersQueryRepository.findUserById(Number(req.user!.userId));
     if (!req.user || !req.user.userId || !user) throw new UnauthorizedException();
     return user;
   }

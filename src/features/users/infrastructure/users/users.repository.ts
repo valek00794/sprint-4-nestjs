@@ -1,48 +1,46 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
+import { User } from './users.entity';
+import { UsersRecoveryPasssword } from './UsersRecoveryPasssword.entity ';
 import {
-  UserEntity,
-  UserEmailConfirmationInfoEntity,
-  UsersRecoveryPassswordEntity,
-} from './users.entity';
+  UserType,
+  UserEmailConfirmationInfoType,
+  UsersRecoveryPassswordType,
+} from '../../domain/users.types';
+import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(User) protected usersRepository: Repository<User>,
+    @InjectRepository(UserEmailConfirmationInfo)
+    protected userEmailConfirmationInfoRepository: Repository<UserEmailConfirmationInfo>,
+  ) {}
 
-  async createUser(newUser: UserEntity, emailConfirmationInfo?: UserEmailConfirmationInfoEntity) {
-    const queryUsers = `
-     INSERT INTO "users" ("Login", "Email", "CreatedAt", "PasswordHash") 
-     VALUES ('${newUser.login}', '${newUser.email}', '${newUser.createdAt}', 
-            '${newUser.passwordHash}')
-      RETURNING "Id" as "id", "Login" as "login", "Email" as "email", "CreatedAt" as "createdAt"
-    `;
-    const user = await this.dataSource.query(queryUsers);
+  async createUser(newUser: UserType, emailConfirmationInfo?: UserEmailConfirmationInfoType) {
+    const user = await this.usersRepository.save(newUser);
     if (emailConfirmationInfo) {
-      const queryEmailComfirmation = `
-      INSERT INTO "emailConfirmations" ("ConfirmationCode", "ExpirationDate", "IsConfirmed", "UserId") 
-      VALUES ('${emailConfirmationInfo.confirmationCode}', '${emailConfirmationInfo.expirationDate}', '${emailConfirmationInfo.isConfirmed}', 
-             '${user[0].id}')
-     `;
-      await this.dataSource.query(queryEmailComfirmation);
+      await this.userEmailConfirmationInfoRepository.save(emailConfirmationInfo);
     }
-    return user[0];
+    return user;
   }
 
-  async deleteUserById(id: string): Promise<boolean> {
-    const queryUsers = `
-      DELETE FROM "users"
-      WHERE "Id" = '${id}'
-    `;
-    const queryEmailComfirmation = `
-    DELETE FROM "emailConfirmations"
-    WHERE "UserId" = '${id}'
-  `;
-    const result = await this.dataSource.query(queryUsers);
-    await this.dataSource.query(queryEmailComfirmation);
-    return result[1] === 1 ? true : false;
+  async deleteUserById(id: number): Promise<boolean> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      return false;
+    }
+    await this.usersRepository.remove(user);
+    const emailConfirmationInfo = await this.userEmailConfirmationInfoRepository.findOne({
+      where: { id },
+    });
+    if (emailConfirmationInfo) {
+      await this.userEmailConfirmationInfoRepository.remove(emailConfirmationInfo);
+    }
+    return true;
   }
 
   async updateUserPassword(userId: string, passwordHash: string): Promise<boolean> {
@@ -60,8 +58,8 @@ export class UsersRepository {
     return result[1] === 1 ? true : false;
   }
   async updateConfirmationInfo(
-    userId: string,
-    emailConfirmationInfo: UserEmailConfirmationInfoEntity,
+    userId: number,
+    emailConfirmationInfo: UserEmailConfirmationInfoType,
   ): Promise<boolean> {
     const query = `
     UPDATE "emailConfirmations"
@@ -74,7 +72,7 @@ export class UsersRepository {
     return result[1] === 1 ? true : false;
   }
 
-  async updateConfirmation(userId: string): Promise<UserEntity> {
+  async updateConfirmation(userId: string): Promise<User> {
     const query = `
     UPDATE "emailConfirmations"
     SET "IsConfirmed" = true
@@ -85,8 +83,8 @@ export class UsersRepository {
 
   async updatePasswordRecoveryInfo(
     userId: string,
-    updatedRecoveryInfo: UsersRecoveryPassswordEntity,
-  ): Promise<UserEntity> {
+    updatedRecoveryInfo: UsersRecoveryPassswordType,
+  ): Promise<User> {
     const query = `
       UPDATE "usersRecoveryPassword"
       SET "ExpirationDate" = '${updatedRecoveryInfo.expirationDate}', "RecoveryCode" = '${updatedRecoveryInfo.recoveryCode}'
@@ -116,13 +114,9 @@ export class UsersRepository {
   }
 
   async findUserByLoginOrEmail(loginOrEmail: string) {
-    const query = `
-    SELECT "Id" as "id", "Login" as "login", "Email" as "email", "CreatedAt" as "createdAt", "PasswordHash" as "passwordHash"
-    FROM "users" 
-    WHERE "Email" = $1 OR "Login" = $1;
-    `;
-    const user = await this.dataSource.query(query, [loginOrEmail]);
-    return user.length !== 0 ? user[0] : null;
+    return await this.usersRepository.findOne({
+      where: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
   }
 
   async findPasswordRecoveryInfo(recoveryCodeOrUserId: string) {
@@ -131,19 +125,19 @@ export class UsersRepository {
     FROM "usersRecoveryPassword" 
     WHERE "RecoveryCode" = $1 OR "UserId" = $1;
   `;
-    const user = await this.dataSource.query<UsersRecoveryPassswordEntity[]>(query, [
+    const user = await this.dataSource.query<UsersRecoveryPasssword[]>(query, [
       recoveryCodeOrUserId,
     ]);
     return user.length !== 0 ? user[0] : null;
   }
 
-  async findUserById(id: string): Promise<UserEntity | null> {
+  async findUserById(id: string): Promise<User | null> {
     const query = `
     SELECT * 
     FROM "users" 
     WHERE "Id" = $1;
   `;
-    const user = await this.dataSource.query<UserEntity[]>(query, [id]);
+    const user = await this.dataSource.query<User[]>(query, [id]);
     return user.length !== 0 ? user[0] : null;
   }
 }

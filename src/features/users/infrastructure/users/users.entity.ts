@@ -1,19 +1,24 @@
-export class UserEmailConfirmationInfoEntity {
-  confirmationCode: string;
-  expirationDate: string;
-  isConfirmed: boolean;
-}
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 
-export class UserEntity {
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'varchar', length: 255, nullable: false })
   login: string;
-  email: string;
-  createdAt: string;
-  passwordHash: string;
-  id?: number;
-}
 
-export class UsersRecoveryPassswordEntity {
-  userId: string;
-  expirationDate: Date;
-  recoveryCode: string;
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  email: string;
+
+  @Column({ type: 'timestamp with time zone', nullable: false })
+  createdAt: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  passwordHash: string;
+
+  @OneToOne(() => UserEmailConfirmationInfo, { nullable: true, cascade: true })
+  @JoinColumn()
+  emailConfirmation: UserEmailConfirmationInfo | null;
 }

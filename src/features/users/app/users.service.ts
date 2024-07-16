@@ -13,6 +13,6 @@ export class UsersService {
   }
 
   async deleteUserById(id: string): Promise<boolean> {
-    return await this.usersRepository.deleteUserById(id);
+    return await this.usersRepository.deleteUserById(Number(id));
   }
 }

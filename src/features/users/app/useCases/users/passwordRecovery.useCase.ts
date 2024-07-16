@@ -25,7 +25,7 @@ export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecovery
       recoveryCode: uuidv4(),
       expirationDate: add(new Date(), {
         hours: 1,
-      }),
+      }).toISOString(),
     };
     try {
       await emailManager.sendEmailPasswordRecoveryMessage(
