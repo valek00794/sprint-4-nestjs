@@ -1,3 +1,5 @@
+import { UserEmailConfirmationInfo } from '../infrastructure/users/usersEmailConfirmationInfo.entity';
+
 export class UserInfo {
   constructor(
     public userId: string,
@@ -7,7 +9,7 @@ export class UserInfo {
 }
 
 export type UserDeviceInfoType = {
-  userId: string;
+  userId: number;
   deviceId: string;
   iat?: number;
   exp?: number;
@@ -17,7 +19,28 @@ export type UsersDevicesType = {
   deviceId: string;
   title: string;
   ip: string;
-  userId?: string;
-  lastActiveDate?: string;
-  expiryDate?: string;
+  userId: number;
+  lastActiveDate?: Date;
+  expiryDate?: Date;
 };
+
+export class UserEmailConfirmationInfoType {
+  confirmationCode: string;
+  expirationDate: Date;
+  isConfirmed: boolean;
+  userId?: number;
+}
+
+export class UserType {
+  login: string;
+  email: string;
+  createdAt: string;
+  passwordHash: string;
+  emailConfirmation: UserEmailConfirmationInfo | null;
+}
+
+export class UsersRecoveryPassswordType {
+  userId: number;
+  expirationDate: Date;
+  recoveryCode: string;
+}

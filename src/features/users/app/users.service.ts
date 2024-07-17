@@ -7,12 +7,12 @@ import { bcryptArapter } from 'src/infrastructure/adapters/bcrypt/bcrypt.adapter
 export class UsersService {
   constructor(protected usersRepository: UsersRepository) {}
 
-  async updateUserPassword(userId: string, password: string): Promise<boolean> {
+  async updateUserPassword(userId: number, password: string): Promise<boolean> {
     const passwordHash = await bcryptArapter.generateHash(password);
-    return await this.usersRepository.updateUserPassword(userId, passwordHash);
+    return await this.usersRepository.updateUserPassword(Number(userId), passwordHash);
   }
 
   async deleteUserById(id: string): Promise<boolean> {
-    return await this.usersRepository.deleteUserById(id);
+    return await this.usersRepository.deleteUserById(Number(id));
   }
 }

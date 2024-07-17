@@ -18,6 +18,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
       email: command.inputModel.email,
       passwordHash,
       createdAt: new Date().toISOString(),
+      emailConfirmation: null,
     };
     return await this.usersRepository.createUser(signUpData);
   }

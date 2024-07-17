@@ -7,15 +7,18 @@ export class DbService {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
   async clearDb() {
     const query = `
-      DELETE FROM "users";
-      DELETE FROM "emailConfirmations";
-      DELETE FROM "usersRecoveryPassword";
-      DELETE FROM "usersDevices";
-      DELETE FROM "blogs";
-      DELETE FROM "posts";
-      DELETE FROM "comments";
-      DELETE FROM "commentsLikes";
-      DELETE FROM "postsLikes";
+      CREATE OR REPLACE FUNCTION truncate_tables(username IN VARCHAR) RETURNS void AS $$
+      DECLARE
+        statements CURSOR FOR
+          SELECT tablename FROM pg_tables
+          WHERE tableowner = username AND schemaname = 'public';
+      BEGIN
+        FOR stmt IN statements LOOP
+          EXECUTE 'TRUNCATE TABLE ' || quote_ident(stmt.tablename) || ' CASCADE;';
+        END LOOP;
+      END;
+      $$ LANGUAGE plpgsql;
+      SELECT truncate_tables('postgres');
     `;
     await this.dataSource.query(query);
     return true;

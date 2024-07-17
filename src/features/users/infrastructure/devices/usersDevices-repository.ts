@@ -1,71 +1,62 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
 
 import { UserDeviceInfoType, UsersDevicesType } from '../../domain/users.types';
+import { UsersDevices } from './usersDevices.entity';
 
 @Injectable()
 export class UsersDevicesRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async addUserDevice(device: UsersDevicesType) {
-    const query = `
-      INSERT INTO "usersDevices"  ("DeviceId", "Title", "Ip", "UserId", "LastActiveDate", "ExpiryDate")
-      VALUES ('${device.deviceId}', '${device.title}', '${device.ip}', '${device.userId}', '${device.lastActiveDate}', '${device.expiryDate}')
-    `;
-    await this.dataSource.query(query);
-    return device;
+  constructor(
+    @InjectRepository(UsersDevices) protected usersDevicesRepository: Repository<UsersDevices>,
+    @InjectDataSource() protected dataSource: DataSource,
+  ) {}
+  async addUserDevice(device: UsersDevicesType): Promise<UsersDevices> {
+    return await this.usersDevicesRepository.save(device);
   }
 
   async updateUserDevice(
     userVerifyInfoByOldToken: UserDeviceInfoType,
-    newLastActiveDate: string,
-    newExpiryDate: string,
-  ) {
-    const query = `
-      UPDATE "usersDevices" 
-      SET "LastActiveDate" = '${newLastActiveDate}', "ExpiryDate" = '${newExpiryDate}'
-      WHERE "DeviceId" = '${userVerifyInfoByOldToken.deviceId}'
-      AND "UserId" = '${userVerifyInfoByOldToken.userId}'
-      AND "LastActiveDate" = '${new Date(userVerifyInfoByOldToken!.iat! * 1000).toISOString()}'
-    `;
-
-    return await this.dataSource.query(query);
+    newLastActiveDate: Date,
+    newExpiryDate: Date,
+  ): Promise<boolean> {
+    const device = await this.usersDevicesRepository.findOne({
+      where: {
+        deviceId: userVerifyInfoByOldToken.deviceId,
+        userId: userVerifyInfoByOldToken.userId,
+        lastActiveDate: new Date(userVerifyInfoByOldToken!.iat! * 1000),
+      },
+    });
+    if (device) {
+      device.lastActiveDate = newLastActiveDate;
+      device.expiryDate = newExpiryDate;
+      await this.usersDevicesRepository.save(device);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   async deleteUserDevices(userVerifyInfo: UserDeviceInfoType) {
-    const query = `
-      DELETE FROM "usersDevices" 
-      WHERE "UserId" = '${userVerifyInfo.userId}'
-      AND "DeviceId" != '${userVerifyInfo.deviceId}'
-      AND "LastActiveDate" != '${new Date(userVerifyInfo.iat! * 1000).toISOString()}'
-    `;
-
-    return await this.dataSource.query(query);
+    return await this.usersDevicesRepository.delete({
+      userId: userVerifyInfo.userId,
+      deviceId: Not(userVerifyInfo.deviceId),
+      lastActiveDate: Not(new Date(userVerifyInfo!.iat! * 1000)),
+    });
   }
 
   async deleteUserDevicebyDeviceId(deviceId: string) {
-    const query = `DELETE FROM "usersDevices"  WHERE "DeviceId" = '${deviceId}'`;
-    return await this.dataSource.query(query);
+    const result = await this.usersDevicesRepository.delete({
+      deviceId,
+    });
+    return result.affected === 1 ? true : false;
   }
 
   async getUserDeviceByDeviceId(deviceId: string) {
-    const query = `
-      SELECT "DeviceId" as "deviceId", "Title" as "title", "Ip" as "ip", 
-            "UserId" as "userId", "LastActiveDate" as "lastActiveDate", "ExpiryDate" as "expiryDate"
-      FROM "usersDevices"  
-      WHERE "DeviceId" = '${deviceId}'
-    `;
-    const result = await this.dataSource.query(query);
-    return result.length !== 0 ? result[0] : null;
+    return await this.usersDevicesRepository.findOneBy({ deviceId });
   }
 
-  async getAllActiveDevicesByUser(userId: string) {
-    const query = `
-      SELECT "DeviceId" as "deviceId", "Title" as "title", "Ip" as "ip", 
-        "UserId" as "userId", "LastActiveDate" as "lastActiveDate", "ExpiryDate" as "expiryDate"
-      FROM "usersDevices"  
-      WHERE "UserId" = '${userId}'
-    `;
-    return await this.dataSource.query(query);
-  }
+  // async getAllActiveDevicesByUser(userId: number) {
+  //   return await this.usersDevicesRepository.findBy({ userId });
+  // }
 }

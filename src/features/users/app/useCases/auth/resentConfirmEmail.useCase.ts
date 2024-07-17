@@ -33,7 +33,7 @@ export class ResentConfirmEmailUseCase implements ICommandHandler<ResentConfirmE
       confirmationCode: uuidv4(),
       expirationDate: add(new Date(), {
         hours: 1,
-      }).toISOString(),
+      }),
       isConfirmed: false,
     };
 

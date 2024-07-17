@@ -1,84 +1,58 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ILike, Repository } from 'typeorm';
 
 import { UserViewModel } from '../../api/models/output/users.output.models';
 import { Paginator } from 'src/features/domain/result.types';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { UserInfo } from '../../domain/users.types';
-import { UserEntity } from './users.entity';
+import { User } from './users.entity';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(@InjectRepository(User) protected usersRepository: Repository<User>) {}
 
-  async findUserById(id: string): Promise<UserInfo | false> {
-    const query = `
-    SELECT "Id" as "id", "Email" as "email", "Login" as "login"
-      FROM users 
-      WHERE "Id" = $1;
-    `;
-    const user = await this.dataSource.query(query, [id]);
-    return user.length !== 0
-      ? new UserInfo(user[0].id.toString(), user[0].login, user[0].email)
-      : false;
-  }
-
-  async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserEntity | null> {
-    const query = `
-        SELECT * 
-        FROM users 
-        WHERE "Email" = $1 OR "Login" = $1;
-      `;
-    const user = await this.dataSource.query<UserEntity[]>(query, [loginOrEmail]);
-    return user.length !== 0 ? user[0] : null;
+  async findUserById(id: number): Promise<UserInfo | false> {
+    const user = await this.usersRepository.findOne({
+      where: [{ id: id }],
+    });
+    return user ? new UserInfo(user.id.toString(), user.login, user.email) : false;
   }
 
   async getUsers(query?: SearchQueryParametersType): Promise<Paginator<UserViewModel[]>> {
     const sanitizationQuery = getSanitizationQuery(query);
 
-    let condition = '';
-    const params: any[] = [];
+    const take = sanitizationQuery.pageSize;
+    const skip = sanitizationQuery.pageSize * (sanitizationQuery.pageNumber - 1);
+
+    const where: any = {};
 
     if (sanitizationQuery.searchLoginTerm) {
-      condition += `"Login" ILIKE $${params.length + 1} `;
-      params.push(`%${sanitizationQuery.searchLoginTerm}%`);
+      where.login = ILike(`%${sanitizationQuery.searchLoginTerm}%`);
     }
     if (sanitizationQuery.searchEmailTerm) {
-      if (condition !== '') {
-        condition += ' OR ';
-      }
-      condition += `"Email" ILIKE $${params.length + 1} `;
-      params.push(`%${sanitizationQuery.searchEmailTerm}%`);
+      where.email = ILike(`%${sanitizationQuery.searchEmailTerm}%`);
     }
-
-    const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
-    const queryString = `
-    SELECT "Id" as "id", "Login" as "login", "Email" as "email", "CreatedAt" as "createdAt"
-    FROM users
-    ${condition !== '' ? `WHERE ${condition}` : ''}
-    ORDER BY "${sanitizationQuery.sortBy}"  ${sanitizationQuery.sortDirection}
-    LIMIT ${sanitizationQuery.pageSize} 
-    OFFSET ${offset};
-  `;
-    const users = await this.dataSource.query<UserEntity[]>(queryString, params);
-    const countQuery = `
-    SELECT COUNT(*)
-    FROM users
-    ${condition !== '' ? `WHERE ${condition}` : ''};
-  `;
-    const usersCount = await this.dataSource.query(countQuery, params);
+    const [users, count] = await this.usersRepository.findAndCount({
+      select: ['id', 'login', 'email', 'createdAt'],
+      where: [{ login: where.login }, { email: where.email }],
+      order: {
+        [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection,
+      },
+      take,
+      skip,
+    });
 
     return new Paginator<UserViewModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
-      Number(usersCount[0]?.count || 0),
+      Number(count),
       users.map((user) => this.mapToOutput(user)),
     );
   }
 
-  mapToOutput(user: UserEntity): UserViewModel {
+  mapToOutput(user: User): UserViewModel {
     return new UserViewModel(user.id!.toString(), user.login, user.email, user.createdAt);
   }
 }
