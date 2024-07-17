@@ -25,7 +25,7 @@ export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecovery
       recoveryCode: uuidv4(),
       expirationDate: add(new Date(), {
         hours: 1,
-      }).toISOString(),
+      }),
     };
     try {
       await emailManager.sendEmailPasswordRecoveryMessage(
@@ -38,10 +38,9 @@ export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecovery
         new FieldError('Error sending confirmation email', 'email sender'),
       ]);
     }
-    const userId = user!.id!.toString();
-    return await this.usersRepository.updatePasswordRecoveryInfo(userId, {
+    return await this.usersRepository.updatePasswordRecoveryInfo(user.id, {
       ...newUserRecoveryPasswordInfo,
-      userId,
+      userId: user.id,
     });
   }
 }

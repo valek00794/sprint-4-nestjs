@@ -27,8 +27,8 @@ export class UpdateUserDeviceUseCase implements ICommandHandler<UpdateUserDevice
       command.refreshToken,
       SETTINGS.JWT.RT_SECRET,
     );
-    const newLastActiveDate = new Date(userVerifyInfo!.iat! * 1000).toISOString();
-    const newExpiryDate = new Date(userVerifyInfo!.exp! * 1000).toISOString();
+    const newLastActiveDate = new Date(userVerifyInfo!.iat! * 1000);
+    const newExpiryDate = new Date(userVerifyInfo!.exp! * 1000);
     return await this.usersDevicesRepository.updateUserDevice(
       userVerifyInfoByOldToken!,
       newLastActiveDate,

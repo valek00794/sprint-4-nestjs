@@ -32,7 +32,7 @@ export class SignUpUserUseCase implements ICommandHandler<SignUpUserCommand> {
       confirmationCode: uuidv4(),
       expirationDate: add(signUpData.createdAt, {
         hours: 1,
-      }).toISOString(),
+      }),
       isConfirmed: false,
     };
     const createdUser = await this.usersRepository.createUser(signUpData, emailConfirmation);

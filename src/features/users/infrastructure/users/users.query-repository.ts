@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ILike, Repository } from 'typeorm';
 
 import { UserViewModel } from '../../api/models/output/users.output.models';
 import { Paginator } from 'src/features/domain/result.types';
@@ -11,10 +11,7 @@ import { User } from './users.entity';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(
-    @InjectDataSource() protected dataSource: DataSource,
-    @InjectRepository(User) protected usersRepository: Repository<User>,
-  ) {}
+  constructor(@InjectRepository(User) protected usersRepository: Repository<User>) {}
 
   async findUserById(id: number): Promise<UserInfo | false> {
     const user = await this.usersRepository.findOne({
@@ -25,12 +22,33 @@ export class UsersQueryRepository {
 
   async getUsers(query?: SearchQueryParametersType): Promise<Paginator<UserViewModel[]>> {
     const sanitizationQuery = getSanitizationQuery(query);
-    const users = await this.usersRepository.findAndCount();
+
+    const take = sanitizationQuery.pageSize;
+    const skip = sanitizationQuery.pageSize * (sanitizationQuery.pageNumber - 1);
+
+    const where: any = {};
+
+    if (sanitizationQuery.searchLoginTerm) {
+      where.login = ILike(`%${sanitizationQuery.searchLoginTerm}%`);
+    }
+    if (sanitizationQuery.searchEmailTerm) {
+      where.email = ILike(`%${sanitizationQuery.searchEmailTerm}%`);
+    }
+    const [users, count] = await this.usersRepository.findAndCount({
+      select: ['id', 'login', 'email', 'createdAt'],
+      where: [{ login: where.login }, { email: where.email }],
+      order: {
+        [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection,
+      },
+      take,
+      skip,
+    });
+
     return new Paginator<UserViewModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
-      users[1],
-      users[0].map((user) => this.mapToOutput(user)),
+      Number(count),
+      users.map((user) => this.mapToOutput(user)),
     );
   }
 

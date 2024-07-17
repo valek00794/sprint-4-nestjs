@@ -9,7 +9,7 @@ export class UserInfo {
 }
 
 export type UserDeviceInfoType = {
-  userId: string;
+  userId: number;
   deviceId: string;
   iat?: number;
   exp?: number;
@@ -19,15 +19,16 @@ export type UsersDevicesType = {
   deviceId: string;
   title: string;
   ip: string;
-  userId?: string;
-  lastActiveDate?: string;
-  expiryDate?: string;
+  userId: number;
+  lastActiveDate?: Date;
+  expiryDate?: Date;
 };
 
 export class UserEmailConfirmationInfoType {
   confirmationCode: string;
-  expirationDate: string;
+  expirationDate: Date;
   isConfirmed: boolean;
+  userId?: number;
 }
 
 export class UserType {
@@ -39,7 +40,7 @@ export class UserType {
 }
 
 export class UsersRecoveryPassswordType {
-  userId: string;
-  expirationDate: string;
+  userId: number;
+  expirationDate: Date;
   recoveryCode: string;
 }

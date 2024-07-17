@@ -10,9 +10,9 @@ import { BlogsModule } from './features/blogs/blogs.module';
 import { AuthModule } from './features/users/auth.module';
 import { UsersModule } from './features/users/users.module';
 import { TestingModule } from './features/common/testing.module';
-import { ConstraintsSModule } from './features/common/constraints.module';
+import { ConstraintsModule } from './features/common/constraints.module';
 
-const modules = [BlogsModule, AuthModule, UsersModule, ConstraintsSModule, TestingModule];
+const modules = [BlogsModule, AuthModule, UsersModule, ConstraintsModule, TestingModule];
 
 const options: TypeOrmModuleOptions = {
   type: 'postgres',

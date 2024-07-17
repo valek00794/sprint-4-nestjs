@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 
 @Entity()
@@ -18,7 +19,7 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: false })
   passwordHash: string;
 
-  @OneToOne(() => UserEmailConfirmationInfo, { nullable: true, cascade: true })
+  @OneToOne(() => UserEmailConfirmationInfo, (ec) => ec.userId, { nullable: true, cascade: true })
   @JoinColumn()
   emailConfirmation: UserEmailConfirmationInfo | null;
 }

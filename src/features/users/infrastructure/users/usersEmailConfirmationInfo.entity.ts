@@ -13,4 +13,7 @@ export class UserEmailConfirmationInfo {
 
   @Column({ type: 'boolean', nullable: false })
   isConfirmed: boolean;
+
+  @Column({ type: 'int', nullable: false })
+  userId: number;
 }
