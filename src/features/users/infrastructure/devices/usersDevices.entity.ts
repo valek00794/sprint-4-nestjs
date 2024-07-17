@@ -2,7 +2,10 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class UsersDevices {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column('uuid')
   deviceId: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })

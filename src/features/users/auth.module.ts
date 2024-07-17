@@ -56,12 +56,12 @@ const usersDevicesProviders = [
       UserEmailConfirmationInfo,
       UsersDevices,
     ]),
-    // ThrottlerModule.forRoot([
-    //   {
-    //     ttl: 10000,
-    //     limit: 5,
-    //   },
-    // ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
   ],
   controllers: [AuthController, UsersDevicesController],
   providers: [
@@ -71,10 +71,10 @@ const usersDevicesProviders = [
     ...usersDevicesUseCases,
     UsersRepository,
     UsersQueryRepository,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AuthModule {}

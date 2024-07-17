@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
 
 import { UserDeviceInfoType, UsersDevicesType } from '../../domain/users.types';
 import { UsersDevices } from './usersDevices.entity';
@@ -38,12 +38,11 @@ export class UsersDevicesRepository {
   }
 
   async deleteUserDevices(userVerifyInfo: UserDeviceInfoType) {
-    const result = await this.usersDevicesRepository.delete({
-      deviceId: userVerifyInfo.deviceId,
+    return await this.usersDevicesRepository.delete({
       userId: userVerifyInfo.userId,
-      lastActiveDate: new Date(userVerifyInfo!.iat! * 1000),
+      deviceId: Not(userVerifyInfo.deviceId),
+      lastActiveDate: Not(new Date(userVerifyInfo!.iat! * 1000)),
     });
-    return result.affected === 1 ? true : false;
   }
 
   async deleteUserDevicebyDeviceId(deviceId: string) {
