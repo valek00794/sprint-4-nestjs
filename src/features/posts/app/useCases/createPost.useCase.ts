@@ -24,7 +24,7 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
     if (isNaN(getBlogId)) {
       throw new NotFoundException('Blog not found');
     }
-    const blog = await this.blogsRepository.findBlog(getBlogId);
+    const blog = await this.blogsRepository.findBlogById(getBlogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }

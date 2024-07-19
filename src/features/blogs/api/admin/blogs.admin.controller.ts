@@ -106,7 +106,7 @@ export class BlogsAdminController {
   @Delete(':blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('blogId') blogId: number, @Param('postId') postId: string) {
-    const blog = await this.blogsQueryRepository.findBlog(blogId);
+    const blog = await this.blogsQueryRepository.findBlogById(blogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }

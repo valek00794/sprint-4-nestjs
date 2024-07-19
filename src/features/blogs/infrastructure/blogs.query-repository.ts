@@ -1,62 +1,54 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ILike, Repository } from 'typeorm';
 
 import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
-import { BlogView } from '../api/models/output/blogs.output.model';
-import { BlogEntity } from './blogs.entity';
+import { BlogViewModel } from '../api/models/output/blogs.output.model';
+import { Blog } from './blogs.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(@InjectRepository(Blog) protected blogsRepository: Repository<Blog>) {}
 
   async getBlogs(query?: SearchQueryParametersType) {
     const sanitizationQuery = getSanitizationQuery(query);
 
-    const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
-    const queryString = `
-      SELECT "Id" as "id", "Name" as "name", "Description" as "description", 
-        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership"
-      FROM "blogs" 
-      ${sanitizationQuery.searchNameTerm ? `WHERE LOWER("Name") LIKE LOWER('%${sanitizationQuery.searchNameTerm}%')` : ''}
-      ORDER BY "${sanitizationQuery.sortBy}"  ${sanitizationQuery.sortDirection}
-      LIMIT ${sanitizationQuery.pageSize} 
-      OFFSET ${offset};
-    `;
-    const blogs = await this.dataSource.query(queryString);
-    const countQuery = `
-      SELECT COUNT(*)
-      FROM "blogs"
-      ${sanitizationQuery.searchNameTerm ? `WHERE LOWER("Name") LIKE LOWER('%${sanitizationQuery.searchNameTerm}%')` : ''};
-    `;
-    const blogsCount = await this.dataSource.query(countQuery);
+    const take = sanitizationQuery.pageSize;
+    const skip = sanitizationQuery.pageSize * (sanitizationQuery.pageNumber - 1);
 
-    return new Paginator<BlogView[]>(
+    const where: any = {};
+
+    if (sanitizationQuery.searchNameTerm) {
+      where.name = ILike(`%${sanitizationQuery.searchNameTerm}%`);
+    }
+    const [blogs, count] = await this.blogsRepository.findAndCount({
+      select: ['id', 'name', 'description', 'websiteUrl', 'createdAt', 'isMembership'],
+      where: { name: where.name },
+      order: {
+        [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection,
+      },
+      take,
+      skip,
+    });
+    return new Paginator<BlogViewModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
-      Number(blogsCount[0]?.count || 0),
-      blogs.map((blog) => this.mapToOutput(blog)),
+      Number(count),
+      blogs.map((user) => this.mapToOutput(user)),
     );
   }
 
-  async findBlog(id: number): Promise<BlogView | null> {
-    if (isNaN(id)) {
-      return null;
-    }
-    const query = `
-     SELECT "Id" as "id", "Name" as "name", "Description" as "description", 
-        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership"
-      FROM "blogs" 
-      WHERE "Id" = '${id}';
-    `;
-    const blog = await this.dataSource.query(query);
-    return blog.length !== 0 ? this.mapToOutput(blog[0]) : null;
+  async findBlogById(id: number): Promise<BlogViewModel | null> {
+    const blog = await this.blogsRepository.findOne({
+      where: [{ id: id }],
+    });
+    return blog ? this.mapToOutput(blog) : null;
   }
 
-  mapToOutput(blog: BlogEntity): BlogView {
-    return new BlogView(
+  mapToOutput(blog: Blog): BlogViewModel {
+    return new BlogViewModel(
       blog.id!.toString(),
       blog.name,
       blog.description,

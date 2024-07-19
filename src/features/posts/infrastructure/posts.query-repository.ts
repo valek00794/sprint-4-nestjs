@@ -33,7 +33,7 @@ export class PostsQueryRepository {
     }
     let blog;
     if (blogId) {
-      blog = await this.blogsQueryRepository.findBlog(Number(blogId));
+      blog = await this.blogsQueryRepository.findBlogById(Number(blogId));
     }
     if (!blog && blogId) {
       return null;

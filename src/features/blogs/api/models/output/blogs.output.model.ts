@@ -1,4 +1,4 @@
-export class BlogView {
+export class BlogViewModel {
   constructor(
     public id: string,
     public name: string,

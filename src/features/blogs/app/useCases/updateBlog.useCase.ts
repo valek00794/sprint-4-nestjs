@@ -16,10 +16,11 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
   constructor(protected blogsRepository: BlogsRepository) {}
 
   async execute(command: UpdateBlogCommand) {
-    if (isNaN(Number(command.id))) {
+    const blogId = Number(command.id);
+    if (isNaN(blogId)) {
       throw new NotFoundException('Blog not found');
     }
-    const blog = await this.blogsRepository.findBlog(Number(command.id));
+    const blog = await this.blogsRepository.findBlogById(blogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -30,6 +31,6 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
       createdAt: new Date(blog.createdAt).toISOString(),
       isMembership: false,
     };
-    return await this.blogsRepository.updateBlog(updatedblog, command.id);
+    return await this.blogsRepository.updateBlog(updatedblog, blogId);
   }
 }

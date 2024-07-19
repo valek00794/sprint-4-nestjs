@@ -37,7 +37,7 @@ export class BlogsPublicController {
 
   @Get(':id')
   async getBlog(@Param('id') id: number) {
-    const blog = await this.blogsQueryRepository.findBlog(id);
+    const blog = await this.blogsQueryRepository.findBlogById(id);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
