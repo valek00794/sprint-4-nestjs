@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { BlogsPublicController } from './api/public/blogs.public.controller';
 import { BlogsService } from './app/blogs.service';
@@ -23,6 +24,8 @@ import { DeleteCommentUseCase } from '../comments/app/useCases/deleteComment.use
 import { ChangeLikeStatusUseCase } from '../likes/app/useCases/changeLikeStatus.useCase';
 import { CommentsController } from '../comments/api/public/comments.controller';
 import { BlogsAdminController } from './api/admin/blogs.admin.controller';
+import { Blog } from './infrastructure/blogs.entity';
+import { Post } from '../posts/infrastructure/posts.entity';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -35,7 +38,7 @@ const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteComm
 const likesUseCases = [ChangeLikeStatusUseCase];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, TypeOrmModule.forFeature([Blog, Post])],
   controllers: [BlogsPublicController, BlogsAdminController, PostsController, CommentsController],
   providers: [
     ...blogsProviders,

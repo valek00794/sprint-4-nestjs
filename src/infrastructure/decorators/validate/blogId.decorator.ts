@@ -11,7 +11,7 @@ import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.qu
 export class BlogIdExistConstraint implements ValidatorConstraintInterface {
   constructor(private readonly blogsQueryRepository: BlogsQueryRepository) {}
   async validate(blogId: any) {
-    const blog = await this.blogsQueryRepository.findBlog(blogId);
+    const blog = await this.blogsQueryRepository.findBlogById(blogId);
     if (!blog) return false;
     return true;
   }

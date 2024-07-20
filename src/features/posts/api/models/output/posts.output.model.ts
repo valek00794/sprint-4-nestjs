@@ -1,6 +1,6 @@
 import type { ExtendedLikesInfo } from 'src/features/likes/domain/likes.types';
 
-export class PostView {
+export class PostViewModel {
   constructor(
     public id: string,
     public title: string,

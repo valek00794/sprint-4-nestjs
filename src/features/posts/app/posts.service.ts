@@ -9,8 +9,9 @@ export class PostsService {
     protected blogsRepository: BlogsRepository,
   ) {}
 
-  async deletePost(postId: string): Promise<boolean> {
-    if (isNaN(Number(postId))) {
+  async deletePost(id: string): Promise<boolean> {
+    const postId = Number(id);
+    if (isNaN(postId)) {
       throw new NotFoundException('Post not found');
     }
     return await this.postsRepository.deletePost(postId);

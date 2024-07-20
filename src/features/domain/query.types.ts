@@ -1,4 +1,4 @@
-import { SortDirection } from 'mongodb';
+export type SortDirection = 'ASC' | 'DESC';
 
 export type SearchQueryParametersType = {
   pageNumber: number;

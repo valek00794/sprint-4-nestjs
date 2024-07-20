@@ -23,7 +23,7 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
   ) {}
 
   async execute(command: CreateCommentCommand): Promise<number | null> {
-    const post = await this.postsRepository.findPost(command.postId);
+    const post = await this.postsRepository.findPostbyId(Number(command.postId));
     if (!post) {
       throw new NotFoundException('Post not found');
     }

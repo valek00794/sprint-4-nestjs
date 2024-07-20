@@ -1,11 +1,11 @@
-import { SearchQueryParametersType } from './domain/query.types';
+import { SearchQueryParametersType, SortDirection } from './domain/query.types';
 
 const defaultSearchQueryParameters = {
   pageNumber: 1,
   pageSize: 10,
   maxPageSize: 100,
   sortBy: 'createdAt',
-  sortDirection: 'desc' as 'asc' | 'desc',
+  sortDirection: 'DESC' as SortDirection,
   searchLoginTerm: null,
   searchEmailTerm: null,
   searchNameTerm: null,
@@ -24,9 +24,11 @@ export const getSanitizationQuery = (
         : defaultSearchQueryParameters.pageSize,
     sortBy: query?.sortBy ? query.sortBy : defaultSearchQueryParameters.sortBy,
     sortDirection:
-      query?.sortDirection && (query?.sortDirection === 'asc' || query?.sortDirection === 'desc')
-        ? query.sortDirection
-        : defaultSearchQueryParameters.sortDirection,
+      query?.sortDirection && query.sortDirection.toUpperCase() === 'ASC'
+        ? 'ASC'
+        : query?.sortDirection && query.sortDirection.toUpperCase() === 'DESC'
+          ? 'DESC'
+          : defaultSearchQueryParameters.sortDirection,
     searchLoginTerm: query?.searchLoginTerm
       ? query.searchLoginTerm
       : defaultSearchQueryParameters.searchLoginTerm,

@@ -8,11 +8,14 @@ import { BlogIdExistConstraint } from 'src/infrastructure/decorators/validate/bl
 import { User } from '../users/infrastructure/users/users.entity';
 import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEmailConfirmationInfo.entity';
 import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
+import { Blog } from '../blogs/infrastructure/blogs.entity';
 
 const validationConstraints = [IsUserAlreadyExistConstraint, BlogIdExistConstraint];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, UserEmailConfirmationInfo, UsersRecoveryPasssword])],
+  imports: [
+    TypeOrmModule.forFeature([User, UserEmailConfirmationInfo, UsersRecoveryPasssword, Blog]),
+  ],
   controllers: [],
   providers: [...validationConstraints, UsersRepository, BlogsQueryRepository],
 })

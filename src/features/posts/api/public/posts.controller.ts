@@ -52,12 +52,12 @@ export class PostsController {
   @Public()
   @Get()
   async getPosts(@Query() query: SearchQueryParametersType, @Req() req: Request) {
-    return await this.postsQueryRepository.getPosts(query, undefined, req.user?.userId);
+    return await this.postsQueryRepository.getPosts(query, req.user?.userId);
   }
   @Public()
   @Get(':id')
   async getPost(@Param('id') id: string, @Req() req: Request) {
-    const post = await this.postsQueryRepository.findPost(id, req.user?.userId);
+    const post = await this.postsQueryRepository.findPost(Number(id), req.user?.userId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -103,7 +103,7 @@ export class PostsController {
     @Req() req: Request,
     @Query() query: SearchQueryParametersType,
   ) {
-    const post = await this.postsQueryRepository.findPost(postId);
+    const post = await this.postsQueryRepository.findPost(Number(postId));
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -123,7 +123,7 @@ export class PostsController {
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
-    const post = await this.postsQueryRepository.findPost(postId);
+    const post = await this.postsQueryRepository.findPost(Number(postId));
     if (!post) {
       throw new NotFoundException('Post not found');
     }

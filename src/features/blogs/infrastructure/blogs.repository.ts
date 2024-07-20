@@ -1,51 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-import { BlogEntity } from './blogs.entity';
+import { Blog } from './blogs.entity';
+import { BlogType } from '../domain/blogs.types';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(@InjectRepository(Blog) protected blogsRepository: Repository<Blog>) {}
 
-  async createBlog(newBlog: BlogEntity) {
-    const query = `
-      INSERT INTO "blogs" ("Name", "Description", "WebsiteUrl", "CreatedAt", "IsMembership")
-      VALUES ('${newBlog.name}', '${newBlog.description}', '${newBlog.websiteUrl}', '${newBlog.createdAt}', '${newBlog.isMembership}')
-      RETURNING "Id" as "id", "Name" as "name", "Description" as "description", 
-        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership";
-    `;
-    const blog = await this.dataSource.query(query);
-    return blog.length !== 0 ? blog[0] : null;
+  async createBlog(newBlog: BlogType) {
+    return await this.blogsRepository.save(newBlog);
   }
-  async findBlog(id: number): Promise<BlogEntity | null> {
-    const query = `
-     SELECT "Id" as "id", "Name" as "name", "Description" as "description", 
-        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership"
-      FROM "blogs" 
-      WHERE "Id" = '${id}';
-    `;
-    const blog = await this.dataSource.query(query);
-    return blog.length !== 0 ? blog[0] : null;
+  async findBlogById(id: number): Promise<Blog | null> {
+    return await this.blogsRepository.findOne({
+      where: [{ id: id }],
+    });
   }
-  async updateBlog(updatedBlog: BlogEntity, id: string): Promise<boolean> {
-    const query = `
-      UPDATE "blogs"
-      SET "Name" = '${updatedBlog.name}', "Description" = '${updatedBlog.description}', "WebsiteUrl" = '${updatedBlog.websiteUrl}', 
-        "CreatedAt" = '${updatedBlog.createdAt}', "IsMembership" = '${updatedBlog.isMembership}'
-      WHERE "Id" = $1
-      RETURNING "Id" as "id", "Name" as "name", "Description" as "description", 
-        "WebsiteUrl" as "websiteUrl", "CreatedAt" as "createdAt",  "IsMembership" as "isMembership";
-    `;
-    const blog = await this.dataSource.query(query, [id]);
-    return blog.length !== 0 ? blog[0] : null;
+  async updateBlog(updatedBlog: BlogType, id: number): Promise<Blog | null> {
+    const blog = await this.blogsRepository.findOne({
+      where: { id },
+    });
+    if (blog) {
+      blog.createdAt = updatedBlog.createdAt;
+      blog.description = updatedBlog.description;
+      blog.isMembership = updatedBlog.isMembership;
+      blog.name = updatedBlog.name;
+      blog.websiteUrl = updatedBlog.websiteUrl;
+
+      await this.blogsRepository.save(blog);
+      return blog;
+    } else {
+      return null;
+    }
   }
   async deleteBlog(id: number): Promise<boolean> {
-    const query = `
-      DELETE FROM "blogs"
-      WHERE "Id" = $1;
-    `;
-    const result = await this.dataSource.query(query, [id]);
-    return result[1] === 1 ? true : false;
+    const result = await this.blogsRepository.delete({ id });
+    return result.affected === 1 ? true : false;
   }
 }
