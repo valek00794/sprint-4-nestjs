@@ -1,10 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Post } from 'src/features/posts/infrastructure/posts.entity';
+
 @Entity()
 export class Blog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false, collation: 'C' })
   name: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
@@ -18,4 +21,7 @@ export class Blog {
 
   @Column({ type: 'boolean', nullable: false })
   isMembership: boolean;
+
+  @OneToMany(() => Post, (post) => post.blog)
+  posts: Post[];
 }

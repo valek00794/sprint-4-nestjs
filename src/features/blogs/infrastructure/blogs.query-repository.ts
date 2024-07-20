@@ -12,37 +12,44 @@ import { Blog } from './blogs.entity';
 export class BlogsQueryRepository {
   constructor(@InjectRepository(Blog) protected blogsRepository: Repository<Blog>) {}
 
-  async getBlogs(query?: SearchQueryParametersType) {
-    const sanitizationQuery = getSanitizationQuery(query);
-
-    const take = sanitizationQuery.pageSize;
-    const skip = sanitizationQuery.pageSize * (sanitizationQuery.pageNumber - 1);
-
+  async getBlogs(queryString?: SearchQueryParametersType) {
+    const sanitizationQuery = getSanitizationQuery(queryString);
+    const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
     const where: any = {};
 
     if (sanitizationQuery.searchNameTerm) {
-      where.name = ILike(`%${sanitizationQuery.searchNameTerm}%`);
+      where.name = ILike(`%${sanitizationQuery.searchNameTerm.toLowerCase()}%`);
     }
-    const [blogs, count] = await this.blogsRepository.findAndCount({
-      select: ['id', 'name', 'description', 'websiteUrl', 'createdAt', 'isMembership'],
-      where: { name: where.name },
-      order: {
-        [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection,
-      },
-      take,
-      skip,
-    });
+    const qb = this.blogsRepository.createQueryBuilder('blog');
+    const query = qb
+      .select([
+        'blog.id',
+        'blog.name',
+        'blog.description',
+        'blog.websiteUrl',
+        'blog.createdAt',
+        'blog.isMembership',
+      ])
+      .orderBy(`blog.${sanitizationQuery.sortBy}`, sanitizationQuery.sortDirection)
+      .where(
+        `${sanitizationQuery.searchNameTerm ? `"blog"."name" ILIKE '%${sanitizationQuery.searchNameTerm}%'` : ''}`,
+      )
+      .offset(offset)
+      .limit(sanitizationQuery.pageSize)
+      .getManyAndCount();
+    const [blogs, count] = await query;
+
     return new Paginator<BlogViewModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
       Number(count),
-      blogs.map((user) => this.mapToOutput(user)),
+      blogs.map((blog) => this.mapToOutput(blog)),
     );
   }
 
   async findBlogById(id: number): Promise<BlogViewModel | null> {
     const blog = await this.blogsRepository.findOne({
-      where: [{ id: id }],
+      where: [{ id }],
     });
     return blog ? this.mapToOutput(blog) : null;
   }
