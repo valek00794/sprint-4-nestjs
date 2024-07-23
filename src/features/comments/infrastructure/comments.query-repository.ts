@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import {
   LikeStatus,
@@ -12,39 +12,34 @@ import type { SearchQueryParametersType } from 'src/features/domain/query.types'
 import { Paginator } from 'src/features/domain/result.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.query-repository';
-import { CommentRaw } from '../domain/comments.types';
+import { Comment } from './comments.entity';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
     protected likesQueryRepository: LikesQueryRepository,
+    @InjectRepository(Comment) protected commentsRepository: Repository<Comment>,
   ) {}
   async getComments(
     postId: string,
-    query?: SearchQueryParametersType,
+    queryString?: SearchQueryParametersType,
     userId?: string,
   ): Promise<Paginator<CommentOutputModel[]>> {
-    const sanitizationQuery = getSanitizationQuery(query);
+    const sanitizationQuery = getSanitizationQuery(queryString);
 
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
-    const queryString = `
-      SELECT  c."Id" as "id",  c."Content" as "content",  c."CommentatorId" as "userId", c."PostId" as "postId",  c."CreatedAt" as "createdAt",
-        u."Login" as "userLogin"
-      FROM "comments" c
-      JOIN "users" u ON c."CommentatorId" = u."Id"
-      WHERE c."PostId" = $1
-      ORDER BY "${sanitizationQuery.sortBy}"  ${sanitizationQuery.sortDirection}
-      LIMIT ${sanitizationQuery.pageSize} 
-      OFFSET ${offset};
-    `;
-    const comments = await this.dataSource.query<CommentRaw[]>(queryString, [postId]);
-    const countQuery = `
-    SELECT COUNT(*)
-    FROM "comments" c
-    WHERE c."PostId" = $1; 
-  `;
-    const commentsCount = await this.dataSource.query(countQuery, [postId]);
+    const qb = this.commentsRepository.createQueryBuilder('comment');
+    const query = qb
+      .leftJoinAndSelect('comment.commenator', 'commenator')
+      .where('comment.postId = :postId', { postId })
+      .orderBy(`comment.${sanitizationQuery.sortBy}`, sanitizationQuery.sortDirection)
+      .take(sanitizationQuery.pageSize)
+      .skip(offset)
+      .getManyAndCount();
+
+    const [comments, count] = await query;
+
     const commentsItems = await Promise.all(
       comments.map(async (comment) => {
         const likesInfo = await this.likesQueryRepository.getLikesInfo(
@@ -58,40 +53,30 @@ export class CommentsQueryRepository {
     return new Paginator<CommentOutputModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
-      Number(commentsCount[0]?.count || 0),
+      Number(count),
       commentsItems,
     );
   }
-  async findComment(id: string, userId?: string): Promise<CommentOutputModel> {
-    if (isNaN(Number(id))) {
+  async findCommentById(id: number, userId?: number): Promise<CommentOutputModel> {
+    const comment = await this.commentsRepository.findOne({
+      where: [{ id: id }],
+      relations: ['commenator'],
+    });
+    if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    const query = `
-      SELECT  c."Id" as "id",  c."Content" as "content",  c."CommentatorId" as "userId",  c."PostId" as "postId",  c."CreatedAt" as "createdAt", 
-        u."Login" as "userLogin"
-       FROM "comments" c
-       JOIN "users" u ON c."CommentatorId" = u."Id"
-       WHERE c."Id" = $1;
-     `;
-    const comment = await this.dataSource.query<CommentRaw[]>(query, [id]);
-    if (comment.length === 0) {
-      throw new NotFoundException('Comment not found');
-    }
-    const likesInfo = await this.likesQueryRepository.getLikesInfo(
-      Number(id),
-      LikesParrentNames.Comment,
-    );
-    const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, Number(userId));
-    return this.mapToOutput(comment[0], mapedlikesInfo);
+    const likesInfo = await this.likesQueryRepository.getLikesInfo(id, LikesParrentNames.Comment);
+    const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(likesInfo!, userId);
+    return this.mapToOutput(comment, mapedlikesInfo);
   }
 
-  mapToOutput(comment: CommentRaw, likesInfo?: LikesInfoView): CommentOutputModel {
+  mapToOutput(comment: Comment, likesInfo?: LikesInfoView): CommentOutputModel {
     return new CommentOutputModel(
       comment.id!.toString(),
       comment.content,
       {
-        userId: comment.userId.toString(),
-        userLogin: comment.userLogin,
+        userId: comment.commentatorId.toString(),
+        userLogin: comment.commenator.login,
       },
       comment.createdAt,
       {

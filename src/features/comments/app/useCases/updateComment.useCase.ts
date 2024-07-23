@@ -4,6 +4,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CreateCommentInputModel } from '../../api/models/input/comments.input.model';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
+import { CommentType } from '../../domain/comments.types';
 
 export class UpdateCommentCommand {
   constructor(
@@ -25,18 +26,18 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
     if (isNaN(commentId)) {
       throw new NotFoundException('Comment not found');
     }
-    const comment = await this.commentsRepository.findComment(commentId);
+    const comment = await this.commentsRepository.findCommentById(commentId);
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    if (comment.userId !== Number(command.userId)) {
+    if (comment.commentatorId !== Number(command.userId)) {
       throw new ForbiddenException('User not author of comment');
     }
-    const updatedComment = {
+    const updatedComment: CommentType = {
       content: command.inputModel.content,
       commentatorInfo: {
-        userId: comment.userId.toString(),
-        userLogin: comment.userLogin,
+        userId: comment.commentatorId.toString(),
+        userLogin: comment.commenator.login,
       },
       createdAt: comment.createdAt,
       postId: comment.postId,

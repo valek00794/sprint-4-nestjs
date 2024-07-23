@@ -1,7 +1,8 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
-
+import { Comment } from '../../../comments/infrastructure/comments.entity';
+import { Like } from 'src/features/likes/infrastructure/likes.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -22,4 +23,10 @@ export class User {
   @OneToOne(() => UserEmailConfirmationInfo, (ec) => ec.userId, { nullable: true, cascade: true })
   @JoinColumn()
   emailConfirmation: UserEmailConfirmationInfo | null;
+
+  @OneToMany(() => Comment, (comment) => comment.commenator)
+  comments: Comment[];
+
+  @OneToMany(() => Like, (like) => like.author)
+  likes: Like[];
 }

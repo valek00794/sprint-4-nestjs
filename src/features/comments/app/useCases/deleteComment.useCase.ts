@@ -23,11 +23,11 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
     if (isNaN(commentId)) {
       throw new NotFoundException('Comment not found');
     }
-    const comment = await this.commentsRepository.findComment(commentId);
+    const comment = await this.commentsRepository.findCommentById(commentId);
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    if (comment.userId !== Number(command.userId)) {
+    if (comment.commentatorId !== Number(command.userId)) {
       throw new ForbiddenException('User not author of comment');
     }
     const deleteResult = await this.commentsRepository.deleteComment(commentId);

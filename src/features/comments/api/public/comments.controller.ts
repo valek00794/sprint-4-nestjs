@@ -34,7 +34,11 @@ export class CommentsController {
   @Public()
   @Get(':id')
   async getComment(@Param('id') id: string, @Req() req: Request) {
-    return await this.commentsQueryRepository.findComment(id, req.user?.userId);
+    const commentId = Number(id);
+    if (isNaN(commentId)) {
+      throw new NotFoundException('Comment not found');
+    }
+    return await this.commentsQueryRepository.findCommentById(commentId, Number(req.user?.userId));
   }
 
   @UseGuards(AuthBearerGuard)
@@ -45,10 +49,11 @@ export class CommentsController {
     @Param('commentId') commentId: string,
     @Req() req: Request,
   ) {
-    const comment = await this.commentsQueryRepository.findComment(commentId);
-    if (!comment) {
+    const id = Number(commentId);
+    if (isNaN(id)) {
       throw new NotFoundException('Comment not found');
     }
+    await this.commentsQueryRepository.findCommentById(id);
     await this.commandBus.execute(
       new ChangeLikeStatusCommand(
         commentId,

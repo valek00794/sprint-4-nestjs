@@ -26,6 +26,10 @@ import { CommentsController } from '../comments/api/public/comments.controller';
 import { BlogsAdminController } from './api/admin/blogs.admin.controller';
 import { Blog } from './infrastructure/blogs.entity';
 import { Post } from '../posts/infrastructure/posts.entity';
+import { Comment } from '../comments/infrastructure/comments.entity';
+import { PostsLike } from '../likes/infrastructure/postslikes.entity';
+import { CommentsLike } from '../likes/infrastructure/commentsLikes.entity';
+import { Like } from '../likes/infrastructure/likes.entity';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -38,7 +42,10 @@ const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteComm
 const likesUseCases = [ChangeLikeStatusUseCase];
 
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([Blog, Post])],
+  imports: [
+    CqrsModule,
+    TypeOrmModule.forFeature([Blog, Post, Comment, Like, PostsLike, CommentsLike]),
+  ],
   controllers: [BlogsPublicController, BlogsAdminController, PostsController, CommentsController],
   providers: [
     ...blogsProviders,

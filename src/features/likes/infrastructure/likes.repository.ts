@@ -1,58 +1,98 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { LikesParrentNames } from '../domain/likes.types';
-import { LikesEntity } from './likes.entity';
+import { PostsLike } from './postslikes.entity';
+import { CommentsLike } from './commentsLikes.entity';
 
 @Injectable()
 export class LikesRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(PostsLike) protected postsLikesRepository: Repository<PostsLike>,
+    @InjectRepository(CommentsLike) protected commentsLikesRepository: Repository<CommentsLike>,
+  ) {}
   async updateLikeInfo(
     parrentId: number,
     parrentName: LikesParrentNames,
     authorId: number,
     status: string,
   ): Promise<number | null> {
-    const query = `
-      INSERT INTO  "${parrentName}" ("Status", "ParrentId", "AuthorId", "AddedAt")
-      VALUES ($1, $2, $3, $4)
-      ON CONFLICT ("ParrentId", "AuthorId")
-      DO UPDATE SET "Status" = $1, "AddedAt" = $4
-      RETURNING "Id" as "id";
-    `;
-
-    const likes = await this.dataSource.query<LikesEntity[]>(query, [
-      status,
-      parrentId,
-      authorId,
-      new Date().toISOString(),
-    ]);
-    return likes.length !== 0 ? likes[0].id : null;
+    let qb;
+    let parrentField;
+    if (parrentName === LikesParrentNames.Post) {
+      qb = this.postsLikesRepository.createQueryBuilder('l');
+      parrentField = 'postId';
+    }
+    if (parrentName === LikesParrentNames.Comment) {
+      qb = this.commentsLikesRepository.createQueryBuilder('l');
+      parrentField = 'commentId';
+    }
+    const result = await qb
+      .insert()
+      .values({
+        status: status,
+        [parrentField]: parrentId,
+        authorId: authorId,
+        addedAt: new Date().toISOString(),
+      })
+      .onConflict(
+        `("authorId", "${parrentField}") DO UPDATE SET
+        "status" = excluded."status",
+        "addedAt" = excluded."addedAt"`,
+      )
+      .execute();
+    return result;
   }
   async deleteLikeInfo(
     parrentId: number,
     authorId: number,
     parrentName: LikesParrentNames,
   ): Promise<boolean> {
-    const query = `
-      DELETE FROM "${parrentName}"
-      WHERE "ParrentId" = $1
-      AND "AuthorId" = $2;
-    `;
-    const result = await this.dataSource.query(query, [parrentId, authorId]);
-    return result[1] === 1 ? true : false;
+    let qb;
+    let parrentField;
+    if (parrentName === LikesParrentNames.Post) {
+      qb = this.postsLikesRepository.createQueryBuilder('l');
+      parrentField = 'postId';
+    }
+    if (parrentName === LikesParrentNames.Comment) {
+      qb = this.commentsLikesRepository.createQueryBuilder('l');
+      parrentField = 'commentId';
+    }
+    const result = await qb
+      .delete()
+      .where(`${parrentField} = :parrentId`, { parrentId })
+      .andWhere('authorId = :authorId', { authorId })
+      .execute();
+
+    return result.affected > 0;
   }
+
   async getLikeInfo(parrentId: number, authorId: number, parrentName: LikesParrentNames) {
-    const query = `
-      SELECT  l."Id" as "id",  l."Status" as "status", l."ParrentId" as "parrentId", l."AuthorId" as "authorId", l."AddedAt" as "addedAt",
-        u."Login" as "authorLogin"
-       FROM  "${parrentName}" l
-       JOIN "users" u ON l."AuthorId" = u."Id"
-       WHERE "ParrentId" = $1
-       AND "AuthorId" = $2
-     `;
-    const likesInfo = await this.dataSource.query<LikesEntity[]>(query, [parrentId, authorId]);
+    let qb;
+    let parrentField;
+    if (parrentName === LikesParrentNames.Post) {
+      qb = this.postsLikesRepository.createQueryBuilder('l');
+      parrentField = 'postId';
+    }
+    if (parrentName === LikesParrentNames.Comment) {
+      qb = this.commentsLikesRepository.createQueryBuilder('l');
+      parrentField = 'commentId';
+    }
+    const likesInfo = await qb
+      .select([
+        'l.id',
+        'l.status',
+        `${parrentField}`,
+        'l.authorId',
+        'l.addedAt',
+        'u.login" as "authorLogin"',
+      ])
+      .leftJoin('users', 'u', 'l."authorId" = u."Id"')
+      .where(`${parrentField} = :parrentId`, { parrentId })
+      .andWhere('l."authorId" = :authorId', { authorId })
+      .getRawMany();
+
     return likesInfo.length !== 0 ? likesInfo : null;
   }
 }

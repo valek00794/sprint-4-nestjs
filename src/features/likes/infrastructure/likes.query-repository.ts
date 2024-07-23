@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import {
   ExtendedLikesInfo,
@@ -8,23 +8,37 @@ import {
   LikesInfoView,
   NewestLike,
   LikesParrentNames,
+  LikeType,
 } from '../domain/likes.types';
-import { LikesEntity } from './likes.entity';
+
+import { PostsLike } from './postslikes.entity';
+import { CommentsLike } from './commentsLikes.entity';
 @Injectable()
 export class LikesQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async getLikesInfo(parrentId: number, parrentName: LikesParrentNames): Promise<LikesEntity[]> {
-    const query = `
-      SELECT  l."Id" as "id",  l."Status" as "status", l."ParrentId" as "parrentId", l."AuthorId" as "authorId", l."AddedAt" as "addedAt",
-        u."Login" as "authorLogin"
-       FROM "${parrentName}" l
-       JOIN "users" u ON l."AuthorId" = u."Id"
-       WHERE "ParrentId" = $1;
-     `;
-    return await this.dataSource.query<LikesEntity[]>(query, [parrentId]);
+  constructor(
+    @InjectRepository(PostsLike) protected postsLikesRepository: Repository<PostsLike>,
+    @InjectRepository(CommentsLike) protected commentsLikesRepository: Repository<CommentsLike>,
+  ) {}
+  async getLikesInfo(parrentId: number, parrentName: LikesParrentNames): Promise<LikeType[]> {
+    let qb;
+    let parrentField;
+    if (parrentName === LikesParrentNames.Post) {
+      qb = this.postsLikesRepository.createQueryBuilder('l');
+      parrentField = 'l.postId';
+    }
+    if (parrentName === LikesParrentNames.Comment) {
+      qb = this.commentsLikesRepository.createQueryBuilder('l');
+      parrentField = 'l.commentId';
+    }
+    const likes = await qb
+      .select(['l.id, l.status, l.authorId, l.addedAt, u.login as "authorLogin"'])
+      .innerJoinAndSelect('l.author', 'u')
+      .where(`${parrentField} = :parrentId`, { parrentId })
+      .getRawMany();
+    return likes;
   }
 
-  mapLikesInfo(likesInfo: LikesEntity[], userId?: number): LikesInfoView {
+  mapLikesInfo(likesInfo: LikeType[], userId?: number): LikesInfoView {
     const likesInfoView = new LikesInfoView(
       likesInfo.filter((like) => like.status === LikeStatus.Like).length,
       likesInfo.filter((like) => like.status === LikeStatus.Dislike).length,
@@ -33,11 +47,11 @@ export class LikesQueryRepository {
     return likesInfoView;
   }
 
-  mapExtendedLikesInfo(likesInfo: LikesEntity[], userId?: number): ExtendedLikesInfo {
+  mapExtendedLikesInfo(likesInfo: LikeType[], userId?: number): ExtendedLikesInfo {
     const lastLikesCount = 3;
     const newestLikes = likesInfo
       .filter((like) => like.status === LikeStatus.Like)
-      .sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
+      .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
       .slice(0, lastLikesCount);
     const newestLikesView = newestLikes.map(
       (like) => new NewestLike(like.addedAt, like.authorId.toString(), like.authorLogin),
