@@ -18,7 +18,7 @@ export class LikesInfoView {
 
 export class NewestLike {
   constructor(
-    public addedAt: Date,
+    public addedAt: string,
     public userId: string,
     public login: string,
   ) {}
@@ -33,4 +33,13 @@ export class ExtendedLikesInfo extends LikesInfoView {
   ) {
     super(likesCount, dislikesCount, myStatus);
   }
+}
+
+export class LikeType {
+  parrentId: number;
+  authorId: number;
+  status: LikeStatus;
+  addedAt: string;
+  authorLogin: string;
+  id: number;
 }

@@ -33,6 +33,7 @@ export class PostsQueryRepository {
     if (blogId && isNaN(Number(blogId))) {
       return null;
     }
+
     let blog;
     if (blogId) {
       blog = await this.blogsQueryRepository.findBlogById(Number(blogId));
@@ -40,9 +41,13 @@ export class PostsQueryRepository {
     if (!blog && blogId) {
       return null;
     }
+
     const sanitizationQuery = getSanitizationQuery(queryString);
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
     const qb = this.postsRepository.createQueryBuilder('post');
+    if (blogId) {
+      qb.where('post.blogId = :blogId', { blogId: Number(blogId) });
+    }
     const query = qb
       .select([
         'post.id',
@@ -84,7 +89,7 @@ export class PostsQueryRepository {
     );
   }
 
-  async findPost(id: number, userId?: string): Promise<PostViewModel | null> {
+  async findPostById(id: number, userId?: number): Promise<PostViewModel | null> {
     const post = await this.postsRepository.findOne({
       where: [{ id }],
       relations: ['blog'],

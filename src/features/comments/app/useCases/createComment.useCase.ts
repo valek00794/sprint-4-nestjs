@@ -5,6 +5,7 @@ import { CreateCommentInputModel } from '../../api/models/input/comments.input.m
 import { CommentatorInfo } from '../../domain/comments.types';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
+import { Comment } from '../../infrastructure/comments.entity';
 
 export class CreateCommentCommand {
   constructor(
@@ -22,13 +23,14 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
     protected postsRepository: PostsRepository,
   ) {}
 
-  async execute(command: CreateCommentCommand): Promise<number | null> {
+  async execute(command: CreateCommentCommand): Promise<Comment | null> {
     const post = await this.postsRepository.findPostbyId(Number(command.postId));
     if (!post) {
       throw new NotFoundException('Post not found');
     }
 
     const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
+
     const newComment = {
       content: command.inputModel.content,
       createdAt: new Date().toISOString(),

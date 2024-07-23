@@ -6,19 +6,10 @@ export class CommentatorInfo {
   ) {}
 }
 
-export class Comment {
+export class CommentType {
   content: string;
   createdAt: string;
   commentatorInfo: CommentatorInfo;
-  postId: number;
-  id?: number;
-}
-
-export class CommentRaw {
-  content: string;
-  createdAt: string;
-  userId: number;
-  userLogin: string;
   postId: number;
   id?: number;
 }
