@@ -14,15 +14,17 @@ export class Comment {
   @Column({ type: 'timestamp with time zone', nullable: false })
   createdAt: string;
 
-  @ManyToOne(() => User, (user) => user.comments, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => User, (user) => user.comments, { nullable: false, cascade: true })
+  @JoinColumn({ name: 'commentatorId' })
   commenator: User;
 
-  commentatorId: number;
-
-  @ManyToOne(() => Post, (post) => post.comments, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => Post, (post) => post.comments, { nullable: false, cascade: true })
+  @JoinColumn({ name: 'postId' })
   posts: Post;
+
+  @Column()
+  commentatorId: number;
+  @Column()
   postId: number;
 
   @OneToMany(() => CommentsLike, (likes) => likes.comment)

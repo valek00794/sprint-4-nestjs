@@ -8,25 +8,14 @@ import { Comment } from './comments.entity';
 export class CommentsRepository {
   constructor(@InjectRepository(Comment) protected commentsRepository: Repository<Comment>) {}
   async createComment(newComment: CommentType): Promise<Comment> {
-    console.log(newComment.commentatorInfo.userId, newComment.postId);
-    // const comment = this.commentsRepository.create({
-    //   content: newComment.content,
-    //   createdAt: newComment.createdAt,
-    //   commentatorId: Number(newComment.commentatorInfo.userId),
-    //   postId: newComment.postId,
-    // });
-    // const comment = new Comment();
-    // comment.content = newComment.content;
-    // comment.createdAt = newComment.createdAt;
-    // comment.commentatorId = Number(newComment.commentatorInfo.userId);
-    // comment.postId = newComment.postId;
+    const comment = new Comment();
+    comment.content = newComment.content;
+    comment.createdAt = newComment.createdAt;
+    comment.commentatorId = Number(newComment.commentatorInfo.userId);
+    comment.postId = newComment.postId;
 
-    return await this.commentsRepository.save({
-      content: newComment.content,
-      createdAt: newComment.createdAt,
-      commentatorId: Number(newComment.commentatorInfo.userId),
-      postId: newComment.postId,
-    });
+    await this.commentsRepository.save(comment);
+    return comment;
   }
   async updateComment(updateComment: CommentType, commentId: number): Promise<Comment | null> {
     const updatedComment = await this.commentsRepository.findOne({
