@@ -6,11 +6,7 @@ import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { PostViewModel } from '../api/models/output/posts.output.model';
-import {
-  ExtendedLikesInfo,
-  LikeStatus,
-  LikesParrentNames,
-} from 'src/features/likes/domain/likes.types';
+import { ExtendedLikesInfo, LikeStatus } from 'src/features/likes/domain/likes.types';
 import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.query-repository';
 import { Post } from './posts.entity';
 import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.query-repository';
@@ -59,6 +55,8 @@ export class PostsQueryRepository {
         'blog.name',
       ])
       .leftJoinAndSelect('post.blog', 'blog')
+      .leftJoinAndSelect('post.likes', 'like')
+      .leftJoinAndSelect('like.author', 'author')
       .orderBy(
         `${sanitizationQuery.sortBy && sanitizationQuery.sortBy === 'blogName' ? 'blog.name' : 'post.' + sanitizationQuery.sortBy}`,
         sanitizationQuery.sortDirection,
@@ -67,19 +65,14 @@ export class PostsQueryRepository {
       .limit(sanitizationQuery.pageSize)
       .getManyAndCount();
     const [posts, count] = await query;
-    const postsItems = await Promise.all(
-      posts.map(async (post) => {
-        const likesInfo = await this.likesQueryRepository.getLikesInfo(
-          post.id!,
-          LikesParrentNames.Post,
-        );
-        const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
-          likesInfo,
-          Number(userId),
-        );
-        return this.mapToOutput(post, mapedlikesInfo);
-      }),
-    );
+
+    const postsItems = posts.map((post) => {
+      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
+        post.likes,
+        Number(userId),
+      );
+      return this.mapToOutput(post, mapedlikesInfo);
+    });
 
     return new Paginator<PostViewModel[]>(
       sanitizationQuery.pageNumber,
@@ -92,15 +85,11 @@ export class PostsQueryRepository {
   async findPostById(id: number, userId?: number): Promise<PostViewModel | null> {
     const post = await this.postsRepository.findOne({
       where: [{ id }],
-      relations: ['blog'],
+      relations: ['blog', 'likes.author'],
     });
     if (post) {
-      const likesInfo = await this.likesQueryRepository.getLikesInfo(
-        post.id,
-        LikesParrentNames.Post,
-      );
       const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
-        likesInfo,
+        post.likes,
         Number(userId),
       );
       return this.mapToOutput(post, mapedlikesInfo);
