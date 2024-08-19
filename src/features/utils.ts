@@ -1,4 +1,4 @@
-import { SearchQueryParametersType, SortDirection } from './domain/query.types';
+import { PublishedStatuses, SearchQueryParametersType, SortDirection } from './domain/query.types';
 
 const defaultSearchQueryParameters = {
   pageNumber: 1,
@@ -9,6 +9,8 @@ const defaultSearchQueryParameters = {
   searchLoginTerm: null,
   searchEmailTerm: null,
   searchNameTerm: null,
+  bodySearchTerm: null,
+  publishedStatus: 'all',
 };
 
 export const getSanitizationQuery = (
@@ -38,5 +40,12 @@ export const getSanitizationQuery = (
     searchNameTerm: query?.searchNameTerm
       ? query.searchNameTerm
       : defaultSearchQueryParameters.searchNameTerm,
+    publishedStatus:
+      query?.publishedStatus && PublishedStatuses.includes(query.publishedStatus)
+        ? query.publishedStatus
+        : defaultSearchQueryParameters.publishedStatus,
+    bodySearchTerm: query?.bodySearchTerm
+      ? query.bodySearchTerm
+      : defaultSearchQueryParameters.bodySearchTerm,
   };
 };
