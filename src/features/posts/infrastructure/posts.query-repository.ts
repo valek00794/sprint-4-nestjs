@@ -25,7 +25,7 @@ export class PostsQueryRepository {
     queryString?: SearchQueryParametersType,
     blogId?: string,
     userId?: string,
-  ): Promise<null | Paginator<PostViewModel[] | Post[]>> {
+  ): Promise<null | Paginator<PostViewModel[]>> {
     if (blogId && isNaN(Number(blogId))) {
       return null;
     }
@@ -45,27 +45,20 @@ export class PostsQueryRepository {
       qb.where('post.blogId = :blogId', { blogId: Number(blogId) });
     }
     const query = qb
-      .select([
-        'post.id',
-        'post.title',
-        'post.shortDescription',
-        'post.content',
-        'post.blogId',
-        'post.createdAt',
-        'blog.name',
-      ])
       .leftJoinAndSelect('post.blog', 'blog')
-      .leftJoinAndSelect('post.likes', 'like')
-      .leftJoinAndSelect('like.author', 'author')
+      .leftJoinAndSelect('post.likes', 'likes')
+      .leftJoinAndSelect('likes.author', 'author')
       .orderBy(
-        `${sanitizationQuery.sortBy && sanitizationQuery.sortBy === 'blogName' ? 'blog.name' : 'post.' + sanitizationQuery.sortBy}`,
+        sanitizationQuery.sortBy && sanitizationQuery.sortBy === 'blogName'
+          ? 'blog.name'
+          : `post.${sanitizationQuery.sortBy}`,
         sanitizationQuery.sortDirection,
       )
-      .offset(offset)
-      .limit(sanitizationQuery.pageSize)
+      .skip(offset)
+      .take(sanitizationQuery.pageSize)
       .getManyAndCount();
-    const [posts, count] = await query;
 
+    const [posts, count] = await query;
     const postsItems = posts.map((post) => {
       const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
         post.likes,
@@ -77,7 +70,7 @@ export class PostsQueryRepository {
     return new Paginator<PostViewModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
-      Number(count),
+      count,
       postsItems,
     );
   }

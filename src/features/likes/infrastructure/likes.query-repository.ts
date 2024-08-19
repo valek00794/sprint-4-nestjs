@@ -23,7 +23,7 @@ export class LikesQueryRepository {
       .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
       .slice(0, lastLikesCount);
     const newestLikesView = newestLikes.map(
-      (like) => new NewestLike(like.addedAt, like.authorId.toString(), like.author.login),
+      (like) => new NewestLike(like.addedAt, like.author.id.toString(), like.author.login),
     );
     const mappedLikesInfo = this.mapLikesInfo(likesInfo, userId);
     return new ExtendedLikesInfo(
