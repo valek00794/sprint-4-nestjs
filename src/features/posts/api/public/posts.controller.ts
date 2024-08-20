@@ -90,10 +90,11 @@ export class PostsController {
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
-    const comment = await this.commandBus.execute(
+    const newComment = await this.commandBus.execute(
       new CreateCommentCommand(inputModel, postId, req.user!.userId, req.user!.login),
     );
-    return this.commentsQueryRepository.findCommentById(comment.id);
+    const comment = await this.commentsQueryRepository.findCommentById(newComment.id);
+    return comment;
   }
 
   @Public()

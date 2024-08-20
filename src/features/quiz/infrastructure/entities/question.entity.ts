@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Game } from './game.entity';
 
 @Entity()
 export class Question {
@@ -12,11 +13,14 @@ export class Question {
   createdAt: string;
 
   @Column({ type: 'jsonb', nullable: false })
-  correctAnswers: [string];
+  correctAnswers: string[];
 
   @Column({ type: 'timestamp with time zone', nullable: false })
   updatedAt: string;
 
   @Column({ type: 'boolean', nullable: false })
   published: boolean;
+
+  @ManyToOne(() => Game, (game) => game.questions)
+  game: Game;
 }

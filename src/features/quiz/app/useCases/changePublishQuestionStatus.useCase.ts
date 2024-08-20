@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PublishQuestionStatusInputModel } from '../../api/models/input/quiz.input.model';
-import { QuizRepository } from '../../infrastructure/quiz.repository';
+import { QuizQuestionsRepository } from '../../infrastructure/quizQuestions.repository';
 import { FieldError } from 'src/infrastructure/exception.filter.types';
 
 export class ChangePublishQuestionStatusCommand {
@@ -15,7 +15,7 @@ export class ChangePublishQuestionStatusCommand {
 export class ChangePublishQuestionStatusUseCase
   implements ICommandHandler<ChangePublishQuestionStatusCommand>
 {
-  constructor(protected quizRepository: QuizRepository) {}
+  constructor(protected quizRepository: QuizQuestionsRepository) {}
 
   async execute(command: ChangePublishQuestionStatusCommand) {
     const questionId = Number(command.id);

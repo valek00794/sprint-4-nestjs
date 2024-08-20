@@ -38,7 +38,13 @@ export class CommentsController {
     if (isNaN(commentId)) {
       throw new NotFoundException('Comment not found');
     }
-    return await this.commentsQueryRepository.findCommentById(commentId, Number(req.user?.userId));
+    const comment = await this.commentsQueryRepository.findCommentById(
+      commentId,
+      Number(req.user?.userId),
+    );
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
   }
 
   @UseGuards(AuthBearerGuard)
@@ -53,7 +59,10 @@ export class CommentsController {
     if (isNaN(id)) {
       throw new NotFoundException('Comment not found');
     }
-    await this.commentsQueryRepository.findCommentById(id);
+    const comment = await this.commentsQueryRepository.findCommentById(id);
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
     await this.commandBus.execute(
       new ChangeLikeStatusCommand(
         commentId,

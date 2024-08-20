@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { QuizRepository } from '../infrastructure/quiz.repository';
+import { QuizQuestionsRepository } from '../infrastructure/quizQuestions.repository';
 
 @Injectable()
 export class QuizService {
-  constructor(protected quizRepository: QuizRepository) {}
+  constructor(protected quizRepository: QuizQuestionsRepository) {}
   async deleteQuestion(id: string): Promise<boolean> {
     if (isNaN(Number(id))) {
       throw new NotFoundException('Question not found');

@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Question } from './question.entity';
+import { Question } from './entities/question.entity';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 
 @Injectable()
-export class QuizQueryRepository {
+export class QuizQuestionsQueryRepository {
   constructor(@InjectRepository(Question) protected quizRepository: Repository<Question>) {}
 
   async getQuestions(queryString?: SearchQueryParametersType) {

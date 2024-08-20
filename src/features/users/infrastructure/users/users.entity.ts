@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 import { Comment } from '../../../comments/infrastructure/comments.entity';
 import { Like } from 'src/features/likes/infrastructure/likes.entity';
+import { PlayerProgress } from 'src/features/quiz/infrastructure/entities/playerProgress.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()

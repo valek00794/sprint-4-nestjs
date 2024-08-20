@@ -34,3 +34,9 @@ export class PublishQuestionStatusInputModel {
   @IsIn([true, false])
   published: boolean;
 }
+
+export class AnswerInputModel {
+  @Trim()
+  @IsNotEmpty()
+  answer: string;
+}

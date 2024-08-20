@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Question } from './question.entity';
+import { Question } from './entities/question.entity';
 import { ChangePublishQuestionStatusType, QuestionType } from '../domain/quiz.types';
 
 @Injectable()
-export class QuizRepository {
+export class QuizQuestionsRepository {
   constructor(@InjectRepository(Question) protected quizRepository: Repository<Question>) {}
 
   async createQuestion(newQuestion: QuestionType) {

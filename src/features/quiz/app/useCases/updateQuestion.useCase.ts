@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 import { QuestionInputModel } from '../../api/models/input/quiz.input.model';
-import { QuizRepository } from '../../infrastructure/quiz.repository';
+import { QuizQuestionsRepository } from '../../infrastructure/quizQuestions.repository';
 
 export class UpdateQuestionCommand {
   constructor(
@@ -12,7 +12,7 @@ export class UpdateQuestionCommand {
 
 @CommandHandler(UpdateQuestionCommand)
 export class UpdateQuestionUseCase implements ICommandHandler<UpdateQuestionCommand> {
-  constructor(protected quizRepository: QuizRepository) {}
+  constructor(protected quizRepository: QuizQuestionsRepository) {}
 
   async execute(command: UpdateQuestionCommand) {
     const questionId = Number(command.id);

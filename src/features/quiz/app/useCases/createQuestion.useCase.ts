@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { QuizRepository } from '../../infrastructure/quiz.repository';
+import { QuizQuestionsRepository } from '../../infrastructure/quizQuestions.repository';
 import { QuestionInputModel } from '../../api/models/input/quiz.input.model';
 
 export class CreateQuestionCommand {
@@ -9,7 +9,7 @@ export class CreateQuestionCommand {
 
 @CommandHandler(CreateQuestionCommand)
 export class CreateQuestionUseCase implements ICommandHandler<CreateQuestionCommand> {
-  constructor(protected quizRepository: QuizRepository) {}
+  constructor(protected quizRepository: QuizQuestionsRepository) {}
 
   async execute(command: CreateQuestionCommand) {
     const newQuestion = {

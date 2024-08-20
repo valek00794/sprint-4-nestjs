@@ -26,7 +26,7 @@ import { QuizService } from '../../app/quiz.service';
 import { UpdateQuestionCommand } from '../../app/useCases/updateQuestion.useCase';
 import { ChangePublishQuestionStatusCommand } from '../../app/useCases/changePublishQuestionStatus.useCase';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
-import { QuizQueryRepository } from '../../infrastructure/quiz.query-repository';
+import { QuizQuestionsQueryRepository } from '../../infrastructure/quizQuestions.query-repository';
 
 @Public()
 @UseGuards(AuthBasicGuard)
@@ -34,7 +34,7 @@ import { QuizQueryRepository } from '../../infrastructure/quiz.query-repository'
 export class QuizAdminController {
   constructor(
     protected quizService: QuizService,
-    protected quizQueryRepository: QuizQueryRepository,
+    protected quizQueryRepository: QuizQuestionsQueryRepository,
     private commandBus: CommandBus,
   ) {}
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
@@ -48,13 +48,13 @@ export class CommentsQueryRepository {
       commentsItems,
     );
   }
-  async findCommentById(id: number, userId?: number): Promise<CommentOutputModel> {
+  async findCommentById(id: number, userId?: number): Promise<CommentOutputModel | null> {
     const comment = await this.commentsRepository.findOne({
       where: [{ id: id }],
       relations: ['commenator', 'likes.author'],
     });
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      return null;
     }
     const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(comment.likes, userId);
     return this.mapToOutput(comment, mapedlikesInfo);
