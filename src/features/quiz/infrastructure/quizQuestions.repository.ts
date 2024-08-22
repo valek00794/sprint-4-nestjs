@@ -4,10 +4,16 @@ import { Repository } from 'typeorm';
 
 import { Question } from './entities/question.entity';
 import { ChangePublishQuestionStatusType, QuestionType } from '../domain/quiz.types';
+import { Game } from './entities/game.entity';
+import { QuestionOfTheGame } from './entities/questionOfTheGame.entity';
 
 @Injectable()
 export class QuizQuestionsRepository {
-  constructor(@InjectRepository(Question) protected quizRepository: Repository<Question>) {}
+  constructor(
+    @InjectRepository(Question) protected quizRepository: Repository<Question>,
+    @InjectRepository(QuestionOfTheGame)
+    protected questionOfTheGameRepository: Repository<QuestionOfTheGame>,
+  ) {}
 
   async createQuestion(newQuestion: QuestionType) {
     return await this.quizRepository.save(newQuestion);
@@ -17,6 +23,26 @@ export class QuizQuestionsRepository {
     return await this.quizRepository.findOne({
       where: [{ id }],
     });
+  }
+
+  async getQuestionsForGame(game: Game): Promise<QuestionOfTheGame[]> {
+    const questions = await this.quizRepository
+      .createQueryBuilder('question')
+      .where('question.published = :published', { published: true })
+      .orderBy('RANDOM()')
+      .take(5)
+      .getMany();
+
+    const questionsOfTheGame = questions.map((question) => {
+      const questionOfTheGame = new QuestionOfTheGame();
+      questionOfTheGame.question = question;
+      questionOfTheGame.game = game;
+      return questionOfTheGame;
+    });
+
+    const savedQuestionsOfTheGame = await this.questionOfTheGameRepository.save(questionsOfTheGame);
+
+    return savedQuestionsOfTheGame;
   }
 
   async updateQuestion(updatedQuestion: QuestionType, id: number): Promise<Question | null> {

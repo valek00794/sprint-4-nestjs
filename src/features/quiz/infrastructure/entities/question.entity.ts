@@ -1,5 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Game } from './game.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Question {
@@ -20,7 +19,4 @@ export class Question {
 
   @Column({ type: 'boolean', nullable: false })
   published: boolean;
-
-  @ManyToOne(() => Game, (game) => game.questions)
-  game: Game;
 }

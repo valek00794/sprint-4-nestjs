@@ -16,7 +16,7 @@ export class PlayerOutputModel {
 export class AnswerOutputModel {
   constructor(
     public questionId: string,
-    public answerStatus: AnswerStatuses,
+    public answerStatus: string,
     public addedAt: string,
   ) {}
 }

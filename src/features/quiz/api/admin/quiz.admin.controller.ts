@@ -22,7 +22,7 @@ import {
   QuestionInputModel,
 } from '../models/input/quiz.input.model';
 import { CreateQuestionCommand } from '../../app/useCases/createQuestion.useCase';
-import { QuizService } from '../../app/quiz.service';
+import { QuizQuestionsService } from '../../app/quizQuestions.service';
 import { UpdateQuestionCommand } from '../../app/useCases/updateQuestion.useCase';
 import { ChangePublishQuestionStatusCommand } from '../../app/useCases/changePublishQuestionStatus.useCase';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
@@ -33,7 +33,7 @@ import { QuizQuestionsQueryRepository } from '../../infrastructure/quizQuestions
 @Controller(SETTINGS.PATH.quizSa)
 export class QuizAdminController {
   constructor(
-    protected quizService: QuizService,
+    protected quizService: QuizQuestionsService,
     protected quizQueryRepository: QuizQuestionsQueryRepository,
     private commandBus: CommandBus,
   ) {}

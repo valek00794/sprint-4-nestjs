@@ -15,6 +15,7 @@ export class PlayerProgress {
   @JoinColumn()
   player: User;
 
-  @OneToMany(() => Answer, (answer) => answer.progress)
-  answers: Answer[] | null = null;
+  @OneToMany(() => Answer, (answers) => answers.progress)
+  @JoinColumn()
+  answers: Answer[];
 }

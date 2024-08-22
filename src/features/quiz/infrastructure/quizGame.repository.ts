@@ -4,49 +4,71 @@ import { Repository } from 'typeorm';
 
 import { Game } from './entities/game.entity';
 import { GameStatuses } from '../domain/quiz.types';
+import { Answer } from './entities/answer.entity';
 import { PlayerProgress } from './entities/playerProgress.entity';
-import { User } from 'src/features/users/infrastructure/users/users.entity';
 
 @Injectable()
 export class QuizGameRepository {
   constructor(
-    @InjectRepository(User) protected usersRepository: Repository<User>,
     @InjectRepository(Game) protected gameRepository: Repository<Game>,
+    @InjectRepository(Answer) protected answersRepository: Repository<Answer>,
     @InjectRepository(PlayerProgress)
     protected playerProgressRepository: Repository<PlayerProgress>,
   ) {}
-  async connectGame(playerId: number) {
-    const user = await this.usersRepository.findOne({
-      where: [{ id: playerId }],
-    });
-    const playerProgress = new PlayerProgress();
-    playerProgress.player = user!;
 
-    const game = new Game();
-    game.firstPlayerProgress = playerProgress;
-    game.status = GameStatuses.PendingSecondPlayer;
+  async saveAnswer(answer: Answer) {
+    return await this.answersRepository.save(answer);
+  }
 
+  async saveGame(game: Game) {
     return await this.gameRepository.save(game);
   }
 
-  async findActiveUserGame(playerId: string): Promise<Game | null> {
+  async findCurrentUserGame(playerId: number): Promise<Game | null> {
     const game = await this.gameRepository
       .createQueryBuilder('game')
-      .innerJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
-      .innerJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
-      .innerJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
-      .innerJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
-      .where('firstPlayer.id = :playerId')
-      .orWhere('secondPlayer.id = :playerId')
-      .setParameter('playerId', playerId)
+      .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
+      .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
+      .leftJoinAndSelect('firstPlayerProgress.answers', 'firstPlayerAnswers')
+      .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
+      .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
+      .leftJoinAndSelect('secondPlayerProgress.answers', 'secondPlayerAnswers')
+      .leftJoinAndSelect('game.questions', 'questions')
+      .leftJoinAndSelect('questions.question', 'question')
+      .where('game.status != :status', { status: GameStatuses.Finished })
+      .andWhere(
+        '(firstPlayerProgress.playerId = :playerId OR secondPlayerProgress.playerId = :playerId)',
+        { playerId },
+      )
       .getOne();
 
     return game;
   }
 
-  // async getNewGame(): Promise<Game | null> {
-  //   return await this.gameRepository.findOne({
-  //     where: [{ status: GameStatuses.PendingSecondPlayer }],
-  //   });
-  // }
+  async findGame(playerId: string): Promise<Game | null> {
+    const game = await this.gameRepository
+      .createQueryBuilder('game')
+      .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
+      .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
+      .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
+      .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
+      .where('firstPlayerProgress.playerId != :playerId')
+      .setParameter('playerId', playerId)
+      .andWhere('game.status = :status', { status: GameStatuses.PendingSecondPlayer })
+      .getOne();
+
+    return game;
+  }
+
+  async findGameById(id: number): Promise<Game | null> {
+    const game = await this.gameRepository
+      .createQueryBuilder('game')
+      .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
+      .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
+      .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
+      .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
+      .where('game.id = :id', { id })
+      .getOne();
+    return game;
+  }
 }

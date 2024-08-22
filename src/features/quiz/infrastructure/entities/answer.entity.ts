@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { PlayerProgress } from './playerProgress.entity';
 
 @Entity()
@@ -12,10 +13,9 @@ export class Answer {
   @Column()
   answerStatus: string;
 
-  @Column({ type: 'timestamp with time zone', nullable: false })
+  @Column({ type: 'timestamp with time zone', nullable: false, default: () => 'NOW()' })
   addedAt: string;
 
   @ManyToOne(() => PlayerProgress, (progress) => progress.answers)
-  @JoinColumn()
   progress: PlayerProgress;
 }

@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { PlayerProgress } from './playerProgress.entity';
-import { Question } from './question.entity';
 import { GameStatuses } from '../../domain/quiz.types';
+import { QuestionOfTheGame } from './questionOfTheGame.entity';
 
 @Entity()
 export class Game {
@@ -17,11 +17,11 @@ export class Game {
   @JoinColumn()
   secondPlayerProgress: PlayerProgress | null = null;
 
-  @OneToMany(() => Question, (question) => question.game)
-  questions: Question[] | null = null;
+  @OneToMany(() => QuestionOfTheGame, (questions) => questions.game)
+  questions: QuestionOfTheGame[];
 
   @Column({ type: 'varchar', nullable: false, default: GameStatuses.PendingSecondPlayer })
-  status: GameStatuses; //либо стринг
+  status: GameStatuses;
 
   @Column({ type: 'timestamp with time zone', nullable: false, default: () => 'NOW()' })
   pairCreatedDate: string;
