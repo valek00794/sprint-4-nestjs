@@ -17,6 +17,7 @@ export class QuizGameRepository {
   ) {}
 
   async saveAnswer(answer: Answer) {
+    await this.playerProgressRepository.save(answer.progress);
     return await this.answersRepository.save(answer);
   }
 
@@ -40,6 +41,8 @@ export class QuizGameRepository {
         '(firstPlayerProgress.playerId = :playerId OR secondPlayerProgress.playerId = :playerId)',
         { playerId },
       )
+      .orderBy('firstPlayerAnswers.addedAt', 'ASC')
+      .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
       .getOne();
 
     return game;
@@ -65,8 +68,12 @@ export class QuizGameRepository {
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
       .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
+      .leftJoinAndSelect('firstPlayerProgress.answers', 'firstPlayerAnswers')
       .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
       .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
+      .leftJoinAndSelect('secondPlayerProgress.answers', 'secondPlayerAnswers')
+      .leftJoinAndSelect('game.questions', 'questions')
+      .leftJoinAndSelect('questions.question', 'question')
       .where('game.id = :id', { id })
       .getOne();
     return game;

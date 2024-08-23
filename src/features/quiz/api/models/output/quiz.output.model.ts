@@ -1,4 +1,4 @@
-import { AnswerStatuses, GameStatuses } from 'src/features/quiz/domain/quiz.types';
+import { GameStatuses } from 'src/features/quiz/domain/quiz.types';
 export class QuestionViewModel {
   constructor(
     public id: string,

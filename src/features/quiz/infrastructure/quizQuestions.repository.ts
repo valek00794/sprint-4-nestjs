@@ -6,6 +6,7 @@ import { Question } from './entities/question.entity';
 import { ChangePublishQuestionStatusType, QuestionType } from '../domain/quiz.types';
 import { Game } from './entities/game.entity';
 import { QuestionOfTheGame } from './entities/questionOfTheGame.entity';
+import { GAME_QUESTIONS_COUNT } from '../quizSettings';
 
 @Injectable()
 export class QuizQuestionsRepository {
@@ -30,7 +31,7 @@ export class QuizQuestionsRepository {
       .createQueryBuilder('question')
       .where('question.published = :published', { published: true })
       .orderBy('RANDOM()')
-      .take(5)
+      .take(GAME_QUESTIONS_COUNT)
       .getMany();
 
     const questionsOfTheGame = questions.map((question) => {

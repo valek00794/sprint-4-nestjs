@@ -21,8 +21,10 @@ export class QuizGameService {
       throw new NotFoundException('Game not found');
     }
     if (
-      (game && game.firstPlayerProgress.player.id !== Number(playerId)) ||
-      (game.secondPlayerProgress && game.secondPlayerProgress.player.id !== Number(playerId))
+      game &&
+      game.firstPlayerProgress.player.id !== Number(playerId) &&
+      game.secondPlayerProgress &&
+      game.secondPlayerProgress.player.id !== Number(playerId)
     ) {
       throw new ForbiddenException(
         'Current user tries to get pair in which user is not participant',
