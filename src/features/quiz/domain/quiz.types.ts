@@ -2,7 +2,7 @@ export class QuestionType {
   constructor(
     public body: string,
     public correctAnswers: [string],
-    public updatedAt: string,
+    public updatedAt: string | null,
     public createdAt?: string,
     public published?: boolean,
   ) {}

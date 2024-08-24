@@ -17,7 +17,8 @@ export class Game {
   @JoinColumn()
   secondPlayerProgress: PlayerProgress | null = null;
 
-  @OneToMany(() => QuestionOfTheGame, (questions) => questions.game)
+  @OneToMany(() => QuestionOfTheGame, (questionOfTheGame) => questionOfTheGame.game)
+  @JoinColumn()
   questions: QuestionOfTheGame[];
 
   @Column({ type: 'varchar', nullable: false, default: GameStatuses.PendingSecondPlayer })

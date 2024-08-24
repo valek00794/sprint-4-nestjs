@@ -34,18 +34,19 @@ import { QuizQuestionsQueryRepository } from '../../infrastructure/quizQuestions
 export class QuizAdminController {
   constructor(
     protected quizService: QuizQuestionsService,
-    protected quizQueryRepository: QuizQuestionsQueryRepository,
+    protected quizQuestionQueryRepository: QuizQuestionsQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
   @Get()
   async getQuestions(@Query() query?: SearchQueryParametersType) {
-    return await this.quizQueryRepository.getQuestions(query);
+    return await this.quizQuestionQueryRepository.getQuestions(query);
   }
 
   @Post()
   async createQuestion(@Body() inputModel: QuestionInputModel) {
-    return await this.commandBus.execute(new CreateQuestionCommand(inputModel));
+    const question = await this.commandBus.execute(new CreateQuestionCommand(inputModel));
+    return this.quizQuestionQueryRepository.mapToOutput(question);
   }
 
   @Delete(':id')

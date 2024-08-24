@@ -1,5 +1,4 @@
-import { Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-
+import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Game } from './game.entity';
 import { Question } from './question.entity';
 
@@ -8,7 +7,7 @@ export class QuestionOfTheGame {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Question)
+  @ManyToOne(() => Question, (question) => question.questionOfGames)
   @JoinColumn()
   question: Question;
 

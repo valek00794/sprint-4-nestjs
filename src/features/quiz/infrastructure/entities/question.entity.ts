@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { QuestionOfTheGame } from './questionOfTheGame.entity';
 
 @Entity()
 export class Question {
@@ -14,9 +15,12 @@ export class Question {
   @Column({ type: 'jsonb', nullable: false })
   correctAnswers: string[];
 
-  @Column({ type: 'timestamp with time zone', nullable: false })
-  updatedAt: string;
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  updatedAt: string | null;
 
   @Column({ type: 'boolean', nullable: false })
   published: boolean;
+
+  @OneToMany(() => QuestionOfTheGame, (questionOfTheGame) => questionOfTheGame.question)
+  questionOfGames: QuestionOfTheGame[];
 }

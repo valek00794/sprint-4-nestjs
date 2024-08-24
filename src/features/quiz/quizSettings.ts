@@ -1,1 +1,1 @@
-export const GAME_QUESTIONS_COUNT = 2;
+export const GAME_QUESTIONS_COUNT = 5;

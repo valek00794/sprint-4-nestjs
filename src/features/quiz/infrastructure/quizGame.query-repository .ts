@@ -42,7 +42,7 @@ export class QuizGameQueryRepository {
       game.firstPlayerProgress.player.id.toString(),
       game.firstPlayerProgress.player.login,
     );
-    let firstPlayerAnswers: AnswerOutputModel[] | null = null;
+    let firstPlayerAnswers: AnswerOutputModel[] | null = []; //был null
     let secondPlayerProgress: PlayerProgressOutputModel | null = null;
     if (game.firstPlayerProgress.answers) {
       firstPlayerAnswers = game.firstPlayerProgress.answers?.map(
@@ -61,7 +61,7 @@ export class QuizGameQueryRepository {
     );
 
     if (game.secondPlayerProgress) {
-      const secondPlayerAnswers: AnswerOutputModel[] | null = null;
+      const secondPlayerAnswers: AnswerOutputModel[] | null = []; //был null
       const secondPlayer = new PlayerOutputModel(
         game.secondPlayerProgress.player.id.toString(),
         game.secondPlayerProgress.player.login,
@@ -82,7 +82,7 @@ export class QuizGameQueryRepository {
         );
       }
     }
-    let questions: QuestionViewModel[] | null = null;
+    let questions: QuestionViewModel[] | null = []; //был null
     if (game.questions) {
       questions = game.questions.map(
         (q) => new QuestionViewModel(q.id.toString(), q.question.body),

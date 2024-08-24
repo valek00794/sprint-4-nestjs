@@ -41,3 +41,13 @@ export class GameOutputModel {
     public finishGameDate: string | null,
   ) {}
 }
+export class QuestionOutputModel {
+  constructor(
+    public id: string,
+    public body: string,
+    public correctAnswers: string[],
+    public published: boolean,
+    public createdAt: string,
+    public updatedAt: string | null,
+  ) {}
+}

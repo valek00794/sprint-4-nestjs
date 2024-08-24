@@ -16,7 +16,7 @@ export class CreateQuestionUseCase implements ICommandHandler<CreateQuestionComm
       body: command.inputModel.body,
       correctAnswers: command.inputModel.correctAnswers,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      updatedAt: null,
       published: false,
     };
     return await this.quizRepository.createQuestion(newQuestion);

@@ -20,11 +20,16 @@ export class QuizGameService {
     if (!game) {
       throw new NotFoundException('Game not found');
     }
+    const playerIdNumber = Number(playerId);
+    console.log(game && game.firstPlayerProgress.player.id !== playerIdNumber);
+    console.log(
+      game.secondPlayerProgress && game.secondPlayerProgress.player.id !== playerIdNumber,
+    );
     if (
       game &&
-      game.firstPlayerProgress.player.id !== Number(playerId) &&
+      game.firstPlayerProgress.player.id !== playerIdNumber &&
       game.secondPlayerProgress &&
-      game.secondPlayerProgress.player.id !== Number(playerId)
+      game.secondPlayerProgress.player.id !== playerIdNumber
     ) {
       throw new ForbiddenException(
         'Current user tries to get pair in which user is not participant',

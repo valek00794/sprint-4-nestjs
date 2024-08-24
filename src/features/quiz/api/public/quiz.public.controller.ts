@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
@@ -38,18 +40,20 @@ export class QuizPublicController {
   }
 
   @Get(':id')
-  async getGame(@Req() req: Request, @Param('id') id: string) {
+  async getGameById(@Req() req: Request, @Param('id') id: string) {
     const game = await this.quizGameService.findGameById(id, req.user!.userId);
     return this.quizGameQueryRepository.mapGameToOutput(game);
   }
 
   @Post('/connection')
+  @HttpCode(HttpStatus.OK)
   async connectGame(@Req() req: Request) {
     const game = await this.commandBus.execute(new ConnectGameCommand(req.user!.userId));
     return this.quizGameQueryRepository.mapGameToOutput(game);
   }
 
   @Post('/my-current/answers')
+  @HttpCode(HttpStatus.OK)
   async answerQuestion(@Req() req: Request, @Body() inputModel: AnswerInputModel) {
     const answer = await this.commandBus.execute(
       new AnswerQuestionGameCommand(req.user!.userId, inputModel),

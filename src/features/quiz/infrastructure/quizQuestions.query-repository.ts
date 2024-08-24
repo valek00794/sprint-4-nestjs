@@ -6,12 +6,15 @@ import { Question } from './entities/question.entity';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
+import { QuestionOutputModel } from '../api/models/output/quiz.output.model';
 
 @Injectable()
 export class QuizQuestionsQueryRepository {
   constructor(@InjectRepository(Question) protected quizRepository: Repository<Question>) {}
 
-  async getQuestions(queryString?: SearchQueryParametersType) {
+  async getQuestions(
+    queryString?: SearchQueryParametersType,
+  ): Promise<Paginator<QuestionOutputModel[]>> {
     const sanitizationQuery = getSanitizationQuery(queryString);
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
     const where: any = {};
@@ -31,12 +34,22 @@ export class QuizQuestionsQueryRepository {
       .limit(sanitizationQuery.pageSize)
       .getManyAndCount();
     const [questions, count] = await query;
-
-    return new Paginator<Question[]>(
+    return new Paginator<QuestionOutputModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
       Number(count),
-      questions,
+      questions.map((q) => this.mapToOutput(q)),
+    );
+  }
+
+  mapToOutput(question: Question): QuestionOutputModel {
+    return new QuestionOutputModel(
+      question.id.toString(),
+      question.body,
+      question.correctAnswers,
+      question.published,
+      question.createdAt,
+      question.updatedAt,
     );
   }
 }
