@@ -34,10 +34,11 @@ export class QuizQuestionsRepository {
       .take(GAME_QUESTIONS_COUNT)
       .getMany();
 
-    const questionsOfTheGame = questions.map((question) => {
+    const questionsOfTheGame = questions.map((question, index) => {
       const questionOfTheGame = new QuestionOfTheGame();
       questionOfTheGame.question = question;
       questionOfTheGame.game = game;
+      questionOfTheGame.index = index;
       return questionOfTheGame;
     });
 

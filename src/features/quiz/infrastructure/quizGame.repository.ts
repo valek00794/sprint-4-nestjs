@@ -43,6 +43,7 @@ export class QuizGameRepository {
       )
       .orderBy('firstPlayerAnswers.addedAt', 'ASC')
       .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
+      .addOrderBy('questions.index', 'ASC')
       .getOne();
 
     return game;
@@ -77,6 +78,7 @@ export class QuizGameRepository {
       .where('game.id = :id', { id })
       .orderBy('firstPlayerAnswers.addedAt', 'ASC')
       .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
+      .addOrderBy('questions.index', 'ASC')
       .getOne();
     return game;
   }

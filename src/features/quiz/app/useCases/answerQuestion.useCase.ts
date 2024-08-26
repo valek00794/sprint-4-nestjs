@@ -92,12 +92,10 @@ export class AnswerQuestionGameUseCase implements ICommandHandler<AnswerQuestion
             myActiveGame.finishGameDate = firstPlayerLastAnswerTime;
           }
           myActiveGame.status = GameStatuses.Finished;
+          await this.gameRepository.saveGame(myActiveGame);
         }
-        await this.gameRepository.saveGame(myActiveGame);
       }
     }
-
-    questionId = null;
     return savedAnswer;
   }
 }

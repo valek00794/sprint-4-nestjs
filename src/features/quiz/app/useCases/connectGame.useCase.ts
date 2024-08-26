@@ -35,7 +35,7 @@ export class ConnectGameUseCase implements ICommandHandler<ConnectGameCommand> {
       const questions = await this.questionsRepository.getQuestionsForGame(activeGame);
       activeGame.secondPlayerProgress = playerProgress;
       activeGame.status = GameStatuses.Active;
-      activeGame.questions = questions;
+      activeGame.questions = questions.sort((a, b) => a.index - b.index);
       activeGame.startGameDate = new Date().toISOString();
 
       return await this.gameRepository.saveGame(activeGame);

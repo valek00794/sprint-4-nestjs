@@ -35,6 +35,7 @@ export class QuizGameQueryRepository {
       )
       .orderBy('firstPlayerAnswers.addedAt', 'ASC')
       .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
+      .addOrderBy('questions.index', 'ASC')
       .getOne();
     return game ? this.mapGameToOutput(game) : null;
   }

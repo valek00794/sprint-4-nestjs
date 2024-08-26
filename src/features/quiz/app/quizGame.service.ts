@@ -21,10 +21,6 @@ export class QuizGameService {
       throw new NotFoundException('Game not found');
     }
     const playerIdNumber = Number(playerId);
-    console.log(game && game.firstPlayerProgress.player.id !== playerIdNumber);
-    console.log(
-      game.secondPlayerProgress && game.secondPlayerProgress.player.id !== playerIdNumber,
-    );
     if (
       (!game.firstPlayerProgress || game.firstPlayerProgress.player.id !== playerIdNumber) &&
       (!game.secondPlayerProgress || game.secondPlayerProgress.player.id !== playerIdNumber)
