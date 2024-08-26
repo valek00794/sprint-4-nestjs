@@ -1,4 +1,5 @@
 export type SortDirection = 'ASC' | 'DESC';
+export const PublishedStatuses = ['all', 'published', 'notPublished'];
 
 export type SearchQueryParametersType = {
   pageNumber: number;
@@ -8,4 +9,6 @@ export type SearchQueryParametersType = {
   searchNameTerm?: string | null;
   searchLoginTerm?: string | null;
   searchEmailTerm?: string | null;
+  bodySearchTerm?: string | null;
+  publishedStatus?: string;
 };

@@ -11,8 +11,16 @@ import { AuthModule } from './features/users/auth.module';
 import { UsersModule } from './features/users/users.module';
 import { TestingModule } from './features/common/testing.module';
 import { ConstraintsModule } from './features/common/constraints.module';
+import { QuizModule } from './features/quiz/quiz.module';
 
-const modules = [BlogsModule, AuthModule, UsersModule, ConstraintsModule, TestingModule];
+const modules = [
+  BlogsModule,
+  AuthModule,
+  UsersModule,
+  ConstraintsModule,
+  TestingModule,
+  QuizModule,
+];
 
 const options: TypeOrmModuleOptions = {
   type: 'postgres',

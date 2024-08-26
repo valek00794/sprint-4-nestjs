@@ -9,7 +9,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { CommandBus } from '@nestjs/cqrs';
 
 import { BlogsQueryRepository } from '../../infrastructure/blogs.query-repository';
 import { SETTINGS } from 'src/settings/settings';
@@ -27,7 +26,6 @@ export class BlogsPublicController {
     protected postsService: PostsService,
     protected blogsQueryRepository: BlogsQueryRepository,
     protected postsQueryRepository: PostsQueryRepository,
-    private commandBus: CommandBus,
   ) {}
 
   @Get()

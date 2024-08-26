@@ -13,6 +13,8 @@ export const SETTINGS = {
     auth: '/auth',
     devices: '/security/devices',
     comments: '/comments',
+    quizSa: '/sa/quiz/questions',
+    quizPairGame: '/pair-game-quiz/pairs',
     clearDb: '/testing/all-data',
     clearLocalDb: '/testing/videos/all-data',
   },

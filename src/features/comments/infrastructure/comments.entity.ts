@@ -17,11 +17,14 @@ export class Comment {
   @ManyToOne(() => User, (user) => user.comments, { nullable: false, cascade: true })
   @JoinColumn({ name: 'commentatorId' })
   commenator: User;
-  commentatorId: number;
 
   @ManyToOne(() => Post, (post) => post.comments, { nullable: false, cascade: true })
   @JoinColumn({ name: 'postId' })
-  posts: Post[];
+  posts: Post;
+
+  @Column()
+  commentatorId: number;
+  @Column()
   postId: number;
 
   @OneToMany(() => CommentsLike, (likes) => likes.comment)
