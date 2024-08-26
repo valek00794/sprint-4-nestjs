@@ -43,6 +43,7 @@ export class ConnectGameUseCase implements ICommandHandler<ConnectGameCommand> {
     const game = new Game();
     game.firstPlayerProgress = playerProgress;
     game.status = GameStatuses.PendingSecondPlayer;
+    game.questions = null;
     return await this.gameRepository.saveGame(game);
   }
 }

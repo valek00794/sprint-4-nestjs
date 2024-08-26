@@ -26,10 +26,8 @@ export class QuizGameService {
       game.secondPlayerProgress && game.secondPlayerProgress.player.id !== playerIdNumber,
     );
     if (
-      game &&
-      game.firstPlayerProgress.player.id !== playerIdNumber &&
-      game.secondPlayerProgress &&
-      game.secondPlayerProgress.player.id !== playerIdNumber
+      (!game.firstPlayerProgress || game.firstPlayerProgress.player.id !== playerIdNumber) &&
+      (!game.secondPlayerProgress || game.secondPlayerProgress.player.id !== playerIdNumber)
     ) {
       throw new ForbiddenException(
         'Current user tries to get pair in which user is not participant',

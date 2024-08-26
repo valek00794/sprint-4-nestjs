@@ -64,8 +64,9 @@ export class AnswerQuestionGameUseCase implements ICommandHandler<AnswerQuestion
     }
     const savedAnswer = await this.gameRepository.saveAnswer(answer);
     if (
+      myActiveGame.questions &&
       myActiveGame.questions[GAME_QUESTIONS_COUNT - 1].question.id ===
-      Number(savedAnswer.questionId)
+        Number(savedAnswer.questionId)
     ) {
       const myActiveGame = await this.gameRepository.findCurrentUserGame(playerId);
       if (myActiveGame && myActiveGame.secondPlayerProgress) {

@@ -19,7 +19,7 @@ export class Game {
 
   @OneToMany(() => QuestionOfTheGame, (questionOfTheGame) => questionOfTheGame.game)
   @JoinColumn()
-  questions: QuestionOfTheGame[];
+  questions: QuestionOfTheGame[] | null;
 
   @Column({ type: 'varchar', nullable: false, default: GameStatuses.PendingSecondPlayer })
   status: GameStatuses;

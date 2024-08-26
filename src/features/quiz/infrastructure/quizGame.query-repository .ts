@@ -33,6 +33,8 @@ export class QuizGameQueryRepository {
         '(firstPlayerProgress.playerId = :playerId OR secondPlayerProgress.playerId = :playerId)',
         { playerId },
       )
+      .orderBy('firstPlayerAnswers.addedAt', 'ASC')
+      .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
       .getOne();
     return game ? this.mapGameToOutput(game) : null;
   }
@@ -42,7 +44,7 @@ export class QuizGameQueryRepository {
       game.firstPlayerProgress.player.id.toString(),
       game.firstPlayerProgress.player.login,
     );
-    let firstPlayerAnswers: AnswerOutputModel[] | null = []; //был null
+    let firstPlayerAnswers: AnswerOutputModel[] | null = [];
     let secondPlayerProgress: PlayerProgressOutputModel | null = null;
     if (game.firstPlayerProgress.answers) {
       firstPlayerAnswers = game.firstPlayerProgress.answers?.map(
@@ -61,7 +63,7 @@ export class QuizGameQueryRepository {
     );
 
     if (game.secondPlayerProgress) {
-      const secondPlayerAnswers: AnswerOutputModel[] | null = []; //был null
+      const secondPlayerAnswers: AnswerOutputModel[] | null = [];
       const secondPlayer = new PlayerOutputModel(
         game.secondPlayerProgress.player.id.toString(),
         game.secondPlayerProgress.player.login,
@@ -82,10 +84,10 @@ export class QuizGameQueryRepository {
         );
       }
     }
-    let questions: QuestionViewModel[] | null = []; //был null
-    if (game.questions) {
+    let questions: QuestionViewModel[] | null = null;
+    if (game.questions && game.questions.length > 0) {
       questions = game.questions.map(
-        (q) => new QuestionViewModel(q.id.toString(), q.question.body),
+        (q) => new QuestionViewModel(q.question.id.toString(), q.question.body),
       );
     }
     return new GameOutputModel(

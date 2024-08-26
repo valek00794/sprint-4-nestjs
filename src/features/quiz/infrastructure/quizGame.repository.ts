@@ -75,6 +75,8 @@ export class QuizGameRepository {
       .leftJoinAndSelect('game.questions', 'questions')
       .leftJoinAndSelect('questions.question', 'question')
       .where('game.id = :id', { id })
+      .orderBy('firstPlayerAnswers.addedAt', 'ASC')
+      .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
       .getOne();
     return game;
   }
