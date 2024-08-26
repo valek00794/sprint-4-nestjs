@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -12,6 +12,9 @@ import {
 } from '../api/models/output/quiz.output.model';
 import { AnswerStatuses, GameStatuses } from '../domain/quiz.types';
 import { Answer } from './entities/answer.entity';
+import { getSanitizationQuery } from 'src/features/utils';
+import { SearchQueryParametersType } from 'src/features/domain/query.types';
+import { Paginator } from 'src/features/domain/result.types';
 
 @Injectable()
 export class QuizGameQueryRepository {
@@ -38,6 +41,47 @@ export class QuizGameQueryRepository {
       .addOrderBy('questions.index', 'ASC')
       .getOne();
     return game ? this.mapGameToOutput(game) : null;
+  }
+
+  async findUserGames(
+    playerId: string,
+    @Query() queryString?: SearchQueryParametersType,
+  ): Promise<Paginator<GameOutputModel[]>> {
+    const sanitizationQuery = getSanitizationQuery(queryString);
+    const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
+
+    const orderByField =
+      sanitizationQuery.sortBy && sanitizationQuery.sortBy !== 'createdAt'
+        ? `game.${sanitizationQuery.sortBy}`
+        : 'game.pairCreatedDate';
+    const orderDirection = sanitizationQuery.sortDirection || 'DESC';
+
+    const qb = this.gameRepository.createQueryBuilder('game');
+    const query = qb
+      .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
+      .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
+      .leftJoinAndSelect('firstPlayerProgress.answers', 'firstPlayerAnswers')
+      .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
+      .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
+      .leftJoinAndSelect('secondPlayerProgress.answers', 'secondPlayerAnswers')
+      .leftJoinAndSelect('game.questions', 'questions')
+      .leftJoinAndSelect('questions.question', 'question')
+      .where('(firstPlayer.id = :playerId OR secondPlayer.id = :playerId)', {
+        playerId,
+      })
+      .orderBy(orderByField, orderDirection)
+      .skip(offset)
+      .take(sanitizationQuery.pageSize)
+      .getManyAndCount();
+
+    const [games, count] = await query;
+
+    return new Paginator<GameOutputModel[]>(
+      sanitizationQuery.pageNumber,
+      sanitizationQuery.pageSize,
+      Number(count),
+      games.map((g) => this.mapGameToOutput(g)),
+    );
   }
 
   mapGameToOutput(game: Game): GameOutputModel {

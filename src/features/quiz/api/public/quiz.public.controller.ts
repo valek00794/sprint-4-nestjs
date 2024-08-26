@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { QuizGameQueryRepository } from '../../infrastructure/quizGame.query-rep
 import { QuizGameService } from '../../app/quizGame.service';
 import { AnswerQuestionGameCommand } from '../../app/useCases/answerQuestion.useCase';
 import { AnswerInputModel } from '../models/input/quiz.input.model';
+import { SearchQueryParametersType } from 'src/features/domain/query.types';
 
 @UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.quizPairGame)
@@ -29,6 +31,12 @@ export class QuizPublicController {
     protected quizGameService: QuizGameService,
     private commandBus: CommandBus,
   ) {}
+
+  @Get('/my')
+  async getMyGames(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
+    const games = await this.quizGameQueryRepository.findUserGames(req.user!.userId, query);
+    return games;
+  }
 
   @Get('/my-current')
   async getCurrentGame(@Req() req: Request) {
