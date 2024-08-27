@@ -51,3 +51,14 @@ export class QuestionOutputModel {
     public updatedAt: string | null,
   ) {}
 }
+
+export class StatisticResultOutputModel {
+  constructor(
+    public sumScore: number,
+    public avgScores: number,
+    public gamesCount: number,
+    public winsCount: number,
+    public lossesCount: number,
+    public drawsCount: number,
+  ) {}
+}

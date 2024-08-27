@@ -30,7 +30,7 @@ import { QuizQuestionsQueryRepository } from '../../infrastructure/quizQuestions
 
 @Public()
 @UseGuards(AuthBasicGuard)
-@Controller(SETTINGS.PATH.quizSa)
+@Controller(SETTINGS.PATH.quizQuestionsSa)
 export class QuizAdminController {
   constructor(
     protected quizService: QuizQuestionsService,

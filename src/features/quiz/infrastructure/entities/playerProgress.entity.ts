@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, OneToMany, ManyToOne, PrimaryGeneratedColum
 
 import { User } from 'src/features/users/infrastructure/users/users.entity';
 import { Answer } from './answer.entity';
+import { GameResultStatuses } from '../../domain/quiz.types';
 
 @Entity()
 export class PlayerProgress {
@@ -10,6 +11,9 @@ export class PlayerProgress {
 
   @Column({ default: 0 })
   score: number;
+
+  @Column({ type: 'varchar', nullable: true, default: null })
+  result: GameResultStatuses | null;
 
   @ManyToOne(() => User)
   @JoinColumn()

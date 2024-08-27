@@ -49,3 +49,8 @@ export const getSanitizationQuery = (
       : defaultSearchQueryParameters.bodySearchTerm,
   };
 };
+
+export const roundScore = (score: number): number => {
+  const rounded = Math.round(score * 100) / 100;
+  return rounded % 1 === 0 ? Math.floor(rounded) : rounded;
+};

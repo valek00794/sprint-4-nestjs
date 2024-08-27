@@ -25,3 +25,9 @@ export enum GameStatuses {
   Active = 'Active',
   Finished = 'Finished',
 }
+
+export enum GameResultStatuses {
+  Win = 'Win',
+  Lose = 'Lose',
+  Draw = 'Draw',
+}

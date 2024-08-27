@@ -24,7 +24,7 @@ import { AnswerInputModel } from '../models/input/quiz.input.model';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 
 @UseGuards(AuthBearerGuard)
-@Controller(SETTINGS.PATH.quizPairGame)
+@Controller(SETTINGS.PATH.quizGame)
 export class QuizPublicController {
   constructor(
     protected quizGameQueryRepository: QuizGameQueryRepository,
@@ -32,13 +32,19 @@ export class QuizPublicController {
     private commandBus: CommandBus,
   ) {}
 
-  @Get('/my')
+  @Get('/pairs/my')
   async getMyGames(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
     const games = await this.quizGameQueryRepository.findUserGames(req.user!.userId, query);
     return games;
   }
 
-  @Get('/my-current')
+  @Get('/users/my-statistic')
+  async getMyStatistic(@Req() req: Request) {
+    const statistic = await this.quizGameQueryRepository.getStatistic(req.user!.userId);
+    return statistic;
+  }
+
+  @Get('/pairs/my-current')
   async getCurrentGame(@Req() req: Request) {
     const game = await this.quizGameQueryRepository.findCurrentUserGame(req.user!.userId);
     if (!game) {
@@ -47,20 +53,20 @@ export class QuizPublicController {
     return game;
   }
 
-  @Get(':id')
+  @Get('/pairs/:id')
   async getGameById(@Req() req: Request, @Param('id') id: string) {
     const game = await this.quizGameService.findGameById(id, req.user!.userId);
     return this.quizGameQueryRepository.mapGameToOutput(game);
   }
 
-  @Post('/connection')
+  @Post('/pairs/connection')
   @HttpCode(HttpStatus.OK)
   async connectGame(@Req() req: Request) {
     const game = await this.commandBus.execute(new ConnectGameCommand(req.user!.userId));
     return this.quizGameQueryRepository.mapGameToOutput(game);
   }
 
-  @Post('/my-current/answers')
+  @Post('/pairs/my-current/answers')
   @HttpCode(HttpStatus.OK)
   async answerQuestion(@Req() req: Request, @Body() inputModel: AnswerInputModel) {
     const answer = await this.commandBus.execute(

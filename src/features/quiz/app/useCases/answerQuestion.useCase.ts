@@ -5,7 +5,7 @@ import { QuizGameRepository } from '../../infrastructure/quizGame.repository';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
 import { QuizQuestionsRepository } from '../../infrastructure/quizQuestions.repository';
 import { AnswerInputModel } from '../../api/models/input/quiz.input.model';
-import { AnswerStatuses, GameStatuses } from '../../domain/quiz.types';
+import { AnswerStatuses, GameResultStatuses, GameStatuses } from '../../domain/quiz.types';
 import { Answer } from '../../infrastructure/entities/answer.entity';
 import { GAME_QUESTIONS_COUNT } from '../../quizSettings';
 
@@ -90,6 +90,18 @@ export class AnswerQuestionGameUseCase implements ICommandHandler<AnswerQuestion
               myActiveGame.secondPlayerProgress.score += 1;
             }
             myActiveGame.finishGameDate = firstPlayerLastAnswerTime;
+          }
+          if (myActiveGame.firstPlayerProgress.score > myActiveGame.secondPlayerProgress.score) {
+            myActiveGame.firstPlayerProgress.result = GameResultStatuses.Win;
+            myActiveGame.secondPlayerProgress.result = GameResultStatuses.Lose;
+          }
+          if (myActiveGame.firstPlayerProgress.score < myActiveGame.secondPlayerProgress.score) {
+            myActiveGame.firstPlayerProgress.result = GameResultStatuses.Lose;
+            myActiveGame.secondPlayerProgress.result = GameResultStatuses.Win;
+          }
+          if (myActiveGame.firstPlayerProgress.score === myActiveGame.secondPlayerProgress.score) {
+            myActiveGame.firstPlayerProgress.result = GameResultStatuses.Draw;
+            myActiveGame.secondPlayerProgress.result = GameResultStatuses.Draw;
           }
           myActiveGame.status = GameStatuses.Finished;
           await this.gameRepository.saveGame(myActiveGame);
