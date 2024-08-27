@@ -82,6 +82,7 @@ export class QuizGameQueryRepository {
       // .addOrderBy('questions.index', 'ASC')
       .orderBy(orderByField, orderDirection)
       .addOrderBy('game.pairCreatedDate', 'DESC')
+      //.addOrderBy('questions.index', 'ASC')
       .skip(offset)
       .take(sanitizationQuery.pageSize)
       .getManyAndCount();
@@ -177,7 +178,10 @@ export class QuizGameQueryRepository {
     let firstPlayerAnswers: AnswerOutputModel[] | null = [];
     let secondPlayerProgress: PlayerProgressOutputModel | null = null;
     if (game.firstPlayerProgress.answers) {
-      firstPlayerAnswers = game.firstPlayerProgress.answers?.map(
+      const sortedFirstAnswers = game.firstPlayerProgress.answers
+        .slice()
+        .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+      firstPlayerAnswers = sortedFirstAnswers.map(
         (answer) =>
           new AnswerOutputModel(
             answer.questionId,
@@ -204,7 +208,10 @@ export class QuizGameQueryRepository {
         game.secondPlayerProgress.score,
       );
       if (game.secondPlayerProgress.answers) {
-        secondPlayerProgress.answers = game.secondPlayerProgress.answers?.map(
+        const sortedSecondAnswers = game.firstPlayerProgress.answers
+          .slice()
+          .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+        secondPlayerProgress.answers = sortedSecondAnswers.map(
           (answer) =>
             new AnswerOutputModel(
               answer.questionId,
@@ -216,9 +223,9 @@ export class QuizGameQueryRepository {
     }
     let questions: QuestionViewModel[] | null = null;
     if (game.questions && game.questions.length > 0) {
-      questions = game.questions.map(
-        (q) => new QuestionViewModel(q.question.id.toString(), q.question.body),
-      );
+      questions = game.questions
+        .sort((a, b) => a.index - b.index)
+        .map((q) => new QuestionViewModel(q.question.id.toString(), q.question.body));
     }
     return new GameOutputModel(
       game.id.toString(),

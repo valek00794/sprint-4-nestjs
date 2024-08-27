@@ -29,7 +29,7 @@ const options: TypeOrmModuleOptions = {
   username: 'postgres',
   password: 'sa',
   database: 'test',
-  logging: ['query'],
+  //logging: ['query'],
   autoLoadEntities: true,
   synchronize: true,
 };
