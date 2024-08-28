@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -9,13 +9,22 @@ import {
   PlayerOutputModel,
   PlayerProgressOutputModel,
   QuestionViewModel,
+  StatisticResultOutputModel,
 } from '../api/models/output/quiz.output.model';
-import { AnswerStatuses, GameStatuses } from '../domain/quiz.types';
+import { AnswerStatuses, GameResultStatuses, GameStatuses } from '../domain/quiz.types';
 import { Answer } from './entities/answer.entity';
+import { getSanitizationQuery, roundScore } from 'src/features/utils';
+import { SearchQueryParametersType } from 'src/features/domain/query.types';
+import { Paginator } from 'src/features/domain/result.types';
+import { PlayerProgress } from './entities/playerProgress.entity';
 
 @Injectable()
 export class QuizGameQueryRepository {
-  constructor(@InjectRepository(Game) protected gameRepository: Repository<Game>) {}
+  constructor(
+    @InjectRepository(Game) protected gameRepository: Repository<Game>,
+    @InjectRepository(PlayerProgress)
+    protected playerProgressRepository: Repository<PlayerProgress>,
+  ) {}
 
   async findCurrentUserGame(playerId: string): Promise<GameOutputModel | null> {
     const game = await this.gameRepository
@@ -40,6 +49,96 @@ export class QuizGameQueryRepository {
     return game ? this.mapGameToOutput(game) : null;
   }
 
+  async findUserGames(
+    playerId: string,
+    @Query() queryString?: SearchQueryParametersType,
+  ): Promise<Paginator<GameOutputModel[]>> {
+    const sanitizationQuery = getSanitizationQuery(queryString);
+    const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
+
+    const orderByField =
+      sanitizationQuery.sortBy && sanitizationQuery.sortBy !== 'createdAt'
+        ? `game.${sanitizationQuery.sortBy}`
+        : 'game.pairCreatedDate';
+    const orderDirection = sanitizationQuery.sortDirection
+      ? sanitizationQuery.sortDirection
+      : 'DESC';
+
+    const qb = this.gameRepository.createQueryBuilder('game');
+    const query = qb
+      .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
+      .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
+      .leftJoinAndSelect('firstPlayerProgress.answers', 'firstPlayerAnswers')
+      .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
+      .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
+      .leftJoinAndSelect('secondPlayerProgress.answers', 'secondPlayerAnswers')
+      .leftJoinAndSelect('game.questions', 'questions')
+      .leftJoinAndSelect('questions.question', 'question')
+      .where('(firstPlayer.id = :playerId OR secondPlayer.id = :playerId)', {
+        playerId,
+      })
+      .orderBy(orderByField, orderDirection)
+      .addOrderBy('game.pairCreatedDate', 'DESC')
+      // .addOrderBy('firstPlayerAnswers.addedAt', 'ASC')
+      // .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
+      // .addOrderBy('questions.index', 'ASC')
+      .skip(offset)
+      .take(sanitizationQuery.pageSize)
+      .getManyAndCount();
+
+    const [games, count] = await query;
+    const sortedGames = games.map((g) => ({
+      ...g,
+      firstPlayerProgress: {
+        ...g.firstPlayerProgress,
+        answers: g.firstPlayerProgress?.answers.sort(
+          (a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime(),
+        ),
+      },
+      secondPlayerProgress: g.secondPlayerProgress
+        ? {
+            ...g.secondPlayerProgress,
+            answers: g.secondPlayerProgress?.answers.sort(
+              (a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime(),
+            ),
+          }
+        : null,
+      questions: g.questions ? g.questions.sort((a, b) => a.index - b.index) : null,
+    }));
+    return new Paginator<GameOutputModel[]>(
+      sanitizationQuery.pageNumber,
+      sanitizationQuery.pageSize,
+      Number(count),
+      sortedGames.map((g) => this.mapGameToOutput(g)),
+    );
+  }
+
+  async getStatistic(playerId: string): Promise<StatisticResultOutputModel> {
+    const qb = this.playerProgressRepository.createQueryBuilder('gameProgress');
+    const query = qb
+      .where('gameProgress.player.id = :playerId ', {
+        playerId,
+      })
+      .getManyAndCount();
+
+    const [gameProgresies, count] = await query;
+
+    const sumScore = gameProgresies.reduce((sum, p) => (sum = sum + p.score), 0);
+    const avgScores = roundScore(sumScore / count);
+    const winsCount = gameProgresies.filter((gp) => gp.result === GameResultStatuses.Win).length;
+    const lossesCount = gameProgresies.filter((gp) => gp.result === GameResultStatuses.Lose).length;
+    const drawsCount = gameProgresies.filter((gp) => gp.result === GameResultStatuses.Draw).length;
+
+    return new StatisticResultOutputModel(
+      sumScore,
+      avgScores,
+      count,
+      winsCount,
+      lossesCount,
+      drawsCount,
+    );
+  }
+
   mapGameToOutput(game: Game): GameOutputModel {
     const firstPlayer = new PlayerOutputModel(
       game.firstPlayerProgress.player.id.toString(),
@@ -48,7 +147,10 @@ export class QuizGameQueryRepository {
     let firstPlayerAnswers: AnswerOutputModel[] | null = [];
     let secondPlayerProgress: PlayerProgressOutputModel | null = null;
     if (game.firstPlayerProgress.answers) {
-      firstPlayerAnswers = game.firstPlayerProgress.answers?.map(
+      // const sortedFirstAnswers = game.firstPlayerProgress.answers
+      //   .slice()
+      //   .sort((a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime());
+      firstPlayerAnswers = game.firstPlayerProgress.answers.map(
         (answer) =>
           new AnswerOutputModel(
             answer.questionId,
@@ -75,7 +177,10 @@ export class QuizGameQueryRepository {
         game.secondPlayerProgress.score,
       );
       if (game.secondPlayerProgress.answers) {
-        secondPlayerProgress.answers = game.secondPlayerProgress.answers?.map(
+        // const sortedSecondAnswers = game.secondPlayerProgress.answers
+        //   .slice()
+        //   .sort((a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime());
+        secondPlayerProgress.answers = game.secondPlayerProgress.answers.map(
           (answer) =>
             new AnswerOutputModel(
               answer.questionId,
