@@ -77,72 +77,41 @@ export class QuizGameQueryRepository {
       .where('(firstPlayer.id = :playerId OR secondPlayer.id = :playerId)', {
         playerId,
       })
-      // .orderBy('firstPlayerAnswers.addedAt', 'ASC')
-      // .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
-      // .addOrderBy('questions.index', 'ASC')
       .orderBy(orderByField, orderDirection)
       .addOrderBy('game.pairCreatedDate', 'DESC')
-      //.addOrderBy('questions.index', 'ASC')
+      // .addOrderBy('firstPlayerAnswers.addedAt', 'ASC')
+      // .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
+      // .addOrderBy('questions.index', 'ASC')
       .skip(offset)
       .take(sanitizationQuery.pageSize)
       .getManyAndCount();
 
     const [games, count] = await query;
-    console.log(games);
+    const sortedGames = games.map((g) => ({
+      ...g,
+      firstPlayerProgress: {
+        ...g.firstPlayerProgress,
+        answers: g.firstPlayerProgress?.answers.sort(
+          (a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime(),
+        ),
+      },
+      secondPlayerProgress: g.secondPlayerProgress
+        ? {
+            ...g.secondPlayerProgress,
+            answers: g.secondPlayerProgress?.answers.sort(
+              (a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime(),
+            ),
+          }
+        : null,
+      questions: g.questions ? g.questions.sort((a, b) => a.index - b.index) : null,
+    }));
     return new Paginator<GameOutputModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
       Number(count),
-      games.map((g) => this.mapGameToOutput(g)),
+      sortedGames.map((g) => this.mapGameToOutput(g)),
     );
   }
-
-  // async findUserGames(
-  //   playerId: string,
-  //   @Query() queryString?: SearchQueryParametersType,
-  // ): Promise<Paginator<GameOutputModel[]>> {
-  //   const sanitizationQuery = getSanitizationQuery(queryString);
-  //   const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
-
-  //   const orderByField =
-  //     sanitizationQuery.sortBy && sanitizationQuery.sortBy !== 'createdAt'
-  //       ? `game.${sanitizationQuery.sortBy}`
-  //       : 'game.pairCreatedDate';
-  //   const orderDirection = sanitizationQuery.sortDirection
-  //     ? sanitizationQuery.sortDirection
-  //     : 'DESC';
-
-  //   const qb = this.gameRepository.createQueryBuilder('game');
-  //   const query = qb
-  //     .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
-  //     .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
-  //     .leftJoinAndSelect('firstPlayerProgress.answers', 'firstPlayerAnswers')
-  //     .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
-  //     .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
-  //     .leftJoinAndSelect('secondPlayerProgress.answers', 'secondPlayerAnswers')
-  //     .leftJoinAndSelect('game.questions', 'questions')
-  //     .leftJoinAndSelect('questions.question', 'question')
-  //     .where('(firstPlayer.id = :playerId OR secondPlayer.id = :playerId)', {
-  //       playerId,
-  //     })
-  //     // .orderBy('firstPlayerAnswers.addedAt', 'ASC')
-  //     // .addOrderBy('secondPlayerAnswers.addedAt', 'ASC')
-  //     // .addOrderBy('questions.index', 'ASC')
-  //     .orderBy(orderByField, orderDirection)
-  //     .addOrderBy('game.pairCreatedDate', 'DESC')
-  //     .skip(offset)
-  //     .take(sanitizationQuery.pageSize)
-  //     .getManyAndCount();
-
-  //   const [games, count] = await query;
-  //   console.log(games);
-  //   return new Paginator<GameOutputModel[]>(
-  //     sanitizationQuery.pageNumber,
-  //     sanitizationQuery.pageSize,
-  //     Number(count),
-  //     games.map((g) => this.mapGameToOutput(g)),
-  //   );
-  // }
 
   async getStatistic(playerId: string): Promise<StatisticResultOutputModel> {
     const qb = this.playerProgressRepository.createQueryBuilder('gameProgress');
@@ -178,10 +147,10 @@ export class QuizGameQueryRepository {
     let firstPlayerAnswers: AnswerOutputModel[] | null = [];
     let secondPlayerProgress: PlayerProgressOutputModel | null = null;
     if (game.firstPlayerProgress.answers) {
-      const sortedFirstAnswers = game.firstPlayerProgress.answers
-        .slice()
-        .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
-      firstPlayerAnswers = sortedFirstAnswers.map(
+      // const sortedFirstAnswers = game.firstPlayerProgress.answers
+      //   .slice()
+      //   .sort((a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime());
+      firstPlayerAnswers = game.firstPlayerProgress.answers.map(
         (answer) =>
           new AnswerOutputModel(
             answer.questionId,
@@ -208,10 +177,10 @@ export class QuizGameQueryRepository {
         game.secondPlayerProgress.score,
       );
       if (game.secondPlayerProgress.answers) {
-        const sortedSecondAnswers = game.firstPlayerProgress.answers
-          .slice()
-          .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
-        secondPlayerProgress.answers = sortedSecondAnswers.map(
+        // const sortedSecondAnswers = game.secondPlayerProgress.answers
+        //   .slice()
+        //   .sort((a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime());
+        secondPlayerProgress.answers = game.secondPlayerProgress.answers.map(
           (answer) =>
             new AnswerOutputModel(
               answer.questionId,
@@ -223,9 +192,9 @@ export class QuizGameQueryRepository {
     }
     let questions: QuestionViewModel[] | null = null;
     if (game.questions && game.questions.length > 0) {
-      questions = game.questions
-        .sort((a, b) => a.index - b.index)
-        .map((q) => new QuestionViewModel(q.question.id.toString(), q.question.body));
+      questions = game.questions.map(
+        (q) => new QuestionViewModel(q.question.id.toString(), q.question.body),
+      );
     }
     return new GameOutputModel(
       game.id.toString(),
