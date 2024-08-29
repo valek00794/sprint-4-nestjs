@@ -22,6 +22,7 @@ import { QuizGameService } from '../../app/quizGame.service';
 import { AnswerQuestionGameCommand } from '../../app/useCases/answerQuestion.useCase';
 import { AnswerInputModel } from '../models/input/quiz.input.model';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
+import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 
 @UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.quizGame)
@@ -42,6 +43,13 @@ export class QuizPublicController {
   async getMyStatistic(@Req() req: Request) {
     const statistic = await this.quizGameQueryRepository.getStatistic(req.user!.userId);
     return statistic;
+  }
+
+  @Public()
+  @Get('/users/top')
+  async getTopUsers(@Query() query?: SearchQueryParametersType) {
+    const top = await this.quizGameQueryRepository.getTop(query);
+    return top;
   }
 
   @Get('/pairs/my-current')

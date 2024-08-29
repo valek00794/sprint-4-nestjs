@@ -11,6 +11,7 @@ const defaultSearchQueryParameters = {
   searchNameTerm: null,
   bodySearchTerm: null,
   publishedStatus: 'all',
+  sort: ['avgScores desc', 'sumScore desc'],
 };
 
 export const getSanitizationQuery = (
@@ -47,6 +48,11 @@ export const getSanitizationQuery = (
     bodySearchTerm: query?.bodySearchTerm
       ? query.bodySearchTerm
       : defaultSearchQueryParameters.bodySearchTerm,
+    sort: query?.sort
+      ? Array.isArray(query.sort)
+        ? query.sort
+        : [query.sort]
+      : defaultSearchQueryParameters.sort,
   };
 };
 

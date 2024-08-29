@@ -60,5 +60,6 @@ export class StatisticResultOutputModel {
     public winsCount: number,
     public lossesCount: number,
     public drawsCount: number,
+    public player?: PlayerOutputModel,
   ) {}
 }
