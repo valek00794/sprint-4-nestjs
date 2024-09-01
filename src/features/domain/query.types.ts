@@ -11,4 +11,5 @@ export type SearchQueryParametersType = {
   searchEmailTerm?: string | null;
   bodySearchTerm?: string | null;
   publishedStatus?: string;
+  sort?: string[];
 };
