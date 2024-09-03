@@ -82,4 +82,20 @@ export class QuizGameRepository {
       .getOne();
     return game;
   }
+
+  async findActiveGames() {
+    const qb = this.gameRepository.createQueryBuilder('game');
+    const query = qb
+      .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
+      .leftJoinAndSelect('firstPlayerProgress.player', 'firstPlayer')
+      .leftJoinAndSelect('firstPlayerProgress.answers', 'firstPlayerAnswers')
+      .leftJoinAndSelect('game.secondPlayerProgress', 'secondPlayerProgress')
+      .leftJoinAndSelect('secondPlayerProgress.player', 'secondPlayer')
+      .leftJoinAndSelect('secondPlayerProgress.answers', 'secondPlayerAnswers')
+      .where('game.status = :status', { status: GameStatuses.Active })
+      .getMany();
+
+    const games = await query;
+    return games;
+  }
 }
