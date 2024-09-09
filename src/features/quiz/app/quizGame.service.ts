@@ -35,7 +35,7 @@ export class QuizGameService {
     }
     return game;
   }
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async checkActiveGames() {
     const activeGames = await this.gameRepository.findActiveGames();
 

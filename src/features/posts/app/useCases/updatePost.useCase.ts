@@ -42,7 +42,6 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
       content: command.inputModel.content,
       createdAt: new Date(post!.createdAt).toISOString(),
       blogId: getBlogId,
-      //blogName: post.blog.name,
     };
     return await this.postsRepository.updatePost(updatedPost, postId);
   }

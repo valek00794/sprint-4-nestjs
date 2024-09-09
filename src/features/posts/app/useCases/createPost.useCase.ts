@@ -34,7 +34,6 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
       content: command.inputModel.content,
       createdAt: new Date().toISOString(),
       blogId: getBlogId,
-      //blogName: blog!.name,
     };
 
     return await this.postsRepository.createPost(newPosts);

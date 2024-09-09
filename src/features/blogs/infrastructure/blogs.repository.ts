@@ -12,11 +12,17 @@ export class BlogsRepository {
   async createBlog(newBlog: BlogType) {
     return await this.blogsRepository.save(newBlog);
   }
+
   async findBlogById(id: number): Promise<Blog | null> {
-    return await this.blogsRepository.findOne({
-      where: [{ id: id }],
-    });
+    const blog = await this.blogsRepository
+      .createQueryBuilder('blog')
+      .leftJoinAndSelect('blog.blogOwnerInfo', 'blogOwnerInfo')
+      .where('blog.id = :id', { id })
+      .getOne();
+
+    return blog;
   }
+
   async updateBlog(updatedBlog: BlogType, id: number): Promise<Blog | null> {
     const blog = await this.blogsRepository.findOne({
       where: { id },
@@ -34,8 +40,13 @@ export class BlogsRepository {
       return null;
     }
   }
+
   async deleteBlog(id: number): Promise<boolean> {
     const result = await this.blogsRepository.delete({ id });
     return result.affected === 1 ? true : false;
+  }
+
+  async bindBlog(blog: Blog) {
+    return await this.blogsRepository.save(blog);
   }
 }

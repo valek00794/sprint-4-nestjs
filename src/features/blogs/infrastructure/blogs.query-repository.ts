@@ -5,7 +5,7 @@ import { ILike, Repository } from 'typeorm';
 import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
-import { BlogViewModel } from '../api/models/output/blogs.output.model';
+import { BlogOwnerInfo, BlogViewModel } from '../api/models/output/blogs.output.model';
 import { Blog } from './blogs.entity';
 
 @Injectable()
@@ -22,6 +22,7 @@ export class BlogsQueryRepository {
     }
     const qb = this.blogsRepository.createQueryBuilder('blog');
     const query = qb
+      .leftJoinAndSelect('blog.blogOwnerInfo', 'blogOwnerInfo')
       .select([
         'blog.id',
         'blog.name',
@@ -29,6 +30,8 @@ export class BlogsQueryRepository {
         'blog.websiteUrl',
         'blog.createdAt',
         'blog.isMembership',
+        'blogOwnerInfo.id',
+        'blogOwnerInfo.login',
       ])
       .orderBy(`blog.${sanitizationQuery.sortBy}`, sanitizationQuery.sortDirection)
       .where(
@@ -62,6 +65,9 @@ export class BlogsQueryRepository {
       blog.websiteUrl,
       blog.createdAt,
       blog.isMembership,
+      blog.blogOwnerInfo
+        ? new BlogOwnerInfo(blog.blogOwnerInfo.id.toString(), blog.blogOwnerInfo.login)
+        : null,
     );
   }
 }
