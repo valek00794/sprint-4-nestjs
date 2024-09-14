@@ -12,6 +12,6 @@ export class BlogViewModel {
     public websiteUrl: string,
     public createdAt: string,
     public isMembership: boolean,
-    public blogOwnerInfo: BlogOwnerInfo | null,
+    public blogOwnerInfo?: BlogOwnerInfo | null,
   ) {}
 }

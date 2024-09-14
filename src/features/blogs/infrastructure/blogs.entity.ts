@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Post } from 'src/features/posts/infrastructure/posts.entity';
 import { User } from 'src/features/users/infrastructure/users/users.entity';
@@ -26,7 +26,7 @@ export class Blog {
   @OneToMany(() => Post, (post) => post.blog)
   posts: Post[];
 
-  @OneToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn()
   blogOwnerInfo: User | null;
 }

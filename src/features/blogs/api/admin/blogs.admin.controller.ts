@@ -34,7 +34,7 @@ export class BlogsAdminController {
 
   @Get()
   async getBlogs(@Query() query?: SearchQueryParametersType) {
-    return await this.blogsQueryRepository.getBlogs(query);
+    return await this.blogsQueryRepository.getBlogs(query, true);
   }
 
   @Put(':id/bind-with-user/:userId')

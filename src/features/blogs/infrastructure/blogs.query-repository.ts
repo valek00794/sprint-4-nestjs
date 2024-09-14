@@ -12,7 +12,11 @@ import { Blog } from './blogs.entity';
 export class BlogsQueryRepository {
   constructor(@InjectRepository(Blog) protected blogsRepository: Repository<Blog>) {}
 
-  async getBlogs(queryString?: SearchQueryParametersType) {
+  async getBlogs(
+    queryString?: SearchQueryParametersType,
+    witnBloggerInfo?: boolean,
+    ownerId?: number,
+  ): Promise<Paginator<BlogViewModel[]>> {
     const sanitizationQuery = getSanitizationQuery(queryString);
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
     const where: any = {};
@@ -34,19 +38,28 @@ export class BlogsQueryRepository {
         'blogOwnerInfo.login',
       ])
       .orderBy(`blog.${sanitizationQuery.sortBy}`, sanitizationQuery.sortDirection)
-      .where(
-        `${sanitizationQuery.searchNameTerm ? `"blog"."name" ILIKE '%${sanitizationQuery.searchNameTerm}%'` : ''}`,
-      )
       .offset(offset)
-      .limit(sanitizationQuery.pageSize)
-      .getManyAndCount();
-    const [blogs, count] = await query;
+      .limit(sanitizationQuery.pageSize);
+
+    if (ownerId) {
+      qb.where('blogOwnerInfo.id = :ownerId', { ownerId });
+    }
+
+    if (sanitizationQuery.searchNameTerm) {
+      qb.andWhere('blog.name ILIKE :searchTerm', {
+        searchTerm: `%${sanitizationQuery.searchNameTerm}%`,
+      });
+    }
+
+    const [blogs, count] = await query.getManyAndCount();
 
     return new Paginator<BlogViewModel[]>(
       sanitizationQuery.pageNumber,
       sanitizationQuery.pageSize,
       Number(count),
-      blogs.map((blog) => this.mapToOutput(blog)),
+      witnBloggerInfo
+        ? blogs.map((blog) => this.mapToBloggerOutput(blog))
+        : blogs.map((blog) => this.mapToOutput(blog)),
     );
   }
 
@@ -58,6 +71,17 @@ export class BlogsQueryRepository {
   }
 
   mapToOutput(blog: Blog): BlogViewModel {
+    return new BlogViewModel(
+      blog.id!.toString(),
+      blog.name,
+      blog.description,
+      blog.websiteUrl,
+      blog.createdAt,
+      blog.isMembership,
+    );
+  }
+
+  mapToBloggerOutput(blog: Blog): BlogViewModel {
     return new BlogViewModel(
       blog.id!.toString(),
       blog.name,

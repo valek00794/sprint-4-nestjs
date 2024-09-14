@@ -35,6 +35,9 @@ import { UsersRepository } from '../users/infrastructure/users/users.repository'
 import { User } from '../users/infrastructure/users/users.entity';
 import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEmailConfirmationInfo.entity';
 import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
+import { BlogsBloggerController } from './api/blogger/blogs.blogger.controller';
+import { DeleteBlogUseCase } from './app/useCases/deleteBlog.useCase';
+import { GetBlogsUseCase } from './app/useCases/getBlogs.useCase';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -42,7 +45,13 @@ const usersProviders = [UsersRepository];
 const commentsProviders = [CommentsRepository, CommentsQueryRepository];
 const likesProviders = [LikesRepository, LikesQueryRepository];
 
-const blogsUseCases = [CreateBlogUseCase, UpdateBlogUseCase, BindBlogUseCase];
+const blogsUseCases = [
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  BindBlogUseCase,
+  DeleteBlogUseCase,
+  GetBlogsUseCase,
+];
 const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
 const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteCommentUseCase];
 const likesUseCases = [ChangeLikeStatusUseCase];
@@ -62,7 +71,13 @@ const likesUseCases = [ChangeLikeStatusUseCase];
       UsersRecoveryPasssword,
     ]),
   ],
-  controllers: [BlogsPublicController, BlogsAdminController, PostsController, CommentsController],
+  controllers: [
+    BlogsPublicController,
+    BlogsAdminController,
+    BlogsBloggerController,
+    PostsController,
+    CommentsController,
+  ],
   providers: [
     ...blogsProviders,
     ...postsProviders,

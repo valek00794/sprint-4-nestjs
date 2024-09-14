@@ -104,7 +104,11 @@ export class PostsController {
     @Req() req: Request,
     @Query() query: SearchQueryParametersType,
   ) {
-    const post = await this.postsQueryRepository.findPostById(Number(postId));
+    const numberPostId = Number(postId);
+    if (isNaN(numberPostId)) {
+      throw new NotFoundException('Post not found');
+    }
+    const post = await this.postsQueryRepository.findPostById(numberPostId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }

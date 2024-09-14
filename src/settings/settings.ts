@@ -7,6 +7,7 @@ export const SETTINGS = {
     videos: '/videos',
     posts: '/posts',
     blogs: '/blogs',
+    blogsBlogger: '/blogger/blogs',
     blogsSa: '/sa/blogs',
     users: '/users',
     usersSa: '/sa/users',
