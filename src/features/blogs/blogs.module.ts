@@ -38,6 +38,7 @@ import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecov
 import { BlogsBloggerController } from './api/blogger/blogs.blogger.controller';
 import { DeleteBlogUseCase } from './app/useCases/deleteBlog.useCase';
 import { GetBlogsUseCase } from './app/useCases/getBlogs.useCase';
+import { DeletePostUseCase } from '../posts/app/useCases/deletePost.useCase';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -52,7 +53,7 @@ const blogsUseCases = [
   DeleteBlogUseCase,
   GetBlogsUseCase,
 ];
-const postsUseCases = [CreatePostUseCase, UpdatePostUseCase];
+const postsUseCases = [CreatePostUseCase, UpdatePostUseCase, DeletePostUseCase];
 const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteCommentUseCase];
 const likesUseCases = [ChangeLikeStatusUseCase];
 

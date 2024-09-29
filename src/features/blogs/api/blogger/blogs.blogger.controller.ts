@@ -19,7 +19,6 @@ import { CommandBus } from '@nestjs/cqrs';
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query-repository';
-import { PostsService } from 'src/features/posts/app/posts.service';
 import { CreatePostCommand } from 'src/features/posts/app/useCases/createPost.useCase';
 import { BlogsService } from '../../app/blogs.service';
 import { BlogsQueryRepository } from '../../infrastructure/blogs.query-repository';
@@ -30,13 +29,13 @@ import { UpdatePostCommand } from 'src/features/posts/app/useCases/updatePost.us
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { DeleteBlogCommand } from '../../app/useCases/deleteBlog.useCase';
 import { GetBlogsCommand } from '../../app/useCases/getBlogs.useCase';
+import { DeletePostCommand } from 'src/features/posts/app/useCases/deletePost.useCase';
 
 @UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.blogsBlogger)
 export class BlogsBloggerController {
   constructor(
     protected blogsService: BlogsService,
-    protected postsService: PostsService,
     protected blogsQueryRepository: BlogsQueryRepository,
     protected postsQueryRepository: PostsQueryRepository,
     private commandBus: CommandBus,
@@ -94,8 +93,11 @@ export class BlogsBloggerController {
   async createPostForBlog(
     @Body() inputModel: CreatePostForBlogModel,
     @Param('blogId') blogId: string,
+    @Req() req: Request,
   ) {
-    const createdPost = await this.commandBus.execute(new CreatePostCommand(inputModel, blogId));
+    const createdPost = await this.commandBus.execute(
+      new CreatePostCommand(inputModel, blogId, req.user?.userId),
+    );
     return this.postsQueryRepository.mapToOutput(createdPost);
   }
 
@@ -105,20 +107,20 @@ export class BlogsBloggerController {
     @Body() inputModel: CreatePostForBlogModel,
     @Param('blogId') blogId: number,
     @Param('postId') postId: string,
+    @Req() req: Request,
   ) {
-    await this.commandBus.execute(new UpdatePostCommand(inputModel, postId, blogId));
+    await this.commandBus.execute(
+      new UpdatePostCommand(inputModel, postId, blogId, req.user?.userId),
+    );
   }
 
   @Delete(':blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePost(@Param('blogId') blogId: number, @Param('postId') postId: string) {
-    const blog = await this.blogsQueryRepository.findBlogById(blogId);
-    if (!blog) {
-      throw new NotFoundException('Blog not found');
-    }
-    const deleteResult = await this.postsService.deletePost(postId);
-    if (!deleteResult) {
-      throw new NotFoundException('Post not found');
-    }
+  async deletePost(
+    @Param('blogId') blogId: number,
+    @Param('postId') postId: string,
+    @Req() req: Request,
+  ) {
+    await this.commandBus.execute(new DeletePostCommand(postId, blogId, req.user?.userId));
   }
 }

@@ -1,30 +1,26 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { CreatePostModel } from '../../api/models/input/posts.input.model';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 
-export class UpdatePostCommand {
+export class DeletePostCommand {
   constructor(
-    public inputModel: CreatePostModel,
     public postId: string,
     public blogId?: number,
     public userId?: string,
   ) {}
 }
 
-@CommandHandler(UpdatePostCommand)
-export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
+@CommandHandler(DeletePostCommand)
+export class DeletePostUseCase implements ICommandHandler<DeletePostCommand> {
   constructor(
     protected postsRepository: PostsRepository,
     protected blogsRepository: BlogsRepository,
   ) {}
 
-  async execute(command: UpdatePostCommand) {
-    const getBlogId = command.inputModel.blogId
-      ? Number(command.inputModel.blogId)
-      : command.blogId!;
+  async execute(command: DeletePostCommand) {
+    const getBlogId = command.blogId!;
     const postId = Number(command.postId);
     const userId = Number(command.userId);
     if (isNaN(getBlogId) || isNaN(postId) || isNaN(userId)) {
@@ -39,15 +35,8 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
       throw new NotFoundException('Blog not found');
     }
     if (userId !== blog.blogOwnerInfo!.id) {
-      throw new ForbiddenException('User try to update post that doesnt belong to current user');
+      throw new ForbiddenException('User try to delete post that doesnt belong to current user');
     }
-    const updatedPost = {
-      title: command.inputModel.title,
-      shortDescription: command.inputModel.shortDescription,
-      content: command.inputModel.content,
-      createdAt: new Date(post!.createdAt).toISOString(),
-      blogId: getBlogId,
-    };
-    return await this.postsRepository.updatePost(updatedPost, postId);
+    return await this.postsRepository.deletePost(postId);
   }
 }

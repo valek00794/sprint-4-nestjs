@@ -1,9 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 import { CreateBlogInputModel } from '../../api/models/input/blogs.input.model';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
-import { FieldError } from 'src/infrastructure/exception.filter.types';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
 
 export class UpdateBlogCommand {
@@ -24,22 +23,17 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
   async execute(command: UpdateBlogCommand) {
     const blogId = Number(command.id);
     const userId = Number(command.userId);
-
-    if (isNaN(blogId)) {
-      throw new BadRequestException([new FieldError('BlogId is incorrect', 'id')]);
-    }
-
-    if (isNaN(userId)) {
-      throw new BadRequestException([new FieldError('UserId is incorrect', 'userId')]);
+    if (isNaN(blogId) || isNaN(userId)) {
+      throw new NotFoundException('BlogId or UserId syntax error');
     }
     const blog = await this.blogsRepository.findBlogById(blogId);
     if (!blog) {
-      throw new BadRequestException([new FieldError('BlogId is incorrect', 'id')]);
+      throw new NotFoundException('Blog not found');
     }
 
     const user = await this.usersRepository.findUserById(userId);
     if (!user) {
-      throw new BadRequestException([new FieldError('UserId is incorrect', 'userId')]);
+      throw new NotFoundException('User not found');
     }
 
     if (user.id !== blog.blogOwnerInfo?.id) {
