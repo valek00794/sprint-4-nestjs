@@ -1,3 +1,5 @@
+import { User } from 'src/features/users/infrastructure/users/users.entity';
+
 export class BlogType {
   constructor(
     public name: string,
@@ -5,5 +7,6 @@ export class BlogType {
     public websiteUrl: string,
     public createdAt: string,
     public isMembership: boolean,
+    public blogOwnerInfo: User,
   ) {}
 }
