@@ -23,7 +23,12 @@ export class SignInUseCase implements ICommandHandler<SignInCommand> {
       command.inputModel.password,
       user.passwordHash,
     );
-    if (!isAuth) throw new UnauthorizedException();
+    if (
+      !isAuth ||
+      (user.emailConfirmation && !user.emailConfirmation.isConfirmed) ||
+      (user.banInfo && user.banInfo.isBanned)
+    )
+      throw new UnauthorizedException();
     return await this.jwtAdapter.createJWTs(user.id.toString());
   }
 }

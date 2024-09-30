@@ -10,7 +10,7 @@ import {
   UsersRecoveryPassswordType,
 } from '../../domain/users.types';
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
-
+import { UsersBanStatuses } from './usersBanStatuses.entity';
 @Injectable()
 export class UsersRepository {
   constructor(
@@ -24,10 +24,12 @@ export class UsersRepository {
   async createUser(newUser: UserType, emailConfirmationInfo?: UserEmailConfirmationInfoType) {
     const user = await this.usersRepository.save(newUser);
     if (emailConfirmationInfo) {
-      await this.userEmailConfirmationInfoRepository.save({
+      const confirmationInfo = await this.userEmailConfirmationInfoRepository.save({
         ...emailConfirmationInfo,
         userId: user.id,
       });
+      user.emailConfirmation = confirmationInfo;
+      await this.usersRepository.save(user);
     }
     return user;
   }
@@ -117,6 +119,10 @@ export class UsersRepository {
   async findUserByLoginOrEmail(loginOrEmail: string) {
     return await this.usersRepository.findOne({
       where: [{ login: loginOrEmail }, { email: loginOrEmail }],
+      relations: {
+        emailConfirmation: true,
+        banInfo: true,
+      },
     });
   }
 
@@ -130,5 +136,15 @@ export class UsersRepository {
     return await this.usersRepository.findOne({
       where: { id },
     });
+  }
+  async updateBanInfo(userId: number, banInfo: UsersBanStatuses): Promise<boolean> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (user) {
+      user.banInfo = banInfo;
+      await this.usersRepository.save(user);
+      return true;
+    } else {
+      return false;
+    }
   }
 }

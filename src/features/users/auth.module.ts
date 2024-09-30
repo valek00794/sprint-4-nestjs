@@ -25,6 +25,7 @@ import { User } from './infrastructure/users/users.entity';
 import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
 import { UsersRecoveryPasssword } from './infrastructure/users/UsersRecoveryPasssword.entity ';
 import { UserEmailConfirmationInfo } from './infrastructure/users/usersEmailConfirmationInfo.entity';
+import { SignUpUserUseCase } from './app/useCases/users/signUpUser.useCase';
 
 const usersDevicesUseCases = [
   AddUserDeviceUseCase,
@@ -34,6 +35,7 @@ const usersDevicesUseCases = [
 
 const authUseCases = [
   SignInUseCase,
+  SignUpUserUseCase,
   ConfirmEmailUseCase,
   ResentConfirmEmailUseCase,
   CheckUserByRefreshTokenUseCase,
