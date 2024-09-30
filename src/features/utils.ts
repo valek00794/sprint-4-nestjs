@@ -1,4 +1,9 @@
-import { PublishedStatuses, SearchQueryParametersType, SortDirection } from './domain/query.types';
+import {
+  BannedStatuses,
+  PublishedStatuses,
+  SearchQueryParametersType,
+  SortDirection,
+} from './domain/query.types';
 
 const defaultSearchQueryParameters = {
   pageNumber: 1,
@@ -11,6 +16,7 @@ const defaultSearchQueryParameters = {
   searchNameTerm: null,
   bodySearchTerm: null,
   publishedStatus: 'all',
+  banStatus: 'all',
   sort: ['avgScores desc', 'sumScore desc'],
 };
 
@@ -45,6 +51,10 @@ export const getSanitizationQuery = (
       query?.publishedStatus && PublishedStatuses.includes(query.publishedStatus)
         ? query.publishedStatus
         : defaultSearchQueryParameters.publishedStatus,
+    banStatus:
+      query?.banStatus && BannedStatuses.includes(query.banStatus)
+        ? query.banStatus
+        : defaultSearchQueryParameters.banStatus,
     bodySearchTerm: query?.bodySearchTerm
       ? query.bodySearchTerm
       : defaultSearchQueryParameters.bodySearchTerm,

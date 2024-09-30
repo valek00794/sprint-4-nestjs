@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 import { Comment } from '../../../comments/infrastructure/comments.entity';
 import { Like } from 'src/features/likes/infrastructure/likes.entity';
+import { UsersBanInfo } from './usersBanStatuses.entity';
 
 @Entity()
 export class User {
@@ -21,7 +22,11 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: false })
   passwordHash: string;
 
-  @OneToOne(() => UserEmailConfirmationInfo, (ec) => ec.userId, { nullable: true, cascade: true })
+  @OneToOne(() => UserEmailConfirmationInfo, (ec) => ec.userId, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   emailConfirmation: UserEmailConfirmationInfo | null;
 
@@ -30,4 +35,12 @@ export class User {
 
   @OneToMany(() => Like, (like) => like.author)
   likes: Like[];
+
+  @OneToOne(() => UsersBanInfo, (ec) => ec.userId, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  banInfo: UsersBanInfo | null;
 }

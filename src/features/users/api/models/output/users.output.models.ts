@@ -4,5 +4,14 @@ export class UserViewModel {
     public login: string,
     public email: string,
     public createdAt: string,
+    public banInfo: BanInfo,
+  ) {}
+}
+
+export class BanInfo {
+  constructor(
+    public banDate: string | null,
+    public banReason: string | null,
+    public isBanned: boolean,
   ) {}
 }

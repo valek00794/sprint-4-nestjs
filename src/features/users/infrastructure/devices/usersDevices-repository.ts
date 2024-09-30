@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Not, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Not, Repository } from 'typeorm';
 
 import { UserDeviceInfoType, UsersDevicesType } from '../../domain/users.types';
 import { UsersDevices } from './usersDevices.entity';
@@ -9,7 +9,6 @@ import { UsersDevices } from './usersDevices.entity';
 export class UsersDevicesRepository {
   constructor(
     @InjectRepository(UsersDevices) protected usersDevicesRepository: Repository<UsersDevices>,
-    @InjectDataSource() protected dataSource: DataSource,
   ) {}
   async addUserDevice(device: UsersDevicesType): Promise<UsersDevices> {
     return await this.usersDevicesRepository.save(device);
@@ -37,7 +36,7 @@ export class UsersDevicesRepository {
     }
   }
 
-  async deleteUserDevices(userVerifyInfo: UserDeviceInfoType) {
+  async deleteUserDevicesExceptCurrent(userVerifyInfo: UserDeviceInfoType) {
     return await this.usersDevicesRepository.delete({
       userId: userVerifyInfo.userId,
       deviceId: Not(userVerifyInfo.deviceId),
@@ -56,7 +55,9 @@ export class UsersDevicesRepository {
     return await this.usersDevicesRepository.findOneBy({ deviceId });
   }
 
-  // async getAllActiveDevicesByUser(userId: number) {
-  //   return await this.usersDevicesRepository.findBy({ userId });
-  // }
+  async deleteAllUserDevices(userId: number) {
+    return await this.usersDevicesRepository.delete({
+      userId,
+    });
+  }
 }

@@ -15,6 +15,6 @@ export class UsersDevicesService {
     const userVerifyInfo = await this.commandBus.execute(
       new CheckUserByRefreshTokenCommand(refreshToken),
     );
-    return await this.usersDevicesRepository.deleteUserDevices(userVerifyInfo);
+    return await this.usersDevicesRepository.deleteUserDevicesExceptCurrent(userVerifyInfo);
   }
 }

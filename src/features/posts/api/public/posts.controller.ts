@@ -32,6 +32,7 @@ import { PostsQueryRepository } from '../../infrastructure/posts.query-repositor
 import { CreatePostCommand } from '../../app/useCases/createPost.useCase';
 import { UpdatePostCommand } from '../../app/useCases/updatePost.useCase';
 import { CreatePostModel } from '../models/input/posts.input.model';
+import { GetPostCommand } from '../../app/useCases/getPost.useCase';
 
 @Controller(SETTINGS.PATH.posts)
 export class PostsController {
@@ -57,11 +58,7 @@ export class PostsController {
   @Public()
   @Get(':id')
   async getPost(@Param('id') id: string, @Req() req: Request) {
-    const post = await this.postsQueryRepository.findPostById(Number(id), Number(req.user?.userId));
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
-    return post;
+    return await this.commandBus.execute(new GetPostCommand(id, req.user?.userId));
   }
 
   @Public()

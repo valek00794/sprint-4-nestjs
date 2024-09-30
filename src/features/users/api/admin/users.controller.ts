@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpCode,
   NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
@@ -20,7 +21,11 @@ import { Public } from 'src/infrastructure/decorators/transform/public.decorator
 import { CreateUserCommand } from '../../app/useCases/users/createUser.useCase';
 import { UsersService } from '../../app/users.service';
 import { UsersQueryRepository } from '../../infrastructure/users/users.query-repository';
-import { CreateUserInputModel } from '../models/input/users.input.models';
+import {
+  ChangeUserBanStatusInputModel,
+  CreateUserInputModel,
+} from '../models/input/users.input.models';
+import { ChangeUserBanStatusCommand } from '../../app/useCases/users/changeUserBanStatus.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)
@@ -50,5 +55,14 @@ export class UsersController {
     if (!deleteResult) {
       throw new NotFoundException('User not found');
     }
+  }
+
+  @Put(':id/ban')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async changeUserBanStatus(
+    @Param('id') id: string,
+    @Body() inputModel: ChangeUserBanStatusInputModel,
+  ) {
+    await this.commandBus.execute(new ChangeUserBanStatusCommand(id, inputModel));
   }
 }

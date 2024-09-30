@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, IsNull, Repository } from 'typeorm';
 
-import { UserViewModel } from '../../api/models/output/users.output.models';
+import { BanInfo, UserViewModel } from '../../api/models/output/users.output.models';
 import { Paginator } from 'src/features/domain/result.types';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
@@ -34,9 +34,18 @@ export class UsersQueryRepository {
     if (sanitizationQuery.searchEmailTerm) {
       where.email = ILike(`%${sanitizationQuery.searchEmailTerm}%`);
     }
+    if (sanitizationQuery.banStatus === 'banned') {
+      where.banInfo = { isBanned: true };
+    } else if (sanitizationQuery.banStatus === 'notBanned') {
+      where.banInfo = IsNull();
+    }
+
     const [users, count] = await this.usersRepository.findAndCount({
       select: ['id', 'login', 'email', 'createdAt'],
-      where: [{ login: where.login }, { email: where.email }],
+      relations: {
+        banInfo: true,
+      },
+      where: [{ login: where.login }, { email: where.email }, { banInfo: where.banInfo }],
       order: {
         [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection,
       },
@@ -53,6 +62,9 @@ export class UsersQueryRepository {
   }
 
   mapToOutput(user: User): UserViewModel {
-    return new UserViewModel(user.id!.toString(), user.login, user.email, user.createdAt);
+    const banInfo = user.banInfo
+      ? new BanInfo(user.banInfo.banDate, user.banInfo.banReason, user.banInfo.isBanned)
+      : new BanInfo(null, null, false);
+    return new UserViewModel(user.id!.toString(), user.login, user.email, user.createdAt, banInfo);
   }
 }

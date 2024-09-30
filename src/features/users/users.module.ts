@@ -6,28 +6,37 @@ import { UsersController } from './api/admin/users.controller';
 import { UsersRepository } from './infrastructure/users/users.repository';
 import { UsersService } from './app/users.service';
 import { UsersQueryRepository } from './infrastructure/users/users.query-repository';
-import { SignUpUserUseCase } from './app/useCases/users/signUpUser.useCase';
-import { PasswordRecoveryUseCase } from './app/useCases/users/passwordRecovery.useCase';
 import { CreateUserUseCase } from './app/useCases/users/createUser.useCase';
-import { ConfirmPasswordRecoveryUseCase } from './app/useCases/users/confirmPasswordRecovery.useCase';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { User } from './infrastructure/users/users.entity';
 import { UserEmailConfirmationInfo } from './infrastructure/users/usersEmailConfirmationInfo.entity';
 import { UsersRecoveryPasssword } from './infrastructure/users/UsersRecoveryPasssword.entity ';
+import { ChangeUserBanStatusUseCase } from './app/useCases/users/changeUserBanStatus.useCase';
+import { UsersDevicesRepository } from './infrastructure/devices/usersDevices-repository';
+import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
+import { UsersBanInfo } from './infrastructure/users/usersBanStatuses.entity';
+import { UsersBanInfoRepository } from './infrastructure/users/usersBanInfo.repository';
 
-const usersUseCases = [
-  SignUpUserUseCase,
-  PasswordRecoveryUseCase,
-  CreateUserUseCase,
-  ConfirmPasswordRecoveryUseCase,
+const usersUseCases = [CreateUserUseCase, ChangeUserBanStatusUseCase];
+
+const usersProviders = [
+  UsersService,
+  UsersRepository,
+  UsersQueryRepository,
+  UsersDevicesRepository,
+  UsersBanInfoRepository,
 ];
-
-const usersProviders = [UsersService, UsersRepository, UsersQueryRepository];
 
 @Module({
   imports: [
     CqrsModule,
-    TypeOrmModule.forFeature([User, UserEmailConfirmationInfo, UsersRecoveryPasssword]),
+    TypeOrmModule.forFeature([
+      User,
+      UserEmailConfirmationInfo,
+      UsersRecoveryPasssword,
+      UsersDevices,
+      UsersBanInfo,
+    ]),
   ],
   controllers: [UsersController],
   providers: [JwtAdapter, ...usersProviders, ...usersUseCases],

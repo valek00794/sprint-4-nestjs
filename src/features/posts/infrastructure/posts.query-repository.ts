@@ -75,19 +75,20 @@ export class PostsQueryRepository {
     );
   }
 
-  async findPostById(id: number, userId?: number): Promise<PostViewModel | null> {
+  async findPostById(id: number): Promise<Post | null> {
     const post = await this.postsRepository.findOne({
       where: [{ id }],
-      relations: ['blog', 'likes.author'],
+      relations: {
+        blog: true,
+        likes: {
+          author: { banInfo: true },
+        },
+      },
     });
-    if (post) {
-      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
-        post.likes,
-        Number(userId),
-      );
-      return this.mapToOutput(post, mapedlikesInfo);
+    if (!post) {
+      return null;
     }
-    return null;
+    return post;
   }
 
   mapToOutput(post: Post, extendedLikesInfo?: ExtendedLikesInfo): PostViewModel {
