@@ -24,6 +24,7 @@ import { DeleteCommentCommand } from '../../app/useCases/deleteComment.useCase';
 import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeLikeStatus.useCase';
 import { LikeStatusInputModel } from 'src/features/likes/api/models/likes.input.model';
 import { LikesParrentNames } from 'src/features/likes/domain/likes.types';
+import { GetCommentCommand } from '../../app/useCases/getComment.useCase';
 
 @Controller(SETTINGS.PATH.comments)
 export class CommentsController {
@@ -34,17 +35,7 @@ export class CommentsController {
   @Public()
   @Get(':id')
   async getComment(@Param('id') id: string, @Req() req: Request) {
-    const commentId = Number(id);
-    if (isNaN(commentId)) {
-      throw new NotFoundException('Comment not found');
-    }
-    const comment = await this.commentsQueryRepository.findCommentById(
-      commentId,
-      Number(req.user?.userId),
-    );
-    if (!comment) {
-      throw new NotFoundException('Comment not found');
-    }
+    return await this.commandBus.execute(new GetCommentCommand(id, req.user?.userId));
   }
 
   @UseGuards(AuthBearerGuard)

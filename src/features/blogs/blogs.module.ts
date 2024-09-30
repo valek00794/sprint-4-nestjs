@@ -39,6 +39,8 @@ import { BlogsBloggerController } from './api/blogger/blogs.blogger.controller';
 import { DeleteBlogUseCase } from './app/useCases/deleteBlog.useCase';
 import { GetBlogsUseCase } from './app/useCases/getBlogs.useCase';
 import { DeletePostUseCase } from '../posts/app/useCases/deletePost.useCase';
+import { GetCommentUseCase } from '../comments/app/useCases/getComment.useCase';
+import { GetPostUseCase } from '../posts/app/useCases/getPost.useCase';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -53,8 +55,13 @@ const blogsUseCases = [
   DeleteBlogUseCase,
   GetBlogsUseCase,
 ];
-const postsUseCases = [CreatePostUseCase, UpdatePostUseCase, DeletePostUseCase];
-const commentsUseCases = [CreateCommentUseCase, UpdateCommentUseCase, DeleteCommentUseCase];
+const postsUseCases = [CreatePostUseCase, UpdatePostUseCase, DeletePostUseCase, GetPostUseCase];
+const commentsUseCases = [
+  CreateCommentUseCase,
+  UpdateCommentUseCase,
+  DeleteCommentUseCase,
+  GetCommentUseCase,
+];
 const likesUseCases = [ChangeLikeStatusUseCase];
 
 @Module({

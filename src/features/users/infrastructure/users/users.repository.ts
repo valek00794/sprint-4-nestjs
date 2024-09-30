@@ -10,7 +10,7 @@ import {
   UsersRecoveryPassswordType,
 } from '../../domain/users.types';
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
-import { UsersBanStatuses } from './usersBanStatuses.entity';
+import { UsersBanInfo } from './usersBanStatuses.entity';
 @Injectable()
 export class UsersRepository {
   constructor(
@@ -137,7 +137,7 @@ export class UsersRepository {
       where: { id },
     });
   }
-  async updateBanInfo(userId: number, banInfo: UsersBanStatuses): Promise<boolean> {
+  async updateBanInfo(userId: number, banInfo: UsersBanInfo): Promise<boolean> {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (user) {
       user.banInfo = banInfo;

@@ -48,16 +48,22 @@ export class CommentsQueryRepository {
       commentsItems,
     );
   }
-  async findCommentById(id: number, userId?: number): Promise<CommentOutputModel | null> {
+  async findCommentById(id: number): Promise<Comment | null> {
     const comment = await this.commentsRepository.findOne({
       where: [{ id: id }],
-      relations: ['commenator', 'likes.author'],
+      relations: {
+        commenator: {
+          banInfo: true,
+        },
+        likes: {
+          author: { banInfo: true },
+        },
+      },
     });
     if (!comment) {
       return null;
     }
-    const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(comment.likes, userId);
-    return this.mapToOutput(comment, mapedlikesInfo);
+    return comment;
   }
 
   mapToOutput(comment: Comment, likesInfo?: LikesInfoView): CommentOutputModel {

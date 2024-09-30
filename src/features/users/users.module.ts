@@ -14,7 +14,7 @@ import { UsersRecoveryPasssword } from './infrastructure/users/UsersRecoveryPass
 import { ChangeUserBanStatusUseCase } from './app/useCases/users/changeUserBanStatus.useCase';
 import { UsersDevicesRepository } from './infrastructure/devices/usersDevices-repository';
 import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
-import { UsersBanStatuses } from './infrastructure/users/usersBanStatuses.entity';
+import { UsersBanInfo } from './infrastructure/users/usersBanStatuses.entity';
 import { UsersBanInfoRepository } from './infrastructure/users/usersBanInfo.repository';
 
 const usersUseCases = [CreateUserUseCase, ChangeUserBanStatusUseCase];
@@ -35,7 +35,7 @@ const usersProviders = [
       UserEmailConfirmationInfo,
       UsersRecoveryPasssword,
       UsersDevices,
-      UsersBanStatuses,
+      UsersBanInfo,
     ]),
   ],
   controllers: [UsersController],

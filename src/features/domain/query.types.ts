@@ -1,5 +1,6 @@
 export type SortDirection = 'ASC' | 'DESC';
 export const PublishedStatuses = ['all', 'published', 'notPublished'];
+export const BannedStatuses = ['all', 'banned', 'notBanned'];
 
 export type SearchQueryParametersType = {
   pageNumber: number;
@@ -11,5 +12,6 @@ export type SearchQueryParametersType = {
   searchEmailTerm?: string | null;
   bodySearchTerm?: string | null;
   publishedStatus?: string;
+  banStatus?: string;
   sort?: string[];
 };

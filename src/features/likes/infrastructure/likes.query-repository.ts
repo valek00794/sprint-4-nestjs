@@ -8,10 +8,11 @@ import { CommentsLike } from './commentsLikes.entity';
 export class LikesQueryRepository {
   constructor() {}
   mapLikesInfo(likesInfo: PostsLike[] | CommentsLike[], userId?: number): LikesInfoView {
+    const likesInfoWuthoutBanned = likesInfo.filter((like) => !like.author.banInfo);
     const likesInfoView = new LikesInfoView(
-      likesInfo.filter((like) => like.status === LikeStatus.Like).length,
-      likesInfo.filter((like) => like.status === LikeStatus.Dislike).length,
-      likesInfo.find((like) => like.authorId === userId)?.status || LikeStatus.None,
+      likesInfoWuthoutBanned.filter((like) => like.status === LikeStatus.Like).length,
+      likesInfoWuthoutBanned.filter((like) => like.status === LikeStatus.Dislike).length,
+      likesInfoWuthoutBanned.find((like) => like.authorId === userId)?.status || LikeStatus.None,
     );
     return likesInfoView;
   }
@@ -19,6 +20,7 @@ export class LikesQueryRepository {
   mapExtendedLikesInfo(likesInfo: PostsLike[], userId?: number): ExtendedLikesInfo {
     const lastLikesCount = 3;
     const newestLikes = likesInfo
+      .filter((like) => !like.author.banInfo)
       .filter((like) => like.status === LikeStatus.Like)
       .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
       .slice(0, lastLikesCount);

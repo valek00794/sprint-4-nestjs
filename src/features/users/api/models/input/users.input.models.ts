@@ -13,8 +13,8 @@ export const VALIDATE_PHARAMS = {
     pattern: new RegExp(/^[a-zA-Z0-9_-]*$/),
   },
   banReason: {
-    minLength: 0,
-    maxLength: 100,
+    minLength: 20,
+    maxLength: 255,
   },
 };
 

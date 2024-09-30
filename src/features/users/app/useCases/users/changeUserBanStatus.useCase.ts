@@ -26,13 +26,14 @@ export class ChangeUserBanStatusUseCase implements ICommandHandler<ChangeUserBan
     if (isNaN(userId)) {
       throw new BadRequestException([new FieldError('Id syntax error', 'id')]);
     }
-    const user = await this.usersRepository.findUserById(userId);
-    if (user) {
+    if (!command.inputModel.isBanned) {
+      await this.usersBanStatusesRepository.unBanUser(userId);
+    } else {
       await this.usersDevicesRepository.deleteAllUserDevices(userId);
-      const banInfo = await this.usersBanStatusesRepository.changeUserBanStatus(
+      const banInfo = await this.usersBanStatusesRepository.banUser(
         userId,
         command.inputModel.banReason,
-        command.inputModel.isBanned,
+        new Date().toISOString(),
       );
       await this.usersRepository.updateBanInfo(userId, banInfo);
     }
