@@ -15,3 +15,11 @@ export class BanInfo {
     public isBanned: boolean,
   ) {}
 }
+
+export class BannedUserForBlogViewModel {
+  constructor(
+    public id: string,
+    public login: string,
+    public banInfo: BanInfo,
+  ) {}
+}

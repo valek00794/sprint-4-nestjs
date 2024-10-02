@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 import { Comment } from '../../../comments/infrastructure/comments.entity';
 import { Like } from 'src/features/likes/infrastructure/likes.entity';
-import { UsersBanInfo } from './usersBanStatuses.entity';
+import { UsersBanInfo } from './usersBanInfo.entity';
 
 @Entity()
 export class User {
@@ -36,7 +36,7 @@ export class User {
   @OneToMany(() => Like, (like) => like.author)
   likes: Like[];
 
-  @OneToOne(() => UsersBanInfo, (ec) => ec.userId, {
+  @OneToOne(() => UsersBanInfo, (bi) => bi.userId, {
     nullable: true,
     cascade: true,
     onDelete: 'CASCADE',

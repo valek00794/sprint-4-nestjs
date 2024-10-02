@@ -2,19 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { UsersBanInfo } from './usersBanStatuses.entity';
+import { UsersBanInfo } from './usersBanInfo.entity';
 import { User } from './users.entity';
+import { UsersBanInfoForBlogs } from './usersBanInfoForBlogs.entity';
 
 @Injectable()
 export class UsersBanInfoRepository {
   constructor(
     @InjectRepository(UsersBanInfo)
-    protected usersBanStatusesRepository: Repository<UsersBanInfo>,
+    protected usersGlobalBanInfoRepository: Repository<UsersBanInfo>,
+    @InjectRepository(UsersBanInfoForBlogs)
+    protected usersBanInfoForBlogsRepository: Repository<UsersBanInfoForBlogs>,
     @InjectRepository(User) protected usersRepository: Repository<User>,
   ) {}
 
   async banUser(userId: number, banReason: string, banDate: string) {
-    let userBanInfo = await this.usersBanStatusesRepository.findOne({
+    let userBanInfo = await this.usersGlobalBanInfoRepository.findOne({
       where: { userId },
     });
     if (userBanInfo) {
@@ -22,14 +25,14 @@ export class UsersBanInfoRepository {
       userBanInfo.isBanned = true;
       userBanInfo.banDate = banDate;
     } else {
-      userBanInfo = this.usersBanStatusesRepository.create({
+      userBanInfo = this.usersGlobalBanInfoRepository.create({
         userId,
         banReason,
         isBanned: true,
         banDate,
       });
     }
-    return await this.usersBanStatusesRepository.save(userBanInfo);
+    return await this.usersGlobalBanInfoRepository.save(userBanInfo);
   }
 
   async unBanUser(userId: number) {
@@ -40,6 +43,35 @@ export class UsersBanInfoRepository {
       user.banInfo = null;
       await this.usersRepository.save(user);
     }
-    return await this.usersBanStatusesRepository.delete({ userId });
+    return await this.usersGlobalBanInfoRepository.delete({ userId });
+  }
+
+  async banUserForBlog(userId: number, blogId: number, banReason: string, banDate: string) {
+    let userBanInfo = await this.usersBanInfoForBlogsRepository.findOne({
+      where: { userId, blogId },
+    });
+    if (userBanInfo) {
+      userBanInfo.banReason = banReason;
+      userBanInfo.isBanned = true;
+      userBanInfo.banDate = banDate;
+    } else {
+      userBanInfo = this.usersBanInfoForBlogsRepository.create({
+        blogId,
+        userId,
+        banReason,
+        isBanned: true,
+        banDate,
+      });
+    }
+    return await this.usersBanInfoForBlogsRepository.save(userBanInfo);
+  }
+  async unBanUserForBlog(userId: number, blogId: number) {
+    return await this.usersBanInfoForBlogsRepository.delete({ userId, blogId });
+  }
+
+  async getBanInfoBlog(blogId: number, userId: number) {
+    return await this.usersBanInfoForBlogsRepository.findOne({
+      where: { userId, blogId },
+    });
   }
 }

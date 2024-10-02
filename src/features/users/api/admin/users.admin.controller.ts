@@ -25,12 +25,12 @@ import {
   ChangeUserBanStatusInputModel,
   CreateUserInputModel,
 } from '../models/input/users.input.models';
-import { ChangeUserBanStatusCommand } from '../../app/useCases/users/changeUserBanStatus.useCase';
+import { ChangeUserBanStatusCommand } from '../../app/useCases/usersBanInfo/changeUserBanStatus.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)
 @Controller(SETTINGS.PATH.usersSa)
-export class UsersController {
+export class UsersAdminController {
   constructor(
     protected usersService: UsersService,
     protected usersQueryRepository: UsersQueryRepository,

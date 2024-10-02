@@ -1,11 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 import { CreateCommentInputModel } from '../../api/models/input/comments.input.model';
 import { CommentatorInfo } from '../../domain/comments.types';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
 import { Comment } from '../../infrastructure/comments.entity';
+import { UsersBanInfoRepository } from 'src/features/users/infrastructure/users/usersBanInfo.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -21,6 +22,7 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
   constructor(
     protected commentsRepository: CommentsRepository,
     protected postsRepository: PostsRepository,
+    protected usersBanInfoRepository: UsersBanInfoRepository,
   ) {}
 
   async execute(command: CreateCommentCommand): Promise<Comment | null> {
@@ -28,7 +30,10 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-
+    const banInfo = await this.usersBanInfoRepository.getBanInfoBlog(post.blog.id, +command.userId);
+    if (banInfo) {
+      throw new ForbiddenException('You are banned for this blog');
+    }
     const commentatorInfo = new CommentatorInfo(command.userId, command.userLogin);
 
     const newComment = {

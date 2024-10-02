@@ -41,11 +41,15 @@ import { GetBlogsUseCase } from './app/useCases/getBlogs.useCase';
 import { DeletePostUseCase } from '../posts/app/useCases/deletePost.useCase';
 import { GetCommentUseCase } from '../comments/app/useCases/getComment.useCase';
 import { GetPostUseCase } from '../posts/app/useCases/getPost.useCase';
+import { UsersBanInfoRepository } from '../users/infrastructure/users/usersBanInfo.repository';
+import { UsersBanInfo } from '../users/infrastructure/users/usersBanInfo.entity';
+import { UsersBanInfoForBlogs } from '../users/infrastructure/users/usersBanInfoForBlogs.entity';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const usersProviders = [UsersRepository];
 const commentsProviders = [CommentsRepository, CommentsQueryRepository];
+const banInfoProviders = [UsersBanInfoRepository];
 const likesProviders = [LikesRepository, LikesQueryRepository];
 
 const blogsUseCases = [
@@ -77,6 +81,8 @@ const likesUseCases = [ChangeLikeStatusUseCase];
       User,
       UserEmailConfirmationInfo,
       UsersRecoveryPasssword,
+      UsersBanInfo,
+      UsersBanInfoForBlogs,
     ]),
   ],
   controllers: [
@@ -96,6 +102,7 @@ const likesUseCases = [ChangeLikeStatusUseCase];
     ...commentsUseCases,
     ...likesUseCases,
     ...usersProviders,
+    ...banInfoProviders,
   ],
 })
 export class BlogsModule {}
