@@ -19,7 +19,9 @@ export class PostsRepository {
   async findPostbyId(id: number): Promise<Post | null> {
     return await this.postsRepository.findOne({
       where: [{ id: id }],
-      relations: ['blog'],
+      relations: {
+        blog: true,
+      },
     });
   }
   async updatePost(updatedPost: PostType, postId: number): Promise<Post | null> {

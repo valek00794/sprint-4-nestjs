@@ -46,3 +46,16 @@ export class ChangeUserBanStatusInputModel {
   @IsBoolean()
   isBanned: boolean;
 }
+
+export class ChangeUserBanStatusForBloggerInputModel {
+  @IsNotEmpty()
+  @IsString()
+  @Length(VALIDATE_PHARAMS.banReason.minLength, VALIDATE_PHARAMS.banReason.maxLength)
+  banReason: string;
+  @IsNotEmpty()
+  @IsBoolean()
+  isBanned: boolean;
+  @IsNotEmpty()
+  @IsString()
+  blogId: string;
+}

@@ -11,6 +11,7 @@ export const SETTINGS = {
     blogsSa: '/sa/blogs',
     users: '/users',
     usersSa: '/sa/users',
+    usersBlogger: '/blogger/users',
     auth: '/auth',
     devices: '/security/devices',
     comments: '/comments',
