@@ -1,4 +1,4 @@
-import { IsDefined, IsNotEmpty, Matches, MaxLength } from 'class-validator';
+import { IsBoolean, IsDefined, IsNotEmpty, Matches, MaxLength } from 'class-validator';
 import { Trim } from 'src/infrastructure/decorators/transform/trim.decorator';
 
 const VALIDATE_PHARAMS = {
@@ -33,7 +33,6 @@ export class CreatePostForBlogModel {
   @IsNotEmpty()
   @MaxLength(VALIDATE_PHARAMS.titleMaxLength)
   title: string;
-
   @IsDefined()
   @Trim()
   @IsNotEmpty()
@@ -44,4 +43,10 @@ export class CreatePostForBlogModel {
   @MaxLength(VALIDATE_PHARAMS.contentMaxLength)
   content: string;
   blogId: string;
+}
+
+export class ChangeBanStatusForBlogInputModel {
+  @IsNotEmpty()
+  @IsBoolean()
+  isBanned: boolean;
 }

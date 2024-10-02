@@ -2,11 +2,11 @@ import { BadRequestException, ForbiddenException, NotFoundException } from '@nes
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 import { ChangeUserBanStatusForBloggerInputModel } from 'src/features/users/api/models/input/users.input.models';
+import { BanInfoRepository } from 'src/features/users/infrastructure/banInfo/banInfo.repository';
 import { UsersQueryRepository } from 'src/features/users/infrastructure/users/users.query-repository';
-import { UsersBanInfoRepository } from 'src/features/users/infrastructure/users/usersBanInfo.repository';
 import { FieldError } from 'src/infrastructure/exception.filter.types';
 
-export class ChangeUserBanStatusForBloggersCommand {
+export class ChangeUserBanStatusForBlogsCommand {
   constructor(
     public userIdNeedBan: string,
     public inputModel: ChangeUserBanStatusForBloggerInputModel,
@@ -14,16 +14,16 @@ export class ChangeUserBanStatusForBloggersCommand {
   ) {}
 }
 
-@CommandHandler(ChangeUserBanStatusForBloggersCommand)
-export class ChangeUserBanStatusForBloggersUseCase
-  implements ICommandHandler<ChangeUserBanStatusForBloggersCommand>
+@CommandHandler(ChangeUserBanStatusForBlogsCommand)
+export class ChangeUserBanStatusForBlogsUseCase
+  implements ICommandHandler<ChangeUserBanStatusForBlogsCommand>
 {
   constructor(
-    protected usersBanInfoRepository: UsersBanInfoRepository,
+    protected usersBanInfoRepository: BanInfoRepository,
     protected usersQueryRepository: UsersQueryRepository,
     protected blogsRepository: BlogsRepository,
   ) {}
-  async execute(command: ChangeUserBanStatusForBloggersCommand) {
+  async execute(command: ChangeUserBanStatusForBlogsCommand) {
     const userIdNeedBan = Number(command.userIdNeedBan);
     const blogId = Number(command.inputModel.blogId);
     const ownerBlogUserId = command.ownerBlogUserId ? +command.ownerBlogUserId : null;

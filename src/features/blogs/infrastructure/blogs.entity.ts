@@ -29,4 +29,7 @@ export class Blog {
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()
   blogOwnerInfo: User | null;
+
+  @Column({ type: 'boolean', default: false })
+  isBanned: boolean;
 }

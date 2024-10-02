@@ -41,15 +41,16 @@ import { GetBlogsUseCase } from './app/useCases/getBlogs.useCase';
 import { DeletePostUseCase } from '../posts/app/useCases/deletePost.useCase';
 import { GetCommentUseCase } from '../comments/app/useCases/getComment.useCase';
 import { GetPostUseCase } from '../posts/app/useCases/getPost.useCase';
-import { UsersBanInfoRepository } from '../users/infrastructure/users/usersBanInfo.repository';
-import { UsersBanInfo } from '../users/infrastructure/users/usersBanInfo.entity';
-import { UsersBanInfoForBlogs } from '../users/infrastructure/users/usersBanInfoForBlogs.entity';
+import { BanInfoRepository } from '../users/infrastructure/banInfo/banInfo.repository';
+import { UsersBanInfo } from '../users/infrastructure/banInfo/usersBanInfo.entity';
+import { UsersBanInfoForBlogs } from '../users/infrastructure/banInfo/usersBanInfoForBlogs.entity';
+import { BanBlogUseCase } from './app/useCases/banBlog.useCase';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const usersProviders = [UsersRepository];
 const commentsProviders = [CommentsRepository, CommentsQueryRepository];
-const banInfoProviders = [UsersBanInfoRepository];
+const banInfoProviders = [BanInfoRepository];
 const likesProviders = [LikesRepository, LikesQueryRepository];
 
 const blogsUseCases = [
@@ -58,6 +59,7 @@ const blogsUseCases = [
   BindBlogUseCase,
   DeleteBlogUseCase,
   GetBlogsUseCase,
+  BanBlogUseCase,
 ];
 const postsUseCases = [CreatePostUseCase, UpdatePostUseCase, DeletePostUseCase, GetPostUseCase];
 const commentsUseCases = [

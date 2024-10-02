@@ -2,9 +2,9 @@ import { BadRequestException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ChangeUserBanStatusInputModel } from 'src/features/users/api/models/input/users.input.models';
+import { BanInfoRepository } from 'src/features/users/infrastructure/banInfo/banInfo.repository';
 import { UsersDevicesRepository } from 'src/features/users/infrastructure/devices/usersDevices-repository';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
-import { UsersBanInfoRepository } from 'src/features/users/infrastructure/users/usersBanInfo.repository';
 import { FieldError } from 'src/infrastructure/exception.filter.types';
 
 export class ChangeUserBanStatusCommand {
@@ -19,7 +19,7 @@ export class ChangeUserBanStatusUseCase implements ICommandHandler<ChangeUserBan
   constructor(
     protected usersRepository: UsersRepository,
     protected usersDevicesRepository: UsersDevicesRepository,
-    protected usersBanStatusesRepository: UsersBanInfoRepository,
+    protected usersBanStatusesRepository: BanInfoRepository,
   ) {}
   async execute(command: ChangeUserBanStatusCommand) {
     const userId = Number(command.userId);

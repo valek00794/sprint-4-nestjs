@@ -49,4 +49,29 @@ export class BlogsRepository {
   async bindBlog(blog: Blog) {
     return await this.blogsRepository.save(blog);
   }
+
+  async banBlog(id: number): Promise<Blog | null> {
+    const blog = await this.blogsRepository.findOne({
+      where: { id },
+    });
+    if (blog) {
+      blog.isBanned = true;
+      await this.blogsRepository.save(blog);
+      return blog;
+    } else {
+      return null;
+    }
+  }
+  async unBanBlog(id: number): Promise<Blog | null> {
+    const blog = await this.blogsRepository.findOne({
+      where: { id },
+    });
+    if (blog) {
+      blog.isBanned = false;
+      await this.blogsRepository.save(blog);
+      return blog;
+    } else {
+      return null;
+    }
+  }
 }

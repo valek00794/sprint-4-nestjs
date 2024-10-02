@@ -6,7 +6,7 @@ import { CommentatorInfo } from '../../domain/comments.types';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
 import { Comment } from '../../infrastructure/comments.entity';
-import { UsersBanInfoRepository } from 'src/features/users/infrastructure/users/usersBanInfo.repository';
+import { BanInfoRepository } from 'src/features/users/infrastructure/banInfo/banInfo.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -22,7 +22,7 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
   constructor(
     protected commentsRepository: CommentsRepository,
     protected postsRepository: PostsRepository,
-    protected usersBanInfoRepository: UsersBanInfoRepository,
+    protected usersBanInfoRepository: BanInfoRepository,
   ) {}
 
   async execute(command: CreateCommentCommand): Promise<Comment | null> {

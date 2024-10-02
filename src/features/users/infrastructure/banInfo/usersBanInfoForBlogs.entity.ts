@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
-import { User } from './users.entity';
+import { User } from '../users/users.entity';
 import { Blog } from 'src/features/blogs/infrastructure/blogs.entity';
 
 @Entity()
