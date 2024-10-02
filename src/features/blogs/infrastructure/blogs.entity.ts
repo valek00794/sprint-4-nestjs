@@ -32,4 +32,7 @@ export class Blog {
 
   @Column({ type: 'boolean', default: false })
   isBanned: boolean;
+
+  @Column({ type: 'timestamp with time zone', default: null })
+  banDate: string | null;
 }

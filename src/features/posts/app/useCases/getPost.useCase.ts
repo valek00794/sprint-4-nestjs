@@ -28,7 +28,11 @@ export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    if (post.blog.blogOwnerInfo && post.blog.blogOwnerInfo.banInfo) {
+    if (
+      post.blog.blogOwnerInfo &&
+      post.blog.blogOwnerInfo.banInfo &&
+      post.blog.blogOwnerInfo.banInfo.isBanned
+    ) {
       throw new NotFoundException('Post not found');
     }
 

@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Post,
@@ -19,7 +18,6 @@ import { CommandBus } from '@nestjs/cqrs';
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
-import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 import { CreateCommentInputModel } from 'src/features/comments/api/models/input/comments.input.model';
 import { CommentsQueryRepository } from 'src/features/comments/infrastructure/comments.query-repository';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
@@ -29,57 +27,30 @@ import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeL
 import { LikesParrentNames } from 'src/features/likes/domain/likes.types';
 import { PostsService } from '../../app/posts.service';
 import { PostsQueryRepository } from '../../infrastructure/posts.query-repository';
-import { CreatePostCommand } from '../../app/useCases/createPost.useCase';
-import { UpdatePostCommand } from '../../app/useCases/updatePost.useCase';
-import { CreatePostModel } from '../models/input/posts.input.model';
 import { GetPostCommand } from '../../app/useCases/getPost.useCase';
 
 @Controller(SETTINGS.PATH.posts)
-export class PostsController {
+export class PostsPublicController {
   constructor(
     protected postsService: PostsService,
     protected postsQueryRepository: PostsQueryRepository,
     protected commentsQueryRepository: CommentsQueryRepository,
     private commandBus: CommandBus,
   ) {}
-  @Public()
-  @UseGuards(AuthBasicGuard)
-  @Post()
-  async createPost(@Body() inputModel: CreatePostModel) {
-    const createdPost = await this.commandBus.execute(new CreatePostCommand(inputModel));
-    return this.postsQueryRepository.mapToOutput(createdPost);
-  }
 
   @Public()
   @Get()
   async getPosts(@Query() query: SearchQueryParametersType, @Req() req: Request) {
-    return await this.postsQueryRepository.getPosts(query, undefined, req.user?.userId);
+    return await this.postsQueryRepository.getPosts(query, undefined, req.user?.userId, true);
   }
+
   @Public()
   @Get(':id')
   async getPost(@Param('id') id: string, @Req() req: Request) {
     return await this.commandBus.execute(new GetPostCommand(id, req.user?.userId));
   }
 
-  @Public()
-  @UseGuards(AuthBasicGuard)
-  @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePost(@Body() inputModel: CreatePostModel, @Param('id') id: string) {
-    await this.commandBus.execute(new UpdatePostCommand(inputModel, id));
-  }
-
-  @Public()
-  @UseGuards(AuthBasicGuard)
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePost(@Param('id') id: string) {
-    const deleteResult = await this.postsService.deletePost(id);
-    if (!deleteResult) {
-      throw new NotFoundException('Post not found');
-    }
-  }
-
+  //переделать
   @UseGuards(AuthBearerGuard)
   @Post(':postId/comments')
   async createCommentForPost(
@@ -87,10 +58,10 @@ export class PostsController {
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
-    const newComment = await this.commandBus.execute(
+    const newCommentId = await this.commandBus.execute(
       new CreateCommentCommand(inputModel, postId, req.user!.userId, req.user!.login),
     );
-    const comment = await this.commentsQueryRepository.findCommentById(newComment.id);
+    const comment = await this.commentsQueryRepository.findCommentById(newCommentId);
     return comment;
   }
 

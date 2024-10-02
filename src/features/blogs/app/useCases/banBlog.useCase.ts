@@ -28,7 +28,8 @@ export class BanBlogUseCase implements ICommandHandler<BanBlogCommand> {
     if (!command.inputModel.isBanned) {
       await this.blogsRepository.unBanBlog(blogId);
     } else {
-      await this.blogsRepository.banBlog(blogId);
+      const banDate = new Date().toISOString();
+      await this.blogsRepository.banBlog(blogId, banDate);
     }
     return;
   }

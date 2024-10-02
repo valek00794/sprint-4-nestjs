@@ -7,7 +7,7 @@ import { Comment } from './comments.entity';
 @Injectable()
 export class CommentsRepository {
   constructor(@InjectRepository(Comment) protected commentsRepository: Repository<Comment>) {}
-  async createComment(newComment: CommentType): Promise<Comment> {
+  async createComment(newComment: CommentType): Promise<number> {
     const comment = new Comment();
     comment.content = newComment.content;
     comment.createdAt = newComment.createdAt;
@@ -15,7 +15,7 @@ export class CommentsRepository {
     comment.postId = newComment.postId;
 
     await this.commentsRepository.save(comment);
-    return comment;
+    return comment.id;
   }
   async updateComment(updateComment: CommentType, commentId: number): Promise<Comment | null> {
     const updatedComment = await this.commentsRepository.findOne({

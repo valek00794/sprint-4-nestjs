@@ -8,7 +8,7 @@ import { BlogsRepository } from './infrastructure/blogs.repository';
 import { BlogsQueryRepository } from './infrastructure/blogs.query-repository';
 import { UpdateBlogUseCase } from './app/useCases/updateBlog.useCase';
 import { CreateBlogUseCase } from './app/useCases/createBlog.useCase';
-import { PostsController } from '../posts/api/public/posts.controller';
+import { PostsPublicController } from '../posts/api/public/posts.public.controller';
 import { UpdatePostUseCase } from '../posts/app/useCases/updatePost.useCase';
 import { CreatePostUseCase } from '../posts/app/useCases/createPost.useCase';
 import { PostsQueryRepository } from '../posts/infrastructure/posts.query-repository';
@@ -37,7 +37,6 @@ import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEm
 import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
 import { BlogsBloggerController } from './api/blogger/blogs.blogger.controller';
 import { DeleteBlogUseCase } from './app/useCases/deleteBlog.useCase';
-import { GetBlogsUseCase } from './app/useCases/getBlogs.useCase';
 import { DeletePostUseCase } from '../posts/app/useCases/deletePost.useCase';
 import { GetCommentUseCase } from '../comments/app/useCases/getComment.useCase';
 import { GetPostUseCase } from '../posts/app/useCases/getPost.useCase';
@@ -58,7 +57,6 @@ const blogsUseCases = [
   UpdateBlogUseCase,
   BindBlogUseCase,
   DeleteBlogUseCase,
-  GetBlogsUseCase,
   BanBlogUseCase,
 ];
 const postsUseCases = [CreatePostUseCase, UpdatePostUseCase, DeletePostUseCase, GetPostUseCase];
@@ -91,7 +89,7 @@ const likesUseCases = [ChangeLikeStatusUseCase];
     BlogsPublicController,
     BlogsAdminController,
     BlogsBloggerController,
-    PostsController,
+    PostsPublicController,
     CommentsController,
   ],
   providers: [

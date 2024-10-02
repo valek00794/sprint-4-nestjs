@@ -5,7 +5,6 @@ import { CreateCommentInputModel } from '../../api/models/input/comments.input.m
 import { CommentatorInfo } from '../../domain/comments.types';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
-import { Comment } from '../../infrastructure/comments.entity';
 import { BanInfoRepository } from 'src/features/users/infrastructure/banInfo/banInfo.repository';
 
 export class CreateCommentCommand {
@@ -25,9 +24,9 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
     protected usersBanInfoRepository: BanInfoRepository,
   ) {}
 
-  async execute(command: CreateCommentCommand): Promise<Comment | null> {
+  async execute(command: CreateCommentCommand): Promise<number> {
     const post = await this.postsRepository.findPostbyId(Number(command.postId));
-    if (!post) {
+    if (!post || post.blog.isBanned) {
       throw new NotFoundException('Post not found');
     }
     const banInfo = await this.usersBanInfoRepository.getBanInfoBlog(post.blog.id, +command.userId);
