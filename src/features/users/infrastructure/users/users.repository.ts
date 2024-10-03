@@ -10,7 +10,7 @@ import {
   UsersRecoveryPassswordType,
 } from '../../domain/users.types';
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
-import { UsersBanInfo } from './usersBanInfo.entity';
+import { UsersBanInfo } from '../banInfo/usersBanInfo.entity';
 @Injectable()
 export class UsersRepository {
   constructor(

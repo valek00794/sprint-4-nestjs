@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -19,6 +20,8 @@ import { BlogsService } from '../../app/blogs.service';
 import { BlogsQueryRepository } from '../../infrastructure/blogs.query-repository';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { BindBlogCommand } from '../../app/useCases/bindBlog.useCase';
+import { ChangeBanStatusForBlogInputModel } from '../models/input/blogs.input.model';
+import { BanBlogCommand } from '../../app/useCases/banBlog.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)
@@ -34,12 +37,21 @@ export class BlogsAdminController {
 
   @Get()
   async getBlogs(@Query() query?: SearchQueryParametersType) {
-    return await this.blogsQueryRepository.getBlogs(query, true);
+    return await this.blogsQueryRepository.getBlogs(query, true, false);
   }
 
   @Put(':id/bind-with-user/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async bindBlog(@Param('id') id: string, @Param('userId') userId: string) {
     await this.commandBus.execute(new BindBlogCommand(id, userId));
+  }
+
+  @Put(':id/ban')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async changeBlogBanStatus(
+    @Param('id') id: string,
+    @Body() inputModel: ChangeBanStatusForBlogInputModel,
+  ) {
+    await this.commandBus.execute(new BanBlogCommand(id, inputModel));
   }
 }

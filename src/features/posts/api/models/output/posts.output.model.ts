@@ -12,3 +12,12 @@ export class PostViewModel {
     public extendedLikesInfo: ExtendedLikesInfo,
   ) {}
 }
+
+export class PostInfoViewModel {
+  constructor(
+    public id: string,
+    public title: string,
+    public blogId: string,
+    public blogName: string,
+  ) {}
+}

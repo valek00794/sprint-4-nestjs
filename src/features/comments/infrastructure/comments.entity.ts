@@ -20,10 +20,11 @@ export class Comment {
 
   @ManyToOne(() => Post, (post) => post.comments, { nullable: false, cascade: true })
   @JoinColumn({ name: 'postId' })
-  posts: Post;
+  post: Post;
 
   @Column()
   commentatorId: number;
+
   @Column()
   postId: number;
 

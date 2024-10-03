@@ -25,6 +25,7 @@ export class PostsQueryRepository {
     queryString?: SearchQueryParametersType,
     blogId?: string,
     userId?: string,
+    withoutBanned?: boolean,
   ): Promise<null | Paginator<PostViewModel[]>> {
     if (blogId && isNaN(Number(blogId))) {
       return null;
@@ -35,6 +36,10 @@ export class PostsQueryRepository {
       blog = await this.blogsQueryRepository.findBlogById(Number(blogId));
     }
     if (!blog && blogId) {
+      return null;
+    }
+
+    if (blog && withoutBanned && blog.isBanned) {
       return null;
     }
 
@@ -77,7 +82,7 @@ export class PostsQueryRepository {
 
   async findPostById(id: number): Promise<Post | null> {
     const post = await this.postsRepository.findOne({
-      where: [{ id }],
+      where: [{ id, blog: { isBanned: false } }],
       relations: {
         blog: true,
         likes: {

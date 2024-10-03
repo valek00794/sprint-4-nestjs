@@ -21,7 +21,7 @@ export class GetCommentUseCase implements ICommandHandler<GetCommentCommand> {
 
   async execute(command: GetCommentCommand): Promise<CommentOutputModel> {
     const commentId = Number(command.id);
-    const userId = command.userId ? Number(command.userId) : undefined;
+    const userId = command.userId ? Number(command.userId) : null;
     if (isNaN(commentId)) {
       throw new NotFoundException('id syntax error');
     }

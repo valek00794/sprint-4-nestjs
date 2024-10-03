@@ -25,7 +25,7 @@ import {
   ChangeUserBanStatusInputModel,
   CreateUserInputModel,
 } from '../models/input/users.input.models';
-import { ChangeUserBanStatusCommand } from '../../app/useCases/usersBanInfo/changeUserBanStatus.useCase';
+import { ChangeUserBanStatusCommand } from '../../app/useCases/banInfo/changeUserBanStatus.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)

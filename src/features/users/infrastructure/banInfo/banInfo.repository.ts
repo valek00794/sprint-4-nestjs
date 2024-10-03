@@ -3,11 +3,11 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { UsersBanInfo } from './usersBanInfo.entity';
-import { User } from './users.entity';
+import { User } from '../users/users.entity';
 import { UsersBanInfoForBlogs } from './usersBanInfoForBlogs.entity';
 
 @Injectable()
-export class UsersBanInfoRepository {
+export class BanInfoRepository {
   constructor(
     @InjectRepository(UsersBanInfo)
     protected usersGlobalBanInfoRepository: Repository<UsersBanInfo>,

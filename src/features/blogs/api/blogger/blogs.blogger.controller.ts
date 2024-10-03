@@ -28,8 +28,8 @@ import { UpdateBlogCommand } from '../../app/useCases/updateBlog.useCase';
 import { UpdatePostCommand } from 'src/features/posts/app/useCases/updatePost.useCase';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { DeleteBlogCommand } from '../../app/useCases/deleteBlog.useCase';
-import { GetBlogsCommand } from '../../app/useCases/getBlogs.useCase';
 import { DeletePostCommand } from 'src/features/posts/app/useCases/deletePost.useCase';
+import { CommentsQueryRepository } from 'src/features/comments/infrastructure/comments.query-repository';
 
 @UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.blogsBlogger)
@@ -38,12 +38,13 @@ export class BlogsBloggerController {
     protected blogsService: BlogsService,
     protected blogsQueryRepository: BlogsQueryRepository,
     protected postsQueryRepository: PostsQueryRepository,
+    protected commentsQueryRepository: CommentsQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
   @Get()
   async getBlogs(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
-    return await this.commandBus.execute(new GetBlogsCommand(query, req.user?.userId));
+    return await this.blogsQueryRepository.getBlogs(query, false, false, +req.user!.userId);
   }
 
   @Post()
@@ -81,7 +82,7 @@ export class BlogsBloggerController {
     @Req() req: Request,
     @Query() query?: SearchQueryParametersType,
   ) {
-    const posts = await this.postsQueryRepository.getPosts(query, blogId, req.user?.userId);
+    const posts = await this.postsQueryRepository.getPosts(query, blogId, req.user?.userId, false);
     if (!posts) {
       throw new NotFoundException('Blog not found');
     }
@@ -122,5 +123,10 @@ export class BlogsBloggerController {
     @Req() req: Request,
   ) {
     await this.commandBus.execute(new DeletePostCommand(postId, blogId, req.user?.userId));
+  }
+
+  @Get('comments')
+  async getComments(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
+    return await this.commentsQueryRepository.getComments(undefined, query, req.user!.userId);
   }
 }

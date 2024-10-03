@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
@@ -15,15 +15,12 @@ export class BlogsQueryRepository {
   async getBlogs(
     queryString?: SearchQueryParametersType,
     witnBloggerInfo?: boolean,
+    withoutBanned?: boolean,
     ownerId?: number,
   ): Promise<Paginator<BlogViewModel[]>> {
     const sanitizationQuery = getSanitizationQuery(queryString);
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
-    const where: any = {};
 
-    if (sanitizationQuery.searchNameTerm) {
-      where.name = ILike(`%${sanitizationQuery.searchNameTerm.toLowerCase()}%`);
-    }
     const qb = this.blogsRepository.createQueryBuilder('blog');
     const query = qb
       .leftJoinAndSelect('blog.blogOwnerInfo', 'blogOwnerInfo')
@@ -34,12 +31,18 @@ export class BlogsQueryRepository {
         'blog.websiteUrl',
         'blog.createdAt',
         'blog.isMembership',
+        'blog.isBanned',
+        'blog.banDate',
         'blogOwnerInfo.id',
         'blogOwnerInfo.login',
       ])
       .orderBy(`blog.${sanitizationQuery.sortBy}`, sanitizationQuery.sortDirection)
       .offset(offset)
       .limit(sanitizationQuery.pageSize);
+
+    if (withoutBanned) {
+      qb.where('blog.isBanned = :isBanned', { isBanned: false });
+    }
 
     if (ownerId) {
       qb.where('blogOwnerInfo.id = :ownerId', { ownerId });
@@ -63,11 +66,18 @@ export class BlogsQueryRepository {
     );
   }
 
-  async findBlogById(id: number): Promise<BlogViewModel | null> {
+  async findUnbannedBlogById(id: number): Promise<BlogViewModel | null> {
+    const blog = await this.blogsRepository.findOne({
+      where: [{ id, isBanned: false }],
+    });
+    return blog ? this.mapToOutput(blog) : null;
+  }
+
+  async findBlogById(id: number): Promise<Blog | null> {
     const blog = await this.blogsRepository.findOne({
       where: [{ id }],
     });
-    return blog ? this.mapToOutput(blog) : null;
+    return blog;
   }
 
   mapToOutput(blog: Blog): BlogViewModel {
@@ -82,6 +92,7 @@ export class BlogsQueryRepository {
   }
 
   mapToBloggerOutput(blog: Blog): BlogViewModel {
+    const banInfo = { isBanned: blog.isBanned, banDate: blog.banDate };
     return new BlogViewModel(
       blog.id!.toString(),
       blog.name,
@@ -89,6 +100,7 @@ export class BlogsQueryRepository {
       blog.websiteUrl,
       blog.createdAt,
       blog.isMembership,
+      banInfo,
       blog.blogOwnerInfo
         ? new BlogOwnerInfo(blog.blogOwnerInfo.id.toString(), blog.blogOwnerInfo.login)
         : null,

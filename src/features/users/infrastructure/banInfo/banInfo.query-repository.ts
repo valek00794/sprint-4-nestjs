@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { UsersBanInfoForBlogs } from './usersBanInfoForBlogs.entity';
 import { SearchQueryParametersType, SortDirection } from 'src/features/domain/query.types';
 import { Paginator } from 'src/features/domain/result.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { BannedUserForBlogViewModel } from '../../api/models/output/users.output.models';
+import { UsersBanInfoForBlogs } from './usersBanInfoForBlogs.entity';
 
 @Injectable()
-export class UsersBanInfoQueryRepository {
+export class BanInfoQueryRepository {
   constructor(
     @InjectRepository(UsersBanInfoForBlogs)
     protected usersBanInfoForBlogsRepository: Repository<UsersBanInfoForBlogs>,

@@ -11,24 +11,24 @@ import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { User } from './infrastructure/users/users.entity';
 import { UserEmailConfirmationInfo } from './infrastructure/users/usersEmailConfirmationInfo.entity';
 import { UsersRecoveryPasssword } from './infrastructure/users/UsersRecoveryPasssword.entity ';
-import { ChangeUserBanStatusUseCase } from './app/useCases/usersBanInfo/changeUserBanStatus.useCase';
+import { ChangeUserBanStatusUseCase } from './app/useCases/banInfo/changeUserBanStatus.useCase';
 import { UsersDevicesRepository } from './infrastructure/devices/usersDevices-repository';
 import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
-import { UsersBanInfo } from './infrastructure/users/usersBanInfo.entity';
-import { UsersBanInfoRepository } from './infrastructure/users/usersBanInfo.repository';
-import { ChangeUserBanStatusForBloggersUseCase } from './app/useCases/usersBanInfo/changeUserBanStatusForBloggers.useCase';
-import { UsersBanInfoForBlogs } from './infrastructure/users/usersBanInfoForBlogs.entity';
+import { UsersBanInfo } from './infrastructure/banInfo/usersBanInfo.entity';
+import { BanInfoRepository } from './infrastructure/banInfo/banInfo.repository';
+import { ChangeUserBanStatusForBlogsUseCase } from './app/useCases/banInfo/changeUserBanStatusForBlogs.useCase';
+import { UsersBanInfoForBlogs } from './infrastructure/banInfo/usersBanInfoForBlogs.entity';
 import { UsersBloggerController } from './api/blogger/users.blogger.controller';
-import { UsersBanInfoQueryRepository } from './infrastructure/users/usersBanInfo.query-repository';
 import { Blog } from '../blogs/infrastructure/blogs.entity';
-import { GetBannedUsersUseCase } from './app/useCases/usersBanInfo/getBannedUsers.useCase';
+import { GetBannedUsersForBlogUseCase } from './app/useCases/banInfo/getBannedUsersForBlog.useCase';
 import { BlogsRepository } from '../blogs/infrastructure/blogs.repository';
+import { BanInfoQueryRepository } from './infrastructure/banInfo/banInfo.query-repository';
 
 const usersUseCases = [
   CreateUserUseCase,
   ChangeUserBanStatusUseCase,
-  ChangeUserBanStatusForBloggersUseCase,
-  GetBannedUsersUseCase,
+  ChangeUserBanStatusForBlogsUseCase,
+  GetBannedUsersForBlogUseCase,
 ];
 
 const usersProviders = [
@@ -36,8 +36,8 @@ const usersProviders = [
   UsersRepository,
   UsersQueryRepository,
   UsersDevicesRepository,
-  UsersBanInfoRepository,
-  UsersBanInfoQueryRepository,
+  BanInfoRepository,
+  BanInfoQueryRepository,
   BlogsRepository,
 ];
 

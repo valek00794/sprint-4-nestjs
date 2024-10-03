@@ -20,7 +20,7 @@ export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
 
   async execute(command: GetPostCommand) {
     const postId = Number(command.id);
-    const userId = command.userId ? Number(command.userId) : undefined;
+    const userId = command.userId ? Number(command.userId) : null;
     if (isNaN(postId)) {
       throw new NotFoundException('id syntax error');
     }
@@ -28,7 +28,11 @@ export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    if (post.blog.blogOwnerInfo && post.blog.blogOwnerInfo.banInfo) {
+    if (
+      post.blog.blogOwnerInfo &&
+      post.blog.blogOwnerInfo.banInfo &&
+      post.blog.blogOwnerInfo.banInfo.isBanned
+    ) {
       throw new NotFoundException('Post not found');
     }
 

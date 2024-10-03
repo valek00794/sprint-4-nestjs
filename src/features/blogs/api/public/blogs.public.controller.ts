@@ -30,12 +30,12 @@ export class BlogsPublicController {
 
   @Get()
   async getBlogs(@Query() query?: SearchQueryParametersType) {
-    return await this.blogsQueryRepository.getBlogs(query);
+    return await this.blogsQueryRepository.getBlogs(query, false, true);
   }
 
   @Get(':id')
   async getBlog(@Param('id') id: number) {
-    const blog = await this.blogsQueryRepository.findBlogById(id);
+    const blog = await this.blogsQueryRepository.findUnbannedBlogById(id);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -49,7 +49,7 @@ export class BlogsPublicController {
     @Req() req: Request,
     @Query() query?: SearchQueryParametersType,
   ) {
-    const posts = await this.postsQueryRepository.getPosts(query, blogId, req.user?.userId);
+    const posts = await this.postsQueryRepository.getPosts(query, blogId, req.user?.userId, true);
     if (!posts) {
       throw new NotFoundException('Post not found');
     }

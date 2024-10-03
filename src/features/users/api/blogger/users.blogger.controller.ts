@@ -18,10 +18,10 @@ import { SearchQueryParametersType } from 'src/features/domain/query.types';
 
 import { ChangeUserBanStatusForBloggerInputModel } from '../models/input/users.input.models';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-import { ChangeUserBanStatusForBloggersCommand } from '../../app/useCases/usersBanInfo/changeUserBanStatusForBloggers.useCase';
+import { ChangeUserBanStatusForBlogsCommand } from '../../app/useCases/banInfo/changeUserBanStatusForBlogs.useCase';
 import { UsersQueryRepository } from '../../infrastructure/users/users.query-repository';
-import { UsersBanInfoQueryRepository } from '../../infrastructure/users/usersBanInfo.query-repository';
-import { GetBannedUsersCommand } from '../../app/useCases/usersBanInfo/getBannedUsers.useCase';
+import { GetBannedUsersForBlogCommand } from '../../app/useCases/banInfo/getBannedUsersForBlog.useCase';
+import { BanInfoQueryRepository } from '../../infrastructure/banInfo/banInfo.query-repository';
 
 @UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.usersBlogger)
@@ -29,7 +29,7 @@ export class UsersBloggerController {
   constructor(
     private commandBus: CommandBus,
     protected usersQueryRepository: UsersQueryRepository,
-    protected usersBanInfoQueryRepository: UsersBanInfoQueryRepository,
+    protected usersBanInfoQueryRepository: BanInfoQueryRepository,
   ) {}
 
   @Get('blog/:id')
@@ -38,7 +38,9 @@ export class UsersBloggerController {
     @Query() query: SearchQueryParametersType,
     @Req() req: Request,
   ) {
-    return await this.commandBus.execute(new GetBannedUsersCommand(id, query, req.user?.userId));
+    return await this.commandBus.execute(
+      new GetBannedUsersForBlogCommand(id, query, req.user?.userId),
+    );
   }
 
   @Put(':id/ban')
@@ -49,7 +51,7 @@ export class UsersBloggerController {
     @Req() req: Request,
   ) {
     await this.commandBus.execute(
-      new ChangeUserBanStatusForBloggersCommand(id, inputModel, req.user?.userId),
+      new ChangeUserBanStatusForBlogsCommand(id, inputModel, req.user?.userId),
     );
   }
 }
