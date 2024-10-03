@@ -62,7 +62,7 @@ export class PostsPublicController {
       new CreateCommentCommand(inputModel, postId, req.user!.userId, req.user!.login),
     );
     const comment = await this.commentsQueryRepository.findCommentById(newCommentId);
-    return comment;
+    return this.commentsQueryRepository.mapToOutput(comment!);
   }
 
   @Public()

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
@@ -20,11 +20,7 @@ export class BlogsQueryRepository {
   ): Promise<Paginator<BlogViewModel[]>> {
     const sanitizationQuery = getSanitizationQuery(queryString);
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
-    const where: any = {};
 
-    if (sanitizationQuery.searchNameTerm) {
-      where.name = ILike(`%${sanitizationQuery.searchNameTerm.toLowerCase()}%`);
-    }
     const qb = this.blogsRepository.createQueryBuilder('blog');
     const query = qb
       .leftJoinAndSelect('blog.blogOwnerInfo', 'blogOwnerInfo')
@@ -82,7 +78,6 @@ export class BlogsQueryRepository {
       where: [{ id }],
     });
     return blog;
-    //return blog ? this.mapToOutput(blog) : null;
   }
 
   mapToOutput(blog: Blog): BlogViewModel {

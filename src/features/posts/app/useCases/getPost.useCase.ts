@@ -20,7 +20,7 @@ export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
 
   async execute(command: GetPostCommand) {
     const postId = Number(command.id);
-    const userId = command.userId ? Number(command.userId) : undefined;
+    const userId = command.userId ? Number(command.userId) : null;
     if (isNaN(postId)) {
       throw new NotFoundException('id syntax error');
     }

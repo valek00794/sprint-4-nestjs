@@ -29,6 +29,7 @@ import { UpdatePostCommand } from 'src/features/posts/app/useCases/updatePost.us
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
 import { DeleteBlogCommand } from '../../app/useCases/deleteBlog.useCase';
 import { DeletePostCommand } from 'src/features/posts/app/useCases/deletePost.useCase';
+import { CommentsQueryRepository } from 'src/features/comments/infrastructure/comments.query-repository';
 
 @UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.blogsBlogger)
@@ -37,6 +38,7 @@ export class BlogsBloggerController {
     protected blogsService: BlogsService,
     protected blogsQueryRepository: BlogsQueryRepository,
     protected postsQueryRepository: PostsQueryRepository,
+    protected commentsQueryRepository: CommentsQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
@@ -121,5 +123,10 @@ export class BlogsBloggerController {
     @Req() req: Request,
   ) {
     await this.commandBus.execute(new DeletePostCommand(postId, blogId, req.user?.userId));
+  }
+
+  @Get('comments')
+  async getComments(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
+    return await this.commentsQueryRepository.getComments(undefined, query, req.user!.userId);
   }
 }

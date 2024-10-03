@@ -1,5 +1,6 @@
 import type { CommentatorInfo } from 'src/features/comments/domain/comments.types';
 import type { LikesInfoView } from 'src/features/likes/domain/likes.types';
+import { PostInfoViewModel } from 'src/features/posts/api/models/output/posts.output.model';
 
 export class CommentOutputModel {
   constructor(
@@ -8,6 +9,6 @@ export class CommentOutputModel {
     public commentatorInfo: CommentatorInfo,
     public createdAt: string,
     public likesInfo?: LikesInfoView,
-    public postId?: number,
+    public postInfo?: PostInfoViewModel,
   ) {}
 }
