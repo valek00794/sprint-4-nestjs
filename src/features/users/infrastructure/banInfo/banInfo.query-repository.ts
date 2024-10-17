@@ -24,10 +24,7 @@ export class BanInfoQueryRepository {
       .createQueryBuilder('b')
       .leftJoinAndSelect('b.bannedUser', 'user')
       .where('b.blogId = :blogId', { blogId })
-      .orderBy(
-        `user.${sanitizationQuery.sortBy}`,
-        sanitizationQuery.sortDirection.toUpperCase() as SortDirection,
-      )
+      .orderBy(`user.${sanitizationQuery.sortBy}`, sanitizationQuery.sortDirection)
       .take(take)
       .skip(skip);
 

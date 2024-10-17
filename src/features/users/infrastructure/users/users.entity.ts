@@ -10,7 +10,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ collation: 'C' })
   login: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
