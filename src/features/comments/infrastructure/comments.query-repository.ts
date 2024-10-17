@@ -28,8 +28,6 @@ export class CommentsQueryRepository {
 
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
 
-    const userIdIsNumber = userId ? Number(userId) : null;
-
     const qb = this.commentsRepository.createQueryBuilder('comment');
     const query = qb
       .leftJoinAndSelect('comment.commenator', 'commenator')
@@ -45,14 +43,14 @@ export class CommentsQueryRepository {
       qb.where('comment.postId = :postId', { postId });
     }
 
-    if (!postId && userIdIsNumber) {
-      qb.where('blogOwnerInfo.id = :userIdIsNumber', { userIdIsNumber });
+    if (!postId && userId) {
+      qb.where('blogOwnerInfo.id = :userId', { userId });
     }
     const [comments, count] = await query.getManyAndCount();
 
     const commentsItems = comments.map((comment) => {
-      const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(comment.likes, userIdIsNumber);
-      if (!postId && userIdIsNumber) {
+      const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(comment.likes, userId);
+      if (!postId && userId) {
         return this.mapToOutput(comment, mapedlikesInfo, comment.post);
       }
       return this.mapToOutput(comment, mapedlikesInfo);
@@ -64,9 +62,9 @@ export class CommentsQueryRepository {
       commentsItems,
     );
   }
-  async findCommentById(id: number): Promise<Comment | null> {
+  async findCommentById(id: string): Promise<Comment | null> {
     const comment = await this.commentsRepository.findOne({
-      where: [{ id: id }],
+      where: [{ id }],
       relations: {
         commenator: {
           banInfo: true,
@@ -84,10 +82,10 @@ export class CommentsQueryRepository {
 
   mapToOutput(comment: Comment, likesInfo?: LikesInfoView, post?: Post): CommentOutputModel {
     return new CommentOutputModel(
-      comment.id!.toString(),
+      comment.id,
       comment.content,
       {
-        userId: comment.commenator.id.toString(),
+        userId: comment.commenator.id,
         userLogin: comment.commenator.login,
       },
       comment.createdAt,
@@ -96,14 +94,7 @@ export class CommentsQueryRepository {
         dislikesCount: likesInfo?.dislikesCount || 0,
         myStatus: likesInfo?.myStatus || LikeStatus.None,
       },
-      post
-        ? new PostInfoViewModel(
-            post.id.toString(),
-            post.title,
-            post.blogId.toString(),
-            post.blog.name,
-          )
-        : undefined,
+      post ? new PostInfoViewModel(post.id, post.title, post.blogId, post.blog.name) : undefined,
     );
   }
 }

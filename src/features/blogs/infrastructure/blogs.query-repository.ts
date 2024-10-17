@@ -16,7 +16,7 @@ export class BlogsQueryRepository {
     queryString?: SearchQueryParametersType,
     witnBloggerInfo?: boolean,
     withoutBanned?: boolean,
-    ownerId?: number,
+    ownerId?: string,
   ): Promise<Paginator<BlogViewModel[]>> {
     const sanitizationQuery = getSanitizationQuery(queryString);
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
@@ -66,14 +66,14 @@ export class BlogsQueryRepository {
     );
   }
 
-  async findUnbannedBlogById(id: number): Promise<BlogViewModel | null> {
+  async findUnbannedBlogById(id: string): Promise<BlogViewModel | null> {
     const blog = await this.blogsRepository.findOne({
       where: [{ id, isBanned: false }],
     });
     return blog ? this.mapToOutput(blog) : null;
   }
 
-  async findBlogById(id: number): Promise<Blog | null> {
+  async findBlogById(id: string): Promise<Blog | null> {
     const blog = await this.blogsRepository.findOne({
       where: [{ id }],
     });

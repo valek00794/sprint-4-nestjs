@@ -20,19 +20,14 @@ export class GetCommentUseCase implements ICommandHandler<GetCommentCommand> {
   ) {}
 
   async execute(command: GetCommentCommand): Promise<CommentOutputModel> {
-    const commentId = Number(command.id);
-    const userId = command.userId ? Number(command.userId) : null;
-    if (isNaN(commentId)) {
-      throw new NotFoundException('id syntax error');
-    }
-    const comment = await this.commentsQueryRepository.findCommentById(commentId);
+    const comment = await this.commentsQueryRepository.findCommentById(command.id);
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
     if (comment.commenator.banInfo && comment.commenator.banInfo?.isBanned) {
       throw new NotFoundException('Comment not found');
     }
-    const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(comment.likes, userId);
+    const mapedlikesInfo = this.likesQueryRepository.mapLikesInfo(comment.likes, command.userId);
     return this.commentsQueryRepository.mapToOutput(comment, mapedlikesInfo);
   }
 }

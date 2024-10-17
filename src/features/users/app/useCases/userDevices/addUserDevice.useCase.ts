@@ -27,7 +27,7 @@ export class AddUserDeviceUseCase implements ICommandHandler<AddUserDeviceComman
     const device = {
       deviceId: userVerifyInfo!.deviceId,
       title: command.deviceTitle,
-      userId: Number(userVerifyInfo!.userId),
+      userId: userVerifyInfo!.userId,
       ip: command.ipAddress,
       lastActiveDate: new Date(userVerifyInfo!.iat! * 1000),
       expiryDate: new Date(userVerifyInfo!.exp! * 1000),

@@ -20,7 +20,7 @@ export class QuizQuestionsRepository {
     return await this.quizRepository.save(newQuestion);
   }
 
-  async findQuestionById(id: number): Promise<Question | null> {
+  async findQuestionById(id: string): Promise<Question | null> {
     return await this.quizRepository.findOne({
       where: [{ id }],
     });
@@ -47,7 +47,7 @@ export class QuizQuestionsRepository {
     return savedQuestionsOfTheGame;
   }
 
-  async updateQuestion(updatedQuestion: QuestionType, id: number): Promise<Question | null> {
+  async updateQuestion(updatedQuestion: QuestionType, id: string): Promise<Question | null> {
     const question = await this.quizRepository.findOne({
       where: { id },
     });
@@ -65,7 +65,7 @@ export class QuizQuestionsRepository {
 
   async changePublishQuestionStatus(
     updatedQuestion: ChangePublishQuestionStatusType,
-    id: number,
+    id: string,
   ): Promise<Question | null> {
     const question = await this.quizRepository.findOne({
       where: { id },
@@ -81,7 +81,7 @@ export class QuizQuestionsRepository {
     }
   }
 
-  async deleteQuestion(id: number): Promise<boolean> {
+  async deleteQuestion(id: string): Promise<boolean> {
     const result = await this.quizRepository.delete({ id });
     return result.affected === 1 ? true : false;
   }

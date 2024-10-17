@@ -21,11 +21,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   ) {}
 
   async execute(command: CreateBlogCommand) {
-    const userId = Number(command.userId);
-    if (isNaN(userId)) {
-      throw new BadRequestException([new FieldError('UserId is incorrect', 'userId')]);
-    }
-    const user = await this.usersRepository.findUserById(userId);
+    const user = await this.usersRepository.findUserById(command.userId);
     if (!user) {
       throw new BadRequestException([new FieldError('UserId is incorrect', 'userId')]);
     }

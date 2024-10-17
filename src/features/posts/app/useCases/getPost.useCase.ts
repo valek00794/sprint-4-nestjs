@@ -19,12 +19,7 @@ export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
   ) {}
 
   async execute(command: GetPostCommand) {
-    const postId = Number(command.id);
-    const userId = command.userId ? Number(command.userId) : null;
-    if (isNaN(postId)) {
-      throw new NotFoundException('id syntax error');
-    }
-    const post = await this.postsQueryRepository.findPostById(postId);
+    const post = await this.postsQueryRepository.findPostById(command.id);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -36,7 +31,10 @@ export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
       throw new NotFoundException('Post not found');
     }
 
-    const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(post.likes, userId);
+    const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
+      post.likes,
+      command.userId,
+    );
     return this.postsQueryRepository.mapToOutput(post, mapedlikesInfo);
   }
 }

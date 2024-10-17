@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { SearchQueryParametersType, SortDirection } from 'src/features/domain/query.types';
+import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { Paginator } from 'src/features/domain/result.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { BannedUserForBlogViewModel } from '../../api/models/output/users.output.models';
@@ -14,7 +14,7 @@ export class BanInfoQueryRepository {
     @InjectRepository(UsersBanInfoForBlogs)
     protected usersBanInfoForBlogsRepository: Repository<UsersBanInfoForBlogs>,
   ) {}
-  async getBannedUsersForBlog(blogId: number, query?: SearchQueryParametersType) {
+  async getBannedUsersForBlog(blogId: string, query?: SearchQueryParametersType) {
     const sanitizationQuery = getSanitizationQuery(query);
 
     const take = sanitizationQuery.pageSize;

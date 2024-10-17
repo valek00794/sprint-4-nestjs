@@ -25,7 +25,7 @@ export class QuizGameRepository {
     return await this.gameRepository.save(game);
   }
 
-  async findCurrentUserGame(playerId: number): Promise<Game | null> {
+  async findCurrentUserGame(playerId: string): Promise<Game | null> {
     const game = await this.gameRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')
@@ -64,7 +64,7 @@ export class QuizGameRepository {
     return game;
   }
 
-  async findGameById(id: number): Promise<Game | null> {
+  async findGameById(id: string): Promise<Game | null> {
     const game = await this.gameRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.firstPlayerProgress', 'firstPlayerProgress')

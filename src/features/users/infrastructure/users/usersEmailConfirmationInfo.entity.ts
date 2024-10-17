@@ -2,8 +2,8 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class UserEmailConfirmationInfo {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   confirmationCode: string;
@@ -14,6 +14,6 @@ export class UserEmailConfirmationInfo {
   @Column({ type: 'boolean', nullable: false })
   isConfirmed: boolean;
 
-  @Column({ type: 'int', nullable: false })
-  userId: number;
+  @Column({ type: 'varchar', nullable: false })
+  userId: string;
 }

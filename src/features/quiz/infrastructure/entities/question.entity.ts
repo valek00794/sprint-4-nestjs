@@ -3,8 +3,8 @@ import { QuestionOfTheGame } from './questionOfTheGame.entity';
 
 @Entity()
 export class Question {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 500, nullable: false, collation: 'C' })
   body: string;

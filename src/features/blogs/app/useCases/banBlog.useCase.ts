@@ -17,19 +17,15 @@ export class BanBlogUseCase implements ICommandHandler<BanBlogCommand> {
   constructor(protected blogsRepository: BlogsRepository) {}
 
   async execute(command: BanBlogCommand) {
-    const blogId = Number(command.blogId);
-    if (isNaN(blogId)) {
-      throw new NotFoundException('BlogId syntax error');
-    }
-    const blog = await this.blogsRepository.findBlogById(blogId);
+    const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
     if (!command.inputModel.isBanned) {
-      await this.blogsRepository.unBanBlog(blogId);
+      await this.blogsRepository.unBanBlog(command.blogId);
     } else {
       const banDate = new Date().toISOString();
-      await this.blogsRepository.banBlog(blogId, banDate);
+      await this.blogsRepository.banBlog(command.blogId, banDate);
     }
     return;
   }

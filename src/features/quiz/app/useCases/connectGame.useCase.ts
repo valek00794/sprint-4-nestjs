@@ -21,12 +21,11 @@ export class ConnectGameUseCase implements ICommandHandler<ConnectGameCommand> {
   ) {}
 
   async execute(command: ConnectGameCommand) {
-    const playerId = Number(command.playerId);
-    const myActiveGame = await this.gameRepository.findCurrentUserGame(playerId);
+    const myActiveGame = await this.gameRepository.findCurrentUserGame(command.playerId);
     if (myActiveGame) {
       throw new ForbiddenException('Current user is already participating in active pair');
     }
-    const user = await this.usersRepository.findUserById(playerId);
+    const user = await this.usersRepository.findUserById(command.playerId);
     const playerProgress = new PlayerProgress();
     playerProgress.player = user!;
 

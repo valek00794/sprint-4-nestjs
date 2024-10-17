@@ -10,14 +10,14 @@ export class UsersBanInfoForBlogs {
   blog: Blog;
 
   @PrimaryColumn()
-  blogId: number;
+  blogId: string;
 
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'userId' })
   bannedUser: User;
 
   @PrimaryColumn()
-  userId: number;
+  userId: string;
 
   @Column({ type: 'timestamp with time zone', nullable: false })
   banDate: string;

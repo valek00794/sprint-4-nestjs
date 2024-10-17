@@ -5,8 +5,8 @@ import { User } from 'src/features/users/infrastructure/users/users.entity';
 import { CommentsLike } from 'src/features/likes/infrastructure/commentsLikes.entity';
 @Entity()
 export class Comment {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false, collation: 'C' })
   content: string;
@@ -23,10 +23,10 @@ export class Comment {
   post: Post;
 
   @Column()
-  commentatorId: number;
+  commentatorId: string;
 
   @Column()
-  postId: number;
+  postId: string;
 
   @OneToMany(() => CommentsLike, (likes) => likes.comment)
   likes: CommentsLike[];

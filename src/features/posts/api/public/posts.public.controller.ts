@@ -72,11 +72,7 @@ export class PostsPublicController {
     @Req() req: Request,
     @Query() query: SearchQueryParametersType,
   ) {
-    const numberPostId = Number(postId);
-    if (isNaN(numberPostId)) {
-      throw new NotFoundException('Post not found');
-    }
-    const post = await this.postsQueryRepository.findPostById(numberPostId);
+    const post = await this.postsQueryRepository.findPostById(postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -96,7 +92,7 @@ export class PostsPublicController {
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
-    const post = await this.postsQueryRepository.findPostById(Number(postId));
+    const post = await this.postsQueryRepository.findPostById(postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }

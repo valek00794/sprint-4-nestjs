@@ -4,8 +4,8 @@ import { Question } from './question.entity';
 
 @Entity()
 export class QuestionOfTheGame {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => Question, (question) => question.questionOfGames)
   @JoinColumn()

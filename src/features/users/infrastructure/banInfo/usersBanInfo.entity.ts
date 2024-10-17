@@ -2,11 +2,11 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class UsersBanInfo {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ type: 'int', nullable: false })
-  userId: number;
+  @Column({ type: 'varchar', nullable: false })
+  userId: string;
 
   @Column({ type: 'boolean', default: false })
   isBanned: boolean;

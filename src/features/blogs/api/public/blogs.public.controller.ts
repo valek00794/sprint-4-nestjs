@@ -34,7 +34,7 @@ export class BlogsPublicController {
   }
 
   @Get(':id')
-  async getBlog(@Param('id') id: number) {
+  async getBlog(@Param('id') id: string) {
     const blog = await this.blogsQueryRepository.findUnbannedBlogById(id);
     if (!blog) {
       throw new NotFoundException('Blog not found');

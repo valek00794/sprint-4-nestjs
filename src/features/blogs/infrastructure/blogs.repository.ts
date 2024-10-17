@@ -13,7 +13,7 @@ export class BlogsRepository {
     return await this.blogsRepository.save(newBlog);
   }
 
-  async findBlogById(id: number): Promise<Blog | null> {
+  async findBlogById(id: string): Promise<Blog | null> {
     const blog = await this.blogsRepository
       .createQueryBuilder('blog')
       .leftJoinAndSelect('blog.blogOwnerInfo', 'blogOwnerInfo')
@@ -23,7 +23,7 @@ export class BlogsRepository {
     return blog;
   }
 
-  async updateBlog(updatedBlog: BlogType, id: number): Promise<Blog | null> {
+  async updateBlog(updatedBlog: BlogType, id: string): Promise<Blog | null> {
     const blog = await this.blogsRepository.findOne({
       where: { id },
     });
@@ -41,7 +41,7 @@ export class BlogsRepository {
     }
   }
 
-  async deleteBlog(id: number): Promise<boolean> {
+  async deleteBlog(id: string): Promise<boolean> {
     const result = await this.blogsRepository.delete({ id });
     return result.affected === 1 ? true : false;
   }
@@ -50,7 +50,7 @@ export class BlogsRepository {
     return await this.blogsRepository.save(blog);
   }
 
-  async banBlog(id: number, banDate: string): Promise<Blog | null> {
+  async banBlog(id: string, banDate: string): Promise<Blog | null> {
     const blog = await this.blogsRepository.findOne({
       where: { id },
     });
@@ -63,7 +63,7 @@ export class BlogsRepository {
       return null;
     }
   }
-  async unBanBlog(id: number): Promise<Blog | null> {
+  async unBanBlog(id: string): Promise<Blog | null> {
     const blog = await this.blogsRepository.findOne({
       where: { id },
     });

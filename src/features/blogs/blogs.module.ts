@@ -44,6 +44,8 @@ import { BanInfoRepository } from '../users/infrastructure/banInfo/banInfo.repos
 import { UsersBanInfo } from '../users/infrastructure/banInfo/usersBanInfo.entity';
 import { UsersBanInfoForBlogs } from '../users/infrastructure/banInfo/usersBanInfoForBlogs.entity';
 import { BanBlogUseCase } from './app/useCases/banBlog.useCase';
+import { FileStorageService } from 'src/infrastructure/utils/file-storage.service';
+import { BlogImageStorageService } from './infrastructure/blog-image-storage.service';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -67,6 +69,8 @@ const commentsUseCases = [
   GetCommentUseCase,
 ];
 const likesUseCases = [ChangeLikeStatusUseCase];
+
+const services = [FileStorageService, BlogImageStorageService];
 
 @Module({
   imports: [
@@ -103,6 +107,7 @@ const likesUseCases = [ChangeLikeStatusUseCase];
     ...likesUseCases,
     ...usersProviders,
     ...banInfoProviders,
+    ...services,
   ],
 })
 export class BlogsModule {}

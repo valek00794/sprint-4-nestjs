@@ -27,13 +27,9 @@ export class PostsQueryRepository {
     userId?: string,
     withoutBanned?: boolean,
   ): Promise<null | Paginator<PostViewModel[]>> {
-    if (blogId && isNaN(Number(blogId))) {
-      return null;
-    }
-
     let blog;
     if (blogId) {
-      blog = await this.blogsQueryRepository.findBlogById(Number(blogId));
+      blog = await this.blogsQueryRepository.findBlogById(blogId);
     }
     if (!blog && blogId) {
       return null;
@@ -47,7 +43,7 @@ export class PostsQueryRepository {
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
     const qb = this.postsRepository.createQueryBuilder('post');
     if (blogId) {
-      qb.where('post.blogId = :blogId', { blogId: Number(blogId) });
+      qb.where('post.blogId = :blogId', { blogId });
     }
     const query = qb
       .leftJoinAndSelect('post.blog', 'blog')
@@ -65,10 +61,7 @@ export class PostsQueryRepository {
 
     const [posts, count] = await query;
     const postsItems = posts.map((post) => {
-      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
-        post.likes,
-        Number(userId),
-      );
+      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(post.likes, userId);
       return this.mapToOutput(post, mapedlikesInfo);
     });
 
@@ -80,7 +73,7 @@ export class PostsQueryRepository {
     );
   }
 
-  async findPostById(id: number): Promise<Post | null> {
+  async findPostById(id: string): Promise<Post | null> {
     const post = await this.postsRepository.findOne({
       where: [{ id, blog: { isBanned: false } }],
       relations: {

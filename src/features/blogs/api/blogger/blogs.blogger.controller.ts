@@ -44,7 +44,7 @@ export class BlogsBloggerController {
 
   @Get()
   async getBlogs(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
-    return await this.blogsQueryRepository.getBlogs(query, false, false, +req.user!.userId);
+    return await this.blogsQueryRepository.getBlogs(query, false, false, req.user!.userId);
   }
 
   @Post()
@@ -106,7 +106,7 @@ export class BlogsBloggerController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Body() inputModel: CreatePostForBlogModel,
-    @Param('blogId') blogId: number,
+    @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
@@ -118,7 +118,7 @@ export class BlogsBloggerController {
   @Delete(':blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(
-    @Param('blogId') blogId: number,
+    @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {

@@ -3,7 +3,7 @@ export class PostType {
   title: string;
   shortDescription: string;
   content: string;
-  blogId: number;
+  blogId: string;
   blogName?: string;
-  id?: number;
+  id?: string;
 }

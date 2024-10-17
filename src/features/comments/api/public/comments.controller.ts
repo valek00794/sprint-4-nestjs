@@ -46,11 +46,7 @@ export class CommentsController {
     @Param('commentId') commentId: string,
     @Req() req: Request,
   ) {
-    const id = Number(commentId);
-    if (isNaN(id)) {
-      throw new NotFoundException('Comment not found');
-    }
-    const comment = await this.commentsQueryRepository.findCommentById(id);
+    const comment = await this.commentsQueryRepository.findCommentById(commentId);
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }

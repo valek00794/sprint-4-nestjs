@@ -16,7 +16,7 @@ export class PostsRepository {
     const post = await this.postsRepository.save(newPosts);
     return this.findPostbyId(post.id);
   }
-  async findPostbyId(id: number): Promise<Post | null> {
+  async findPostbyId(id: string): Promise<Post | null> {
     return await this.postsRepository.findOne({
       where: [{ id: id }],
       relations: {
@@ -24,7 +24,7 @@ export class PostsRepository {
       },
     });
   }
-  async updatePost(updatedPost: PostType, postId: number): Promise<Post | null> {
+  async updatePost(updatedPost: PostType, postId: string): Promise<Post | null> {
     const post = await this.postsRepository.findOne({
       where: { id: postId },
     });
@@ -41,7 +41,7 @@ export class PostsRepository {
       return null;
     }
   }
-  async deletePost(postId: number): Promise<boolean> {
+  async deletePost(postId: string): Promise<boolean> {
     const result = await this.postsRepository.delete({ id: postId });
     return result.affected === 1 ? true : false;
   }

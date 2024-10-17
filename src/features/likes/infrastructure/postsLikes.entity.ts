@@ -11,5 +11,5 @@ export class PostsLike extends Like {
   post: Post;
 
   @Column()
-  postId: number;
+  postId: string;
 }

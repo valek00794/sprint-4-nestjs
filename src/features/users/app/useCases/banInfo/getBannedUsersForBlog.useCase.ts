@@ -20,20 +20,18 @@ export class GetBannedUsersForBlogUseCase implements ICommandHandler<GetBannedUs
     protected banInfoQueryRepository: BanInfoQueryRepository,
   ) {}
   async execute(command: GetBannedUsersForBlogCommand) {
-    const blogId = +command.blogId;
-    const ownerBlogUserId = command.ownerBlogUserId ? +command.ownerBlogUserId : null;
-    const blog = await this.blogsRepository.findBlogById(blogId);
+    const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
     if (
       blog &&
       blog.blogOwnerInfo &&
-      ownerBlogUserId &&
-      blog.blogOwnerInfo.id !== ownerBlogUserId
+      command.ownerBlogUserId &&
+      blog.blogOwnerInfo.id !== command.ownerBlogUserId
     ) {
       throw new ForbiddenException('You are not owner of blog');
     }
-    return await this.banInfoQueryRepository.getBannedUsersForBlog(blogId, command.query);
+    return await this.banInfoQueryRepository.getBannedUsersForBlog(command.blogId, command.query);
   }
 }

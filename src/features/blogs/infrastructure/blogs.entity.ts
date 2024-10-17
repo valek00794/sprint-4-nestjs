@@ -5,8 +5,8 @@ import { User } from 'src/features/users/infrastructure/users/users.entity';
 
 @Entity()
 export class Blog {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false, collation: 'C' })
   name: string;

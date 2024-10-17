@@ -34,13 +34,13 @@ export class UsersRepository {
     return user;
   }
 
-  async deleteUserById(id: number): Promise<boolean> {
+  async deleteUserById(id: string): Promise<boolean> {
     const result = await this.usersRepository.delete({ id });
     await this.userEmailConfirmationInfoRepository.delete({ userId: id });
     return result.affected === 1 ? true : false;
   }
 
-  async updateUserPassword(userId: number, passwordHash: string): Promise<boolean> {
+  async updateUserPassword(userId: string, passwordHash: string): Promise<boolean> {
     await this.usersRecoveryPassswordRepository.delete({ userId });
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (user) {
@@ -52,7 +52,7 @@ export class UsersRepository {
     }
   }
   async updateConfirmationInfo(
-    userId: number,
+    userId: string,
     emailConfirmationInfo: UserEmailConfirmationInfoType,
   ): Promise<boolean> {
     const confirmationInfo = await this.userEmailConfirmationInfoRepository.findOne({
@@ -70,7 +70,7 @@ export class UsersRepository {
     }
   }
 
-  async updateConfirmation(userId: number): Promise<UserEmailConfirmationInfo | null> {
+  async updateConfirmation(userId: string): Promise<UserEmailConfirmationInfo | null> {
     const emailConfirmation = await this.userEmailConfirmationInfoRepository.findOne({
       where: { userId },
     });
@@ -86,7 +86,7 @@ export class UsersRepository {
   }
 
   async updatePasswordRecoveryInfo(
-    userId: number,
+    userId: string,
     updatedRecoveryInfo: UsersRecoveryPassswordType,
   ): Promise<UsersRecoveryPasssword | null> {
     const usersRecoveryPassword = await this.usersRecoveryPassswordRepository.findOne({
@@ -110,7 +110,7 @@ export class UsersRepository {
     });
   }
 
-  async findUserConfirmationInfoByUserId(userId: number) {
+  async findUserConfirmationInfoByUserId(userId: string) {
     return await this.userEmailConfirmationInfoRepository.findOne({
       where: { userId },
     });
@@ -128,16 +128,16 @@ export class UsersRepository {
 
   async findPasswordRecoveryInfo(recoveryCodeOrUserId: string) {
     return await this.usersRecoveryPassswordRepository.findOne({
-      where: [{ recoveryCode: recoveryCodeOrUserId }, { userId: Number(recoveryCodeOrUserId) }],
+      where: [{ recoveryCode: recoveryCodeOrUserId }, { userId: recoveryCodeOrUserId }],
     });
   }
 
-  async findUserById(id: number): Promise<User | null> {
+  async findUserById(id?: string): Promise<User | null> {
     return await this.usersRepository.findOne({
       where: { id },
     });
   }
-  async updateBanInfo(userId: number, banInfo: UsersBanInfo): Promise<boolean> {
+  async updateBanInfo(userId: string, banInfo: UsersBanInfo): Promise<boolean> {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (user) {
       user.banInfo = banInfo;
