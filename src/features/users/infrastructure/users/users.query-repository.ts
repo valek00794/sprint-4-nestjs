@@ -46,9 +46,7 @@ export class UsersQueryRepository {
         banInfo: true,
       },
       where: [{ login: where.login }, { email: where.email }, { banInfo: where.banInfo }],
-      order: {
-        [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection,
-      },
+      order: { [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection },
       take,
       skip,
     });

@@ -35,9 +35,7 @@ export const getSanitizationQuery = (
     sortDirection:
       query?.sortDirection && query.sortDirection.toUpperCase() === 'ASC'
         ? 'ASC'
-        : query?.sortDirection && query.sortDirection.toUpperCase() === 'DESC'
-          ? 'DESC'
-          : defaultSearchQueryParameters.sortDirection,
+        : defaultSearchQueryParameters.sortDirection,
     searchLoginTerm: query?.searchLoginTerm
       ? query.searchLoginTerm
       : defaultSearchQueryParameters.searchLoginTerm,
