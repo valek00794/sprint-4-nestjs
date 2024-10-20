@@ -1,3 +1,5 @@
+import { ImageInfo, ImageType } from 'src/features/blogs/domain/image.types';
+
 export class BlogOwnerInfo {
   constructor(
     public userId: string,
@@ -11,6 +13,7 @@ export class BanInfo {
     public banDate: string | null,
   ) {}
 }
+
 export class BlogViewModel {
   constructor(
     public id: string,
@@ -19,6 +22,7 @@ export class BlogViewModel {
     public websiteUrl: string,
     public createdAt: string,
     public isMembership: boolean,
+    public images: ImageInfo,
     public banInfo?: BanInfo,
     public blogOwnerInfo?: BlogOwnerInfo | null,
   ) {}

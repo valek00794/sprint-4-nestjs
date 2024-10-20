@@ -1,9 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
-import { PostImageSize } from '../domain/blogs.types';
+import { PostImageSize } from '../domain/image.types';
 
 @Entity()
-export class postImage {
+export class PostImageInfo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

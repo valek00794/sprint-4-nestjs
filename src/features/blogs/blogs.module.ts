@@ -45,9 +45,15 @@ import { UsersBanInfo } from '../users/infrastructure/banInfo/usersBanInfo.entit
 import { UsersBanInfoForBlogs } from '../users/infrastructure/banInfo/usersBanInfoForBlogs.entity';
 import { BanBlogUseCase } from './app/useCases/banBlog.useCase';
 import { FileStorageService } from 'src/infrastructure/utils/file-storage.service';
-import { BlogImageStorageService } from './infrastructure/blog-image-storage.service';
+import { ImageStorageService } from './infrastructure/image-storage.service';
+import { UploadBlogMainImageUseCase } from './app/useCases/uploadBlogMainImage.userCase';
+import { ImageInfoRepository } from './infrastructure/blog-image.repository';
+import { BlogWallpaperInfo } from './infrastructure/blog-wallpaper-info.entity';
+import { BlogMainImagesInfo } from './infrastructure/blog-main-images-info.entity';
+import { UploadBlogWallpaperImageUseCase } from './app/useCases/uploadBlogWallpaperImage.useCase';
+import { GetBlogImagesUseCase } from './app/useCases/getBlogImages.userCase';
 
-const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository];
+const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository, ImageInfoRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
 const usersProviders = [UsersRepository];
 const commentsProviders = [CommentsRepository, CommentsQueryRepository];
@@ -61,6 +67,12 @@ const blogsUseCases = [
   DeleteBlogUseCase,
   BanBlogUseCase,
 ];
+
+const imagesUseCases = [
+  UploadBlogMainImageUseCase,
+  UploadBlogWallpaperImageUseCase,
+  GetBlogImagesUseCase,
+];
 const postsUseCases = [CreatePostUseCase, UpdatePostUseCase, DeletePostUseCase, GetPostUseCase];
 const commentsUseCases = [
   CreateCommentUseCase,
@@ -70,7 +82,7 @@ const commentsUseCases = [
 ];
 const likesUseCases = [ChangeLikeStatusUseCase];
 
-const services = [FileStorageService, BlogImageStorageService];
+const services = [FileStorageService, ImageStorageService];
 
 @Module({
   imports: [
@@ -87,6 +99,8 @@ const services = [FileStorageService, BlogImageStorageService];
       UsersRecoveryPasssword,
       UsersBanInfo,
       UsersBanInfoForBlogs,
+      BlogWallpaperInfo,
+      BlogMainImagesInfo,
     ]),
   ],
   controllers: [
@@ -108,6 +122,7 @@ const services = [FileStorageService, BlogImageStorageService];
     ...usersProviders,
     ...banInfoProviders,
     ...services,
+    ...imagesUseCases,
   ],
 })
 export class BlogsModule {}

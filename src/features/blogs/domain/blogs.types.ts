@@ -10,14 +10,3 @@ export class BlogType {
     public blogOwnerInfo: User,
   ) {}
 }
-
-export enum BlogImageType {
-  Wallpaper = 'wallpaper',
-  Icon = 'icon',
-}
-
-export enum PostImageSize {
-  Original = 'original',
-  Middle = 'middle',
-  Small = 'small',
-}

@@ -7,6 +7,9 @@ import { getSanitizationQuery } from 'src/features/utils';
 import { Paginator } from 'src/features/domain/result.types';
 import { BlogOwnerInfo, BlogViewModel } from '../api/models/output/blogs.output.model';
 import { Blog } from './blogs.entity';
+import { ImageInfo, ImageType } from '../domain/image.types';
+import { BlogMainImagesInfo } from './blog-main-images-info.entity';
+import { BlogWallpaperInfo } from './blog-wallpaper-info.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -82,24 +85,36 @@ export class BlogsQueryRepository {
 
   mapToOutput(blog: Blog): BlogViewModel {
     return new BlogViewModel(
-      blog.id!.toString(),
+      blog.id,
       blog.name,
       blog.description,
       blog.websiteUrl,
       blog.createdAt,
       blog.isMembership,
+      new ImageInfo(
+        blog.mainImages ? blog.mainImages.map((mi) => this.mapImageToOutput(mi)) : [],
+        blog.wallpaperImage ? this.mapImageToOutput(blog.wallpaperImage) : null,
+      ),
     );
+  }
+
+  mapImageToOutput(image: BlogMainImagesInfo | BlogWallpaperInfo) {
+    return new ImageType(image.key, image.width, image.height, image.size);
   }
 
   mapToBloggerOutput(blog: Blog): BlogViewModel {
     const banInfo = { isBanned: blog.isBanned, banDate: blog.banDate };
     return new BlogViewModel(
-      blog.id!.toString(),
+      blog.id,
       blog.name,
       blog.description,
       blog.websiteUrl,
       blog.createdAt,
       blog.isMembership,
+      new ImageInfo(
+        blog.mainImages ? blog.mainImages.map((mi) => this.mapImageToOutput(mi)) : [],
+        blog.wallpaperImage ? this.mapImageToOutput(blog.wallpaperImage) : null,
+      ),
       banInfo,
       blog.blogOwnerInfo
         ? new BlogOwnerInfo(blog.blogOwnerInfo.id.toString(), blog.blogOwnerInfo.login)

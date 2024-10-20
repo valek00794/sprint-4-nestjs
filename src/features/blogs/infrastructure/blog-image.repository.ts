@@ -1,40 +1,72 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlogImage } from './blog-image.entity';
-import { BlogImageType } from '../domain/blogs.types';
 import { Repository } from 'typeorm';
 
+import { ImageType } from '../domain/image.types';
+import { BlogMainImagesInfo } from './blog-main-images-info.entity';
+import { BlogWallpaperInfo } from './blog-wallpaper-info.entity';
+
 @Injectable()
-export class BlogImageRepository {
-  constructor(@InjectRepository(BlogImage) protected blogsImageRepository: Repository<BlogImage>) {}
-  public async setBlogImage(blogId: number, type: BlogImageType, imageKey: string) {
-    const existingPhoto = await this.blogsImageRepository.findOne({
-      where: { blogId, type },
+export class ImageInfoRepository {
+  constructor(
+    @InjectRepository(BlogWallpaperInfo)
+    protected blogWallpaperInfoRepository: Repository<BlogWallpaperInfo>,
+    @InjectRepository(BlogMainImagesInfo)
+    protected blogMainImagesInfoRepository: Repository<BlogMainImagesInfo>,
+  ) {}
+  public async saveWallpaperImageInfo(
+    blogId: string,
+    imageKey: string,
+    width: number,
+    height: number,
+    size: number,
+  ) {
+    const existingPhoto = await this.blogWallpaperInfoRepository.findOne({
+      where: { blogId },
     });
     if (existingPhoto) {
-      existingPhoto.updatedAt = new Date().toISOString();
       existingPhoto.key = imageKey;
-      return await this.blogsImageRepository.save(existingPhoto);
+      existingPhoto.width = width;
+      existingPhoto.height = height;
+      existingPhoto.size = size;
+      //existingPhoto.createdAt = new Date().toISOString();
+      return await this.blogWallpaperInfoRepository.save(existingPhoto);
     } else {
-      const newPhoto = this.blogsImageRepository.create({
+      const newPhoto = this.blogWallpaperInfoRepository.create({
         blogId,
-        type,
+
         key: imageKey,
+        width,
+        height,
+        size,
       });
-      return await this.blogsImageRepository.save(newPhoto);
+      return await this.blogWallpaperInfoRepository.save(newPhoto);
     }
   }
-  // public async getAvatarKeyByUserId(userId: User['id']): Promise<UserAvatar['avatarKey'] | null> {
-  //   const result = await this.txHost.tx.userAvatar.findUnique({
-  //     where: { userId },
-  //     select: { avatarKey: true },
-  //   });
-  //   return result ? result.avatarKey : null;
-  // }
 
+  public async saveMainImageInfo(image: BlogMainImagesInfo): Promise<BlogMainImagesInfo> {
+    return this.blogMainImagesInfoRepository.save(image);
+  }
+
+  public async getBlogWallpaperInfo(blogId: string): Promise<BlogWallpaperInfo | null> {
+    const result = await this.blogWallpaperInfoRepository.findOne({
+      where: { blogId },
+    });
+    return result ? result : null;
+  }
+
+  public async getBlogWMainImagesInfo(blogId: string): Promise<BlogMainImagesInfo[] | null> {
+    const result = await this.blogMainImagesInfoRepository.find({
+      where: { blogId },
+    });
+    return result.length ? result : null;
+  }
+
+  mapToOutput(wallpaper: BlogWallpaperInfo | BlogMainImagesInfo, wallPaperUrl: string): ImageType {
+    return new ImageType(wallPaperUrl, wallpaper.width, wallpaper.height, wallpaper.size);
+  }
   // public async deleteAvatarKeyByUserId(userId: User['id']): Promise<UserAvatar> {
   //   return await this.txHost.tx.userAvatar.delete({
   //     where: { userId },
-  //   });
   // }
 }
