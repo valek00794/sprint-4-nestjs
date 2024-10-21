@@ -1,24 +1,26 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 
 import { NotFoundException } from '@nestjs/common';
-import { PostsQueryRepository } from '../../infrastructure/posts.query-repository';
+import { PostsQueryRepository } from '../../../infrastructure/posts.query-repository';
 import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.query-repository';
+import { GetPostImagesQuery } from './getPostImages.useCase';
 
-export class GetPostCommand {
+export class GetPostQuery {
   constructor(
     public id: string,
     public userId?: string,
   ) {}
 }
 
-@CommandHandler(GetPostCommand)
-export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
+@QueryHandler(GetPostQuery)
+export class GetPostUseCase implements IQueryHandler<GetPostQuery> {
   constructor(
     protected postsQueryRepository: PostsQueryRepository,
     protected likesQueryRepository: LikesQueryRepository,
+    private queryBus: QueryBus,
   ) {}
 
-  async execute(command: GetPostCommand) {
+  async execute(command: GetPostQuery) {
     const post = await this.postsQueryRepository.findPostById(command.id);
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -35,6 +37,7 @@ export class GetPostUseCase implements ICommandHandler<GetPostCommand> {
       post.likes,
       command.userId,
     );
-    return this.postsQueryRepository.mapToOutput(post, mapedlikesInfo);
+    const images = await this.queryBus.execute(new GetPostImagesQuery(post.id));
+    return this.postsQueryRepository.mapToOutput(post, mapedlikesInfo, images);
   }
 }

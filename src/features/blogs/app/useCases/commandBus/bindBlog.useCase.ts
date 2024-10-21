@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException } from '@nestjs/common';
 
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { FieldError } from 'src/infrastructure/exception.filter.types';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
+import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 
 export class BindBlogCommand {
   constructor(

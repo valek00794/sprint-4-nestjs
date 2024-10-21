@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 
-import { ChangeBanStatusForBlogInputModel } from '../../api/models/input/blogs.input.model';
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
+import { ChangeBanStatusForBlogInputModel } from 'src/features/blogs/api/models/input/blogs.input.model';
+import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 
 export class BanBlogCommand {
   constructor(

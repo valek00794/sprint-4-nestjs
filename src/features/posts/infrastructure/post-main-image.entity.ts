@@ -1,9 +1,16 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { PostImageSizeType } from '../../blogs/domain/image.types';
 
 @Entity()
-export class BlogWallpaperInfo {
-  @PrimaryColumn('uuid')
-  blogId: string;
+export class PostMainImageInfo {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  postId: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  sizeType: PostImageSizeType;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   key: string;

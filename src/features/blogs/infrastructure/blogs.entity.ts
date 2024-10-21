@@ -1,17 +1,7 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Post } from 'src/features/posts/infrastructure/posts.entity';
 import { User } from 'src/features/users/infrastructure/users/users.entity';
-import { BlogWallpaperInfo } from './blog-wallpaper-info.entity';
-import { BlogMainImagesInfo } from './blog-main-images-info.entity';
 
 @Entity()
 export class Blog {
@@ -45,12 +35,4 @@ export class Blog {
 
   @Column({ type: 'timestamp with time zone', default: null })
   banDate: string | null;
-
-  @OneToOne(() => BlogWallpaperInfo)
-  @JoinColumn()
-  wallpaperImage: BlogWallpaperInfo | null;
-
-  @OneToMany(() => BlogMainImagesInfo, (image) => image.blogId)
-  @JoinColumn()
-  mainImages: BlogMainImagesInfo[] | null;
 }

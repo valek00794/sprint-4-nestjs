@@ -12,13 +12,13 @@ export const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png'];
 @ValidatorConstraint({ name: 'isValidFile', async: true })
 export class IsValidFileConstraint implements ValidatorConstraintInterface {
   private readonly maxSize: number;
-  private readonly maxWidth: number;
-  private readonly maxHeight: number;
+  private readonly allowedWidth: number;
+  private readonly allowedHeight: number;
 
-  constructor(maxSize: number, maxWidth: number, maxHeight: number) {
+  constructor(maxSize: number, allowedWidth: number, allowedHeight: number) {
     this.maxSize = maxSize;
-    this.maxWidth = maxWidth;
-    this.maxHeight = maxHeight;
+    this.allowedWidth = allowedWidth;
+    this.allowedHeight = allowedHeight;
   }
 
   async validate(file: Express.Multer.File, args: ValidationArguments) {
@@ -35,21 +35,21 @@ export class IsValidFileConstraint implements ValidatorConstraintInterface {
     const width = metadata.width;
     const height = metadata.height;
     if (width === undefined || height === undefined) return false;
-    if (width > this.maxWidth || height > this.maxHeight) return false;
+    if (width !== this.allowedWidth || height !== this.allowedHeight) return false;
 
     return true;
   }
 
   defaultMessage(args: ValidationArguments) {
     return `File must be present, less than ${this.maxSize} MB, of type: ${ALLOWED_MIMETYPES.join(', ')}, 
-      and dimensions WxH at least ${this.maxWidth}x${this.maxHeight} pixels.`;
+      and dimensions WxH must be ${this.allowedWidth}x${this.allowedHeight} pixels.`;
   }
 }
 
 export function IsValidFile(
   maxSize: number,
-  maxWidth: number,
-  maxHeight: number,
+  allowedWidth: number,
+  allowedHeight: number,
   validationOptions?: ValidationOptions,
 ) {
   return function (object: Record<string, any>, propertyName: string) {
@@ -58,7 +58,7 @@ export function IsValidFile(
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      validator: new IsValidFileConstraint(maxSize, maxWidth, maxHeight),
+      validator: new IsValidFileConstraint(maxSize, allowedWidth, allowedHeight),
     });
   };
 }

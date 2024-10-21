@@ -1,6 +1,6 @@
 import { IsDefined, IsNotEmpty, MaxLength } from 'class-validator';
 import { Trim } from 'src/infrastructure/decorators/transform/trim.decorator';
-import { IsBlogIdExist } from 'src/infrastructure/decorators/validate/blogId.decorator';
+import { IsBlogIdExist } from 'src/infrastructure/decorators/validate/blog-exists.decorator';
 
 const VALIDATE_PHARAMS = {
   titleMaxLength: 30,

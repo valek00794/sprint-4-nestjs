@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class BlogMainImagesInfo {
+export class BlogMainImageInfo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

@@ -9,35 +9,29 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
-import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query-repository';
-import { PostsService } from 'src/features/posts/app/posts.service';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
-import { BlogsService } from '../../app/blogs.service';
-import { BlogsQueryRepository } from '../../infrastructure/blogs.query-repository';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
-import { BindBlogCommand } from '../../app/useCases/bindBlog.useCase';
 import { ChangeBanStatusForBlogInputModel } from '../models/input/blogs.input.model';
-import { BanBlogCommand } from '../../app/useCases/banBlog.useCase';
+import { GetBlogsQuery } from '../../app/useCases/queryBus/getBlogs.useCase';
+import { BanBlogCommand } from '../../app/useCases/commandBus/banBlog.useCase';
+import { BindBlogCommand } from '../../app/useCases/commandBus/bindBlog.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)
 @Controller(SETTINGS.PATH.blogsSa)
 export class BlogsAdminController {
   constructor(
-    protected blogsService: BlogsService,
-    protected postsService: PostsService,
-    protected blogsQueryRepository: BlogsQueryRepository,
-    protected postsQueryRepository: PostsQueryRepository,
     private commandBus: CommandBus,
+    private queryBus: QueryBus,
   ) {}
 
   @Get()
   async getBlogs(@Query() query?: SearchQueryParametersType) {
-    return await this.blogsQueryRepository.getBlogs(query, true, false);
+    return await this.queryBus.execute(new GetBlogsQuery(query, true, false));
   }
 
   @Put(':id/bind-with-user/:userId')

@@ -11,6 +11,7 @@ import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.qu
 import { Post } from './posts.entity';
 import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.query-repository';
 import { Blog } from 'src/features/blogs/infrastructure/blogs.entity';
+import { ImageInfo } from 'src/features/blogs/domain/image.types';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -89,19 +90,24 @@ export class PostsQueryRepository {
     return post;
   }
 
-  mapToOutput(post: Post, extendedLikesInfo?: ExtendedLikesInfo): PostViewModel {
+  mapToOutput(
+    post: Post,
+    extendedLikesInfo?: ExtendedLikesInfo,
+    images?: ImageInfo,
+  ): PostViewModel {
     const extendedLikesInfoView = extendedLikesInfo
       ? extendedLikesInfo
       : new ExtendedLikesInfo(0, 0, LikeStatus.None, []);
     return {
-      id: post.id.toString(),
+      id: post.id,
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
-      blogId: post.blogId.toString(),
+      blogId: post.blogId,
       blogName: post.blog.name,
       createdAt: post.createdAt,
       extendedLikesInfo: extendedLikesInfoView,
+      images: images ? images : new ImageInfo([]),
     };
   }
 }

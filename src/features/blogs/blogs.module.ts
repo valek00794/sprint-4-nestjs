@@ -6,11 +6,7 @@ import { BlogsPublicController } from './api/public/blogs.public.controller';
 import { BlogsService } from './app/blogs.service';
 import { BlogsRepository } from './infrastructure/blogs.repository';
 import { BlogsQueryRepository } from './infrastructure/blogs.query-repository';
-import { UpdateBlogUseCase } from './app/useCases/updateBlog.useCase';
-import { CreateBlogUseCase } from './app/useCases/createBlog.useCase';
 import { PostsPublicController } from '../posts/api/public/posts.public.controller';
-import { UpdatePostUseCase } from '../posts/app/useCases/updatePost.useCase';
-import { CreatePostUseCase } from '../posts/app/useCases/createPost.useCase';
 import { PostsQueryRepository } from '../posts/infrastructure/posts.query-repository';
 import { PostsRepository } from '../posts/infrastructure/posts.repository';
 import { PostsService } from '../posts/app/posts.service';
@@ -30,28 +26,37 @@ import { Comment } from '../comments/infrastructure/comments.entity';
 import { PostsLike } from '../likes/infrastructure/postslikes.entity';
 import { CommentsLike } from '../likes/infrastructure/commentsLikes.entity';
 import { Like } from '../likes/infrastructure/likes.entity';
-import { BindBlogUseCase } from './app/useCases/bindBlog.useCase';
 import { UsersRepository } from '../users/infrastructure/users/users.repository';
 import { User } from '../users/infrastructure/users/users.entity';
 import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEmailConfirmationInfo.entity';
 import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
 import { BlogsBloggerController } from './api/blogger/blogs.blogger.controller';
-import { DeleteBlogUseCase } from './app/useCases/deleteBlog.useCase';
-import { DeletePostUseCase } from '../posts/app/useCases/deletePost.useCase';
 import { GetCommentUseCase } from '../comments/app/useCases/getComment.useCase';
-import { GetPostUseCase } from '../posts/app/useCases/getPost.useCase';
+import { GetPostUseCase } from '../posts/app/useCases/queryBus/getPost.useCase';
 import { BanInfoRepository } from '../users/infrastructure/banInfo/banInfo.repository';
 import { UsersBanInfo } from '../users/infrastructure/banInfo/usersBanInfo.entity';
 import { UsersBanInfoForBlogs } from '../users/infrastructure/banInfo/usersBanInfoForBlogs.entity';
-import { BanBlogUseCase } from './app/useCases/banBlog.useCase';
 import { FileStorageService } from 'src/infrastructure/utils/file-storage.service';
 import { ImageStorageService } from './infrastructure/image-storage.service';
-import { UploadBlogMainImageUseCase } from './app/useCases/uploadBlogMainImage.userCase';
 import { ImageInfoRepository } from './infrastructure/blog-image.repository';
 import { BlogWallpaperInfo } from './infrastructure/blog-wallpaper-info.entity';
-import { BlogMainImagesInfo } from './infrastructure/blog-main-images-info.entity';
-import { UploadBlogWallpaperImageUseCase } from './app/useCases/uploadBlogWallpaperImage.useCase';
-import { GetBlogImagesUseCase } from './app/useCases/getBlogImages.userCase';
+import { BlogMainImageInfo } from './infrastructure/blog-main-images-info.entity';
+import { GetBlogImagesUseCase } from './app/useCases/queryBus/getBlogImages.useCase';
+import { GetBlogsUseCase } from './app/useCases/queryBus/getBlogs.useCase';
+import { PostMainImageInfo } from '../posts/infrastructure/post-main-image.entity';
+import { GetPostsUseCase } from '../posts/app/useCases/queryBus/getPosts.useCase';
+import { GetPostImagesUseCase } from '../posts/app/useCases/queryBus/getPostImages.useCase';
+import { DeletePostUseCase } from '../posts/app/useCases/commandBus/deletePost.useCase';
+import { CreatePostUseCase } from '../posts/app/useCases/commandBus/createPost.useCase';
+import { UpdatePostUseCase } from '../posts/app/useCases/commandBus/updatePost.useCase';
+import { BanBlogUseCase } from './app/useCases/commandBus/banBlog.useCase';
+import { UploadBlogMainImageUseCase } from './app/useCases/commandBus/uploadBlogMainImage.useCase';
+import { UploadBlogWallpaperImageUseCase } from './app/useCases/commandBus/uploadBlogWallpaperImage.useCase';
+import { UploadPostMainImageUseCase } from './app/useCases/commandBus/uploadPostMainImage.useCase';
+import { BindBlogUseCase } from './app/useCases/commandBus/bindBlog.useCase';
+import { CreateBlogUseCase } from './app/useCases/commandBus/createBlog.useCase';
+import { DeleteBlogUseCase } from './app/useCases/commandBus/deleteBlog.useCase';
+import { UpdateBlogUseCase } from './app/useCases/commandBus/updateBlog.useCase';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository, ImageInfoRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -66,14 +71,23 @@ const blogsUseCases = [
   BindBlogUseCase,
   DeleteBlogUseCase,
   BanBlogUseCase,
+  GetBlogsUseCase,
 ];
 
 const imagesUseCases = [
   UploadBlogMainImageUseCase,
   UploadBlogWallpaperImageUseCase,
+  UploadPostMainImageUseCase,
   GetBlogImagesUseCase,
+  GetPostImagesUseCase,
 ];
-const postsUseCases = [CreatePostUseCase, UpdatePostUseCase, DeletePostUseCase, GetPostUseCase];
+const postsUseCases = [
+  CreatePostUseCase,
+  UpdatePostUseCase,
+  DeletePostUseCase,
+  GetPostUseCase,
+  GetPostsUseCase,
+];
 const commentsUseCases = [
   CreateCommentUseCase,
   UpdateCommentUseCase,
@@ -100,7 +114,8 @@ const services = [FileStorageService, ImageStorageService];
       UsersBanInfo,
       UsersBanInfoForBlogs,
       BlogWallpaperInfo,
-      BlogMainImagesInfo,
+      BlogMainImageInfo,
+      PostMainImageInfo,
     ]),
   ],
   controllers: [

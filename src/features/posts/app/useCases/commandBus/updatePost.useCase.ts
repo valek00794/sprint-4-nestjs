@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { CreatePostModel } from '../../api/models/input/posts.input.model';
-import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
+import { CreatePostModel } from 'src/features/posts/api/models/input/posts.input.model';
+import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
 
 export class UpdatePostCommand {
   constructor(

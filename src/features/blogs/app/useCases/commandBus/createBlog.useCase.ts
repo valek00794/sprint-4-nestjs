@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UnauthorizedException } from '@nestjs/common';
 
-import { CreateBlogInputModel } from '../../api/models/input/blogs.input.model';
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
+import { CreateBlogInputModel } from 'src/features/blogs/api/models/input/blogs.input.model';
+import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 
 export class CreateBlogCommand {
   constructor(

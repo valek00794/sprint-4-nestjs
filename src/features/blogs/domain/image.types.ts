@@ -1,4 +1,4 @@
-export enum PostImageSize {
+export enum PostImageSizeType {
   Original = 'original',
   Middle = 'middle',
   Small = 'small',
@@ -7,7 +7,7 @@ export enum PostImageSize {
 export class ImageInfo {
   constructor(
     public main: ImageType[],
-    public wallpaper: ImageType | null,
+    public wallpaper?: ImageType | null,
   ) {}
 }
 

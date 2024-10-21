@@ -7,15 +7,7 @@ import { FileStorageService } from 'src/infrastructure/utils/file-storage.servic
 @Injectable()
 export class ImageStorageService {
   constructor(private readonly fileStorageService: FileStorageService) {}
-  public async saveBlogImage(
-    userId: string,
-    blogId: string,
-    image: Buffer,
-    mimeType: string,
-  ): Promise<{
-    imageUrl: string;
-    imageKey: string;
-  }> {
+  public async saveBlogImage(userId: string, blogId: string, image: Buffer, mimeType: string) {
     const s3Client = this.fileStorageService.getS3Client();
     const fileExtension = mimeType.split('/')[1];
     const uuid = uuidv4();
@@ -34,33 +26,28 @@ export class ImageStorageService {
   }
   public async savePostImage(
     userId: string,
-    posts: string,
+    blogId: string,
+    postId: string,
     image: Buffer,
     mimeType: string,
-  ): Promise<{
-    imageUrl: string;
-    imageKey: string;
-  }> {
+  ) {
     const s3Client = this.fileStorageService.getS3Client();
     const fileExtension = mimeType.split('/')[1];
     const uuid = uuidv4();
     const bucketName = this.fileStorageService.getBucketName();
     const params = {
       Bucket: bucketName,
-      Key: `users/${userId}/posts/${posts}/${uuid}.${fileExtension}`,
+      Key: `users/${userId}/blogs/${blogId}/posts/${postId}/${uuid}.${fileExtension}`,
       Body: image,
       ContentType: mimeType,
       ACL: ObjectCannedACL.public_read,
     };
     await s3Client.send(new PutObjectCommand(params));
-    const imageUrl = this.getImageUrl(params.Key);
-    const imageKey = params.Key;
-    return { imageUrl, imageKey };
+    return params.Key;
   }
 
   public getImageUrl(imageKey: string): string {
     const publicUrl = this.fileStorageService.getPublicUrl();
-    //const bucketName = this.fileStorageService.getBucketName();
     return `${publicUrl}/${imageKey}`;
   }
 

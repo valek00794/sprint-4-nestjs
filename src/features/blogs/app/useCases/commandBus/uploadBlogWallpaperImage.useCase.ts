@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import sharp from 'sharp';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { ImageStorageService } from '../../infrastructure/image-storage.service';
-import { ImageInfoRepository } from '../../infrastructure/blog-image.repository';
-import { BlogsQueryRepository } from '../../infrastructure/blogs.query-repository';
+import { ImageInfoRepository } from 'src/features/blogs/infrastructure/blog-image.repository';
+import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.query-repository';
+import { ImageStorageService } from 'src/features/blogs/infrastructure/image-storage.service';
 
 export class UploadBlogWallpaperImageCommand {
   constructor(
@@ -25,7 +25,8 @@ export class UploadBlogWallpaperImageUseCase
   ) {}
   async execute(command: UploadBlogWallpaperImageCommand) {
     const blog = await this.blogsQueryRepository.findBlogById(command.blogId);
-    if (!blog || (blog.blogOwnerInfo && blog.blogOwnerInfo.id !== command.userId)) {
+    if (!blog) throw new NotFoundException();
+    if (blog.blogOwnerInfo && blog.blogOwnerInfo.id !== command.userId) {
       throw new ForbiddenException(
         'User try to update blog wallpaper that doesnt belong to current user',
       );
