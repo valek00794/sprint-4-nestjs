@@ -12,24 +12,38 @@ import {
   NotFoundException,
   HttpCode,
   Req,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { validate } from 'class-validator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query-repository';
-import { CreatePostCommand } from 'src/features/posts/app/useCases/createPost.useCase';
 import { BlogsService } from '../../app/blogs.service';
 import { BlogsQueryRepository } from '../../infrastructure/blogs.query-repository';
 import { CreateBlogInputModel, CreatePostForBlogModel } from '../models/input/blogs.input.model';
-import { CreateBlogCommand } from '../../app/useCases/createBlog.useCase';
-import { UpdateBlogCommand } from '../../app/useCases/updateBlog.useCase';
-import { UpdatePostCommand } from 'src/features/posts/app/useCases/updatePost.useCase';
 import { AuthBearerGuard } from 'src/infrastructure/guards/auth-bearer.guards';
-import { DeleteBlogCommand } from '../../app/useCases/deleteBlog.useCase';
-import { DeletePostCommand } from 'src/features/posts/app/useCases/deletePost.useCase';
 import { CommentsQueryRepository } from 'src/features/comments/infrastructure/comments.query-repository';
+import { BlogMainFile, BlogWallpaperFile, PostMainFile } from '../models/input/image.input.model';
+import { FieldError } from 'src/infrastructure/exception.filter.types';
+import { GetBlogImagesQuery } from '../../app/useCases/queryBus/getBlogImages.useCase';
+import { GetBlogsQuery } from '../../app/useCases/queryBus/getBlogs.useCase';
+import { GetPostsQuery } from '../../../posts/app/useCases/queryBus/getPosts.useCase';
+import { GetPostImagesQuery } from 'src/features/posts/app/useCases/queryBus/getPostImages.useCase';
+import { CreatePostCommand } from 'src/features/posts/app/useCases/commandBus/createPost.useCase';
+import { UpdatePostCommand } from 'src/features/posts/app/useCases/commandBus/updatePost.useCase';
+import { DeletePostCommand } from 'src/features/posts/app/useCases/commandBus/deletePost.useCase';
+import { CreateBlogCommand } from '../../app/useCases/commandBus/createBlog.useCase';
+import { DeleteBlogCommand } from '../../app/useCases/commandBus/deleteBlog.useCase';
+import { UpdateBlogCommand } from '../../app/useCases/commandBus/updateBlog.useCase';
+import { UploadBlogMainImageCommand } from '../../app/useCases/commandBus/uploadBlogMainImage.useCase';
+import { UploadBlogWallpaperImageCommand } from '../../app/useCases/commandBus/uploadBlogWallpaperImage.useCase';
+import { UploadPostMainImageCommand } from '../../app/useCases/commandBus/uploadPostMainImage.useCase';
 
 @UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.blogsBlogger)
@@ -40,11 +54,12 @@ export class BlogsBloggerController {
     protected postsQueryRepository: PostsQueryRepository,
     protected commentsQueryRepository: CommentsQueryRepository,
     private commandBus: CommandBus,
+    private queryBus: QueryBus,
   ) {}
 
   @Get()
   async getBlogs(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
-    return await this.blogsQueryRepository.getBlogs(query, false, false, +req.user!.userId);
+    return await this.queryBus.execute(new GetBlogsQuery(query, false, false, req.user!.userId));
   }
 
   @Post()
@@ -82,7 +97,9 @@ export class BlogsBloggerController {
     @Req() req: Request,
     @Query() query?: SearchQueryParametersType,
   ) {
-    const posts = await this.postsQueryRepository.getPosts(query, blogId, req.user?.userId, false);
+    const posts = await this.queryBus.execute(
+      new GetPostsQuery(query, blogId, req.user!.userId, false),
+    );
     if (!posts) {
       throw new NotFoundException('Blog not found');
     }
@@ -106,7 +123,7 @@ export class BlogsBloggerController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Body() inputModel: CreatePostForBlogModel,
-    @Param('blogId') blogId: number,
+    @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
@@ -118,7 +135,7 @@ export class BlogsBloggerController {
   @Delete(':blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(
-    @Param('blogId') blogId: number,
+    @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
@@ -128,5 +145,70 @@ export class BlogsBloggerController {
   @Get('comments')
   async getComments(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
     return await this.commentsQueryRepository.getComments(undefined, query, req.user!.userId);
+  }
+
+  @Post(':blogId/images/wallpaper')
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(HttpStatus.CREATED)
+  async uploadBlogWallpaper(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('blogId') blogId: string,
+    @Req() req: Request,
+  ) {
+    const blogWallpaperFile = new BlogWallpaperFile();
+    blogWallpaperFile.file = file;
+    const errors = await validate(blogWallpaperFile);
+    if (errors.length > 0) {
+      throw new BadRequestException(
+        errors.map((error) => new FieldError(error.constraints!['isValidFile'], error.property)),
+      );
+    }
+    await this.commandBus.execute(
+      new UploadBlogWallpaperImageCommand(file, blogId, req.user!.userId),
+    );
+    return await this.queryBus.execute(new GetBlogImagesQuery(blogId));
+  }
+
+  @Post(':blogId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(HttpStatus.CREATED)
+  async uploadBlogMainImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('blogId') blogId: string,
+    @Req() req: Request,
+  ) {
+    const blogMainFile = new BlogMainFile();
+    blogMainFile.file = file;
+    const errors = await validate(blogMainFile);
+    if (errors.length > 0) {
+      throw new BadRequestException(
+        errors.map((error) => new FieldError(error.constraints!['isValidFile'], error.property)),
+      );
+    }
+    await this.commandBus.execute(new UploadBlogMainImageCommand(file, blogId, req.user!.userId));
+    return await this.queryBus.execute(new GetBlogImagesQuery(blogId));
+  }
+
+  @Post(':blogId/posts/:postId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(HttpStatus.CREATED)
+  async uploadPostMainImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('blogId') blogId: string,
+    @Param('postId') postId: string,
+    @Req() req: Request,
+  ) {
+    const postMainFile = new PostMainFile();
+    postMainFile.file = file;
+    const errors = await validate(postMainFile);
+    if (errors.length > 0) {
+      throw new BadRequestException(
+        errors.map((error) => new FieldError(error.constraints!['isValidFile'], error.property)),
+      );
+    }
+    await this.commandBus.execute(
+      new UploadPostMainImageCommand(file, blogId, postId, req.user!.userId),
+    );
+    return await this.queryBus.execute(new GetPostImagesQuery(postId));
   }
 }

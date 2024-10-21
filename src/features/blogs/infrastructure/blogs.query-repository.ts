@@ -4,9 +4,9 @@ import { Repository } from 'typeorm';
 
 import { SearchQueryParametersType } from '../../domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
-import { Paginator } from 'src/features/domain/result.types';
 import { BlogOwnerInfo, BlogViewModel } from '../api/models/output/blogs.output.model';
 import { Blog } from './blogs.entity';
+import { ImageInfo } from '../domain/image.types';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -14,10 +14,12 @@ export class BlogsQueryRepository {
 
   async getBlogs(
     queryString?: SearchQueryParametersType,
-    witnBloggerInfo?: boolean,
     withoutBanned?: boolean,
-    ownerId?: number,
-  ): Promise<Paginator<BlogViewModel[]>> {
+    ownerId?: string,
+  ): Promise<{
+    blogs: Blog[];
+    count: number;
+  }> {
     const sanitizationQuery = getSanitizationQuery(queryString);
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
 
@@ -56,50 +58,48 @@ export class BlogsQueryRepository {
 
     const [blogs, count] = await query.getManyAndCount();
 
-    return new Paginator<BlogViewModel[]>(
-      sanitizationQuery.pageNumber,
-      sanitizationQuery.pageSize,
-      Number(count),
-      witnBloggerInfo
-        ? blogs.map((blog) => this.mapToBloggerOutput(blog))
-        : blogs.map((blog) => this.mapToOutput(blog)),
-    );
+    return { blogs, count };
   }
 
-  async findUnbannedBlogById(id: number): Promise<BlogViewModel | null> {
+  async findUnbannedBlogById(id: string) {
     const blog = await this.blogsRepository.findOne({
       where: [{ id, isBanned: false }],
     });
     return blog ? this.mapToOutput(blog) : null;
   }
 
-  async findBlogById(id: number): Promise<Blog | null> {
+  async findBlogById(id: string): Promise<Blog | null> {
     const blog = await this.blogsRepository.findOne({
       where: [{ id }],
+      relations: {
+        blogOwnerInfo: true,
+      },
     });
     return blog;
   }
 
-  mapToOutput(blog: Blog): BlogViewModel {
+  mapToOutput(blog: Blog, images?: ImageInfo): BlogViewModel {
     return new BlogViewModel(
-      blog.id!.toString(),
+      blog.id,
       blog.name,
       blog.description,
       blog.websiteUrl,
       blog.createdAt,
       blog.isMembership,
+      images ? images : new ImageInfo([], null),
     );
   }
 
-  mapToBloggerOutput(blog: Blog): BlogViewModel {
+  mapToBloggerOutput(blog: Blog, images?: ImageInfo): BlogViewModel {
     const banInfo = { isBanned: blog.isBanned, banDate: blog.banDate };
     return new BlogViewModel(
-      blog.id!.toString(),
+      blog.id,
       blog.name,
       blog.description,
       blog.websiteUrl,
       blog.createdAt,
       blog.isMembership,
+      images ? images : new ImageInfo([], null),
       banInfo,
       blog.blogOwnerInfo
         ? new BlogOwnerInfo(blog.blogOwnerInfo.id.toString(), blog.blogOwnerInfo.login)

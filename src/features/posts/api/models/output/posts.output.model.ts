@@ -1,3 +1,4 @@
+import { ImageInfo } from 'src/features/blogs/domain/image.types';
 import type { ExtendedLikesInfo } from 'src/features/likes/domain/likes.types';
 
 export class PostViewModel {
@@ -10,6 +11,7 @@ export class PostViewModel {
     public blogName: string,
     public createdAt: string,
     public extendedLikesInfo: ExtendedLikesInfo,
+    public images: ImageInfo,
   ) {}
 }
 

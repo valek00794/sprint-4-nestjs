@@ -13,9 +13,9 @@ import { User } from './users.entity';
 export class UsersQueryRepository {
   constructor(@InjectRepository(User) protected usersRepository: Repository<User>) {}
 
-  async findUserById(id: number): Promise<UserInfo | false> {
+  async findUserById(id: string): Promise<UserInfo | false> {
     const user = await this.usersRepository.findOne({
-      where: [{ id: id }],
+      where: [{ id }],
     });
     return user ? new UserInfo(user.id.toString(), user.login, user.email) : false;
   }
@@ -46,9 +46,7 @@ export class UsersQueryRepository {
         banInfo: true,
       },
       where: [{ login: where.login }, { email: where.email }, { banInfo: where.banInfo }],
-      order: {
-        [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection,
-      },
+      order: { [sanitizationQuery.sortBy]: sanitizationQuery.sortDirection },
       take,
       skip,
     });
@@ -65,6 +63,6 @@ export class UsersQueryRepository {
     const banInfo = user.banInfo
       ? new BanInfo(user.banInfo.banDate, user.banInfo.banReason, user.banInfo.isBanned)
       : new BanInfo(null, null, false);
-    return new UserViewModel(user.id!.toString(), user.login, user.email, user.createdAt, banInfo);
+    return new UserViewModel(user.id!, user.login, user.email, user.createdAt, banInfo);
   }
 }

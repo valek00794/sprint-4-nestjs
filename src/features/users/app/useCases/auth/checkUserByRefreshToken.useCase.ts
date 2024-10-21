@@ -29,7 +29,7 @@ export class CheckUserByRefreshTokenUseCase
       throw new UnauthorizedException();
     }
 
-    const isUserExists = await this.usersRepository.findUserById(Number(userVerifyInfo!.userId));
+    const isUserExists = await this.usersRepository.findUserById(userVerifyInfo!.userId);
     const deviceSession = await this.usersDevicesRepository.getUserDeviceByDeviceId(
       userVerifyInfo.deviceId,
     );

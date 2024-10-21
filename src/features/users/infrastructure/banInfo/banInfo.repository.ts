@@ -16,7 +16,7 @@ export class BanInfoRepository {
     @InjectRepository(User) protected usersRepository: Repository<User>,
   ) {}
 
-  async banUser(userId: number, banReason: string, banDate: string) {
+  async banUser(userId: string, banReason: string, banDate: string) {
     let userBanInfo = await this.usersGlobalBanInfoRepository.findOne({
       where: { userId },
     });
@@ -35,7 +35,7 @@ export class BanInfoRepository {
     return await this.usersGlobalBanInfoRepository.save(userBanInfo);
   }
 
-  async unBanUser(userId: number) {
+  async unBanUser(userId: string) {
     const user = await this.usersRepository.findOne({
       where: { id: userId },
     });
@@ -46,7 +46,7 @@ export class BanInfoRepository {
     return await this.usersGlobalBanInfoRepository.delete({ userId });
   }
 
-  async banUserForBlog(userId: number, blogId: number, banReason: string, banDate: string) {
+  async banUserForBlog(userId: string, blogId: string, banReason: string, banDate: string) {
     let userBanInfo = await this.usersBanInfoForBlogsRepository.findOne({
       where: { userId, blogId },
     });
@@ -65,11 +65,11 @@ export class BanInfoRepository {
     }
     return await this.usersBanInfoForBlogsRepository.save(userBanInfo);
   }
-  async unBanUserForBlog(userId: number, blogId: number) {
+  async unBanUserForBlog(userId: string, blogId: string) {
     return await this.usersBanInfoForBlogsRepository.delete({ userId, blogId });
   }
 
-  async getBanInfoBlog(blogId: number, userId: number) {
+  async getBanInfoBlog(blogId: string, userId: string) {
     return await this.usersBanInfoForBlogsRepository.findOne({
       where: { userId, blogId },
     });

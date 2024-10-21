@@ -13,7 +13,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { SETTINGS } from 'src/settings/settings';
 import { SearchQueryParametersType } from 'src/features/domain/query.types';
@@ -27,7 +27,8 @@ import { ChangeLikeStatusCommand } from 'src/features/likes/app/useCases/changeL
 import { LikesParrentNames } from 'src/features/likes/domain/likes.types';
 import { PostsService } from '../../app/posts.service';
 import { PostsQueryRepository } from '../../infrastructure/posts.query-repository';
-import { GetPostCommand } from '../../app/useCases/getPost.useCase';
+import { GetPostQuery } from '../../app/useCases/queryBus/getPost.useCase';
+import { GetPostsQuery } from 'src/features/posts/app/useCases/queryBus/getPosts.useCase';
 
 @Controller(SETTINGS.PATH.posts)
 export class PostsPublicController {
@@ -36,18 +37,19 @@ export class PostsPublicController {
     protected postsQueryRepository: PostsQueryRepository,
     protected commentsQueryRepository: CommentsQueryRepository,
     private commandBus: CommandBus,
+    private queryBus: QueryBus,
   ) {}
 
   @Public()
   @Get()
   async getPosts(@Query() query: SearchQueryParametersType, @Req() req: Request) {
-    return await this.postsQueryRepository.getPosts(query, undefined, req.user?.userId, true);
+    return await this.queryBus.execute(new GetPostsQuery(query, undefined, req.user!.userId, true));
   }
 
   @Public()
   @Get(':id')
   async getPost(@Param('id') id: string, @Req() req: Request) {
-    return await this.commandBus.execute(new GetPostCommand(id, req.user?.userId));
+    return await this.queryBus.execute(new GetPostQuery(id, req.user?.userId));
   }
 
   //переделать
@@ -72,11 +74,7 @@ export class PostsPublicController {
     @Req() req: Request,
     @Query() query: SearchQueryParametersType,
   ) {
-    const numberPostId = Number(postId);
-    if (isNaN(numberPostId)) {
-      throw new NotFoundException('Post not found');
-    }
-    const post = await this.postsQueryRepository.findPostById(numberPostId);
+    const post = await this.postsQueryRepository.findPostById(postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -96,7 +94,7 @@ export class PostsPublicController {
     @Param('postId') postId: string,
     @Req() req: Request,
   ) {
-    const post = await this.postsQueryRepository.findPostById(Number(postId));
+    const post = await this.postsQueryRepository.findPostById(postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }

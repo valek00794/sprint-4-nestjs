@@ -25,10 +25,9 @@ export class AnswerQuestionGameUseCase implements ICommandHandler<AnswerQuestion
   ) {}
 
   async execute(command: AnswerQuestionGameCommand): Promise<Answer> {
-    const playerId = Number(command.playerId);
-    const myActiveGame = await this.gameRepository.findCurrentUserGame(playerId);
+    const myActiveGame = await this.gameRepository.findCurrentUserGame(command.playerId);
     let currentPlayer;
-    if (myActiveGame?.firstPlayerProgress.player.id === playerId) {
+    if (myActiveGame?.firstPlayerProgress.player.id === command.playerId) {
       currentPlayer = 'firstPlayerProgress';
     } else {
       currentPlayer = 'secondPlayerProgress';
@@ -65,10 +64,9 @@ export class AnswerQuestionGameUseCase implements ICommandHandler<AnswerQuestion
     const savedAnswer = await this.gameRepository.saveAnswer(answer);
     if (
       myActiveGame.questions &&
-      myActiveGame.questions[GAME_QUESTIONS_COUNT - 1].question.id ===
-        Number(savedAnswer.questionId)
+      myActiveGame.questions[GAME_QUESTIONS_COUNT - 1].question.id === savedAnswer.questionId
     ) {
-      const myActiveGame = await this.gameRepository.findCurrentUserGame(playerId);
+      const myActiveGame = await this.gameRepository.findCurrentUserGame(command.playerId);
       if (myActiveGame && myActiveGame.secondPlayerProgress) {
         const firstPlayerAnswersCount = myActiveGame.firstPlayerProgress.answers.length;
         const secondPlayerAnswersCount = myActiveGame.secondPlayerProgress.answers.length;

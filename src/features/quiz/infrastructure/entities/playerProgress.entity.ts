@@ -6,8 +6,8 @@ import { GameResultStatuses } from '../../domain/quiz.types';
 
 @Entity()
 export class PlayerProgress {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ default: 0 })
   score: number;

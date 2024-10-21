@@ -2,8 +2,8 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class UsersDevices {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column('uuid')
   deviceId: string;
@@ -14,8 +14,8 @@ export class UsersDevices {
   @Column({ type: 'varchar', length: 255, nullable: false })
   ip: string;
 
-  @Column({ type: 'int', nullable: false })
-  userId: number;
+  @Column({ type: 'varchar', nullable: false })
+  userId: string;
 
   @Column({ type: 'timestamp with time zone', nullable: false })
   lastActiveDate: Date;

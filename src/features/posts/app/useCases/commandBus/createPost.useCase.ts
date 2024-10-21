@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { CreatePostForBlogModel } from 'src/features/blogs/api/models/input/blogs.input.model';
-import { CreatePostModel } from '../../api/models/input/posts.input.model';
-import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { CreatePostModel } from 'src/features/posts/api/models/input/posts.input.model';
+import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
 export class CreatePostCommand {
   constructor(
     public inputModel: CreatePostModel | CreatePostForBlogModel,
@@ -21,16 +21,12 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
   ) {}
 
   async execute(command: CreatePostCommand) {
-    const getBlogId = command.blogId ? Number(command.blogId) : Number(command.inputModel.blogId);
-    const userId = Number(command.userId);
-    if (isNaN(getBlogId) || isNaN(userId)) {
-      throw new NotFoundException('BlogId or UserId syntax error');
-    }
+    const getBlogId = command.blogId ? command.blogId : command.inputModel.blogId;
     const blog = await this.blogsRepository.findBlogById(getBlogId);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
-    if (userId !== blog.blogOwnerInfo!.id) {
+    if (command.userId !== blog.blogOwnerInfo!.id) {
       throw new ForbiddenException(
         'The user is trying to create a post for a blog that does not belong to them.',
       );

@@ -5,8 +5,8 @@ import { User } from 'src/features/users/infrastructure/users/users.entity';
 
 @Entity()
 export class Like {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   status: LikeStatus;
@@ -19,5 +19,5 @@ export class Like {
   author: User;
 
   @Column()
-  authorId: number;
+  authorId: string;
 }

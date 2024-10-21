@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
+import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
 
 export class DeletePostCommand {
   constructor(
     public postId: string,
-    public blogId?: number,
+    public blogId?: string,
     public userId?: string,
   ) {}
 }
@@ -20,23 +20,17 @@ export class DeletePostUseCase implements ICommandHandler<DeletePostCommand> {
   ) {}
 
   async execute(command: DeletePostCommand) {
-    const getBlogId = command.blogId!;
-    const postId = Number(command.postId);
-    const userId = Number(command.userId);
-    if (isNaN(getBlogId) || isNaN(postId) || isNaN(userId)) {
-      throw new NotFoundException('BlogId, PostId or UserId syntax error');
-    }
-    const post = await this.postsRepository.findPostbyId(postId);
+    const post = await this.postsRepository.findPostbyId(command.postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    const blog = await this.blogsRepository.findBlogById(getBlogId);
+    const blog = await this.blogsRepository.findBlogById(command.blogId!);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
-    if (userId !== blog.blogOwnerInfo!.id) {
+    if (command.userId !== blog.blogOwnerInfo!.id) {
       throw new ForbiddenException('User try to delete post that doesnt belong to current user');
     }
-    return await this.postsRepository.deletePost(postId);
+    return await this.postsRepository.deletePost(command.postId);
   }
 }

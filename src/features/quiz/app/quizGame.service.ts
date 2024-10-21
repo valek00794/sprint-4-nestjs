@@ -1,13 +1,7 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { QuizGameRepository } from '../infrastructure/quizGame.repository';
 import { Game } from '../infrastructure/entities/game.entity';
-import { FieldError } from 'src/infrastructure/exception.filter.types';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { GameResultStatuses, GameStatuses } from '../domain/quiz.types';
 import { PlayerProgress } from '../infrastructure/entities/playerProgress.entity';
@@ -17,17 +11,13 @@ import { GAME_QUESTIONS_COUNT } from '../quizSettings';
 export class QuizGameService {
   constructor(protected gameRepository: QuizGameRepository) {}
   async findGameById(id: string, playerId: string): Promise<Game> {
-    if (isNaN(Number(id))) {
-      throw new BadRequestException([new FieldError('Invalid game id', 'id')]);
-    }
-    const game = await this.gameRepository.findGameById(Number(id));
+    const game = await this.gameRepository.findGameById(id);
     if (!game) {
       throw new NotFoundException('Game not found');
     }
-    const playerIdNumber = Number(playerId);
     if (
-      (!game.firstPlayerProgress || game.firstPlayerProgress.player.id !== playerIdNumber) &&
-      (!game.secondPlayerProgress || game.secondPlayerProgress.player.id !== playerIdNumber)
+      (!game.firstPlayerProgress || game.firstPlayerProgress.player.id !== playerId) &&
+      (!game.secondPlayerProgress || game.secondPlayerProgress.player.id !== playerId)
     ) {
       throw new ForbiddenException(
         'Current user tries to get pair in which user is not participant',

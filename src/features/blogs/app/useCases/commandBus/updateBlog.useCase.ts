@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { CreateBlogInputModel } from '../../api/models/input/blogs.input.model';
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
+import { CreateBlogInputModel } from 'src/features/blogs/api/models/input/blogs.input.model';
+import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 
 export class UpdateBlogCommand {
   constructor(
@@ -21,17 +21,12 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
   ) {}
 
   async execute(command: UpdateBlogCommand) {
-    const blogId = Number(command.id);
-    const userId = Number(command.userId);
-    if (isNaN(blogId) || isNaN(userId)) {
-      throw new NotFoundException('BlogId or UserId syntax error');
-    }
-    const blog = await this.blogsRepository.findBlogById(blogId);
+    const blog = await this.blogsRepository.findBlogById(command.id);
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
 
-    const user = await this.usersRepository.findUserById(userId);
+    const user = await this.usersRepository.findUserById(command.userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -48,6 +43,6 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
       isMembership: false,
       blogOwnerInfo: user,
     };
-    return await this.blogsRepository.updateBlog(updatedblog, blogId);
+    return await this.blogsRepository.updateBlog(updatedblog, command.id);
   }
 }

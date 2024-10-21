@@ -22,15 +22,11 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
   ) {}
 
   async execute(command: UpdateCommentCommand) {
-    const commentId = Number(command.commentId);
-    if (isNaN(commentId)) {
-      throw new NotFoundException('Comment not found');
-    }
-    const comment = await this.commentsRepository.findCommentById(commentId);
+    const comment = await this.commentsRepository.findCommentById(command.commentId);
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    if (comment.commentatorId !== Number(command.userId)) {
+    if (comment.commentatorId !== command.userId) {
       throw new ForbiddenException('User not author of comment');
     }
     const updatedComment: CommentType = {
@@ -42,6 +38,6 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
       createdAt: comment.createdAt,
       postId: comment.postId,
     };
-    return await this.commentsRepository.updateComment(updatedComment, commentId);
+    return await this.commentsRepository.updateComment(updatedComment, command.commentId);
   }
 }

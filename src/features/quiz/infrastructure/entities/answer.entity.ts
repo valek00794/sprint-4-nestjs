@@ -4,8 +4,8 @@ import { PlayerProgress } from './playerProgress.entity';
 
 @Entity()
 export class Answer {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   questionId: string;

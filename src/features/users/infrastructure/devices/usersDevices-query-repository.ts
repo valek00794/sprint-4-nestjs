@@ -11,7 +11,7 @@ export class UsersDevicesQueryRepository {
     @InjectRepository(UsersDevices) protected usersDevicesRepository: Repository<UsersDevices>,
   ) {}
 
-  async getAllActiveDevicesByUser(userId: number): Promise<UsersDevicesOutput[]> {
+  async getAllActiveDevicesByUser(userId: string): Promise<UsersDevicesOutput[]> {
     const userDevices = await this.usersDevicesRepository.find({
       where: { userId },
     });

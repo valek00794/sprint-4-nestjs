@@ -16,11 +16,7 @@ export class UpdateQuestionUseCase implements ICommandHandler<UpdateQuestionComm
   constructor(protected quizRepository: QuizQuestionsRepository) {}
 
   async execute(command: UpdateQuestionCommand) {
-    const questionId = Number(command.id);
-    if (isNaN(questionId)) {
-      throw new NotFoundException('Question not found');
-    }
-    const question = await this.quizRepository.findQuestionById(questionId);
+    const question = await this.quizRepository.findQuestionById(command.id);
     if (!question) {
       throw new NotFoundException('Question not found');
     }
@@ -29,6 +25,6 @@ export class UpdateQuestionUseCase implements ICommandHandler<UpdateQuestionComm
       correctAnswers: command.inputModel.correctAnswers,
       updatedAt: new Date().toISOString(),
     };
-    return await this.quizRepository.updateQuestion(updatedQuestion, questionId);
+    return await this.quizRepository.updateQuestion(updatedQuestion, command.id);
   }
 }

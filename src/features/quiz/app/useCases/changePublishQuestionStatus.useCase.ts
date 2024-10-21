@@ -19,11 +19,7 @@ export class ChangePublishQuestionStatusUseCase
   constructor(protected quizRepository: QuizQuestionsRepository) {}
 
   async execute(command: ChangePublishQuestionStatusCommand) {
-    const questionId = Number(command.id);
-    if (isNaN(questionId)) {
-      throw new NotFoundException('Question not found');
-    }
-    const question = await this.quizRepository.findQuestionById(questionId);
+    const question = await this.quizRepository.findQuestionById(command.id);
     if (!question) {
       throw new NotFoundException('Question not found');
     }
@@ -36,6 +32,6 @@ export class ChangePublishQuestionStatusUseCase
       published: command.inputModel.published,
       updatedAt: new Date().toISOString(),
     };
-    return await this.quizRepository.changePublishQuestionStatus(updatedQuestion, questionId);
+    return await this.quizRepository.changePublishQuestionStatus(updatedQuestion, command.id);
   }
 }

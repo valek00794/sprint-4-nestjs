@@ -24,12 +24,12 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
     protected usersBanInfoRepository: BanInfoRepository,
   ) {}
 
-  async execute(command: CreateCommentCommand): Promise<number> {
-    const post = await this.postsRepository.findPostbyId(Number(command.postId));
+  async execute(command: CreateCommentCommand): Promise<string> {
+    const post = await this.postsRepository.findPostbyId(command.postId);
     if (!post || post.blog.isBanned) {
       throw new NotFoundException('Post not found');
     }
-    const banInfo = await this.usersBanInfoRepository.getBanInfoBlog(post.blog.id, +command.userId);
+    const banInfo = await this.usersBanInfoRepository.getBanInfoBlog(post.blog.id, command.userId);
     if (banInfo) {
       throw new ForbiddenException('You are banned for this blog');
     }
@@ -41,7 +41,7 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
       commentatorInfo: {
         ...commentatorInfo,
       },
-      postId: Number(command.postId),
+      postId: command.postId,
     };
     return await this.commentsRepository.createComment(newComment);
   }

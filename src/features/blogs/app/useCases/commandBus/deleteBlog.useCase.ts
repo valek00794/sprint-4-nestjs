@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException } from '@nestjs/common';
 
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
+import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 
 export class DeleteBlogCommand {
   constructor(
@@ -19,22 +19,12 @@ export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
   ) {}
 
   async execute(command: DeleteBlogCommand) {
-    const blogId = Number(command.id);
-    const userId = Number(command.userId);
-
-    if (isNaN(blogId)) {
-      return false;
-    }
-
-    if (isNaN(userId)) {
-      return false;
-    }
-    const blog = await this.blogsRepository.findBlogById(blogId);
+    const blog = await this.blogsRepository.findBlogById(command.id);
     if (!blog) {
       return false;
     }
 
-    const user = await this.usersRepository.findUserById(userId);
+    const user = await this.usersRepository.findUserById(command.userId);
     if (!user) {
       return false;
     }
@@ -43,6 +33,6 @@ export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
       throw new ForbiddenException('User try to delete blog that doesnt belong to current user');
     }
 
-    return await this.blogsRepository.deleteBlog(blogId);
+    return await this.blogsRepository.deleteBlog(command.id);
   }
 }

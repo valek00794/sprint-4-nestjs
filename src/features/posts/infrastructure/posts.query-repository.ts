@@ -11,6 +11,7 @@ import { LikesQueryRepository } from 'src/features/likes/infrastructure/likes.qu
 import { Post } from './posts.entity';
 import { BlogsQueryRepository } from 'src/features/blogs/infrastructure/blogs.query-repository';
 import { Blog } from 'src/features/blogs/infrastructure/blogs.entity';
+import { ImageInfo } from 'src/features/blogs/domain/image.types';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -27,13 +28,9 @@ export class PostsQueryRepository {
     userId?: string,
     withoutBanned?: boolean,
   ): Promise<null | Paginator<PostViewModel[]>> {
-    if (blogId && isNaN(Number(blogId))) {
-      return null;
-    }
-
     let blog;
     if (blogId) {
-      blog = await this.blogsQueryRepository.findBlogById(Number(blogId));
+      blog = await this.blogsQueryRepository.findBlogById(blogId);
     }
     if (!blog && blogId) {
       return null;
@@ -47,7 +44,7 @@ export class PostsQueryRepository {
     const offset = (sanitizationQuery.pageNumber - 1) * sanitizationQuery.pageSize;
     const qb = this.postsRepository.createQueryBuilder('post');
     if (blogId) {
-      qb.where('post.blogId = :blogId', { blogId: Number(blogId) });
+      qb.where('post.blogId = :blogId', { blogId });
     }
     const query = qb
       .leftJoinAndSelect('post.blog', 'blog')
@@ -65,10 +62,7 @@ export class PostsQueryRepository {
 
     const [posts, count] = await query;
     const postsItems = posts.map((post) => {
-      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(
-        post.likes,
-        Number(userId),
-      );
+      const mapedlikesInfo = this.likesQueryRepository.mapExtendedLikesInfo(post.likes, userId);
       return this.mapToOutput(post, mapedlikesInfo);
     });
 
@@ -80,7 +74,7 @@ export class PostsQueryRepository {
     );
   }
 
-  async findPostById(id: number): Promise<Post | null> {
+  async findPostById(id: string): Promise<Post | null> {
     const post = await this.postsRepository.findOne({
       where: [{ id, blog: { isBanned: false } }],
       relations: {
@@ -96,19 +90,24 @@ export class PostsQueryRepository {
     return post;
   }
 
-  mapToOutput(post: Post, extendedLikesInfo?: ExtendedLikesInfo): PostViewModel {
+  mapToOutput(
+    post: Post,
+    extendedLikesInfo?: ExtendedLikesInfo,
+    images?: ImageInfo,
+  ): PostViewModel {
     const extendedLikesInfoView = extendedLikesInfo
       ? extendedLikesInfo
       : new ExtendedLikesInfo(0, 0, LikeStatus.None, []);
     return {
-      id: post.id.toString(),
+      id: post.id,
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
-      blogId: post.blogId.toString(),
+      blogId: post.blogId,
       blogName: post.blog.name,
       createdAt: post.createdAt,
       extendedLikesInfo: extendedLikesInfoView,
+      images: images ? images : new ImageInfo([]),
     };
   }
 }

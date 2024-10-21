@@ -7,7 +7,7 @@ import { CommentsLike } from './commentsLikes.entity';
 @Injectable()
 export class LikesQueryRepository {
   constructor() {}
-  mapLikesInfo(likesInfo: PostsLike[] | CommentsLike[], userId: number | null): LikesInfoView {
+  mapLikesInfo(likesInfo: PostsLike[] | CommentsLike[], userId?: string): LikesInfoView {
     const likesInfoWuthoutBanned = likesInfo.filter((like) => !like.author.banInfo);
     const likesInfoView = new LikesInfoView(
       likesInfoWuthoutBanned.filter((like) => like.status === LikeStatus.Like).length,
@@ -17,7 +17,7 @@ export class LikesQueryRepository {
     return likesInfoView;
   }
 
-  mapExtendedLikesInfo(likesInfo: PostsLike[], userId: number | null): ExtendedLikesInfo {
+  mapExtendedLikesInfo(likesInfo: PostsLike[], userId?: string): ExtendedLikesInfo {
     const lastLikesCount = 3;
     const newestLikes = likesInfo
       .filter((like) => !like.author.banInfo)

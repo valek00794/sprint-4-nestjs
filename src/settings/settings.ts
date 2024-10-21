@@ -30,6 +30,14 @@ export const SETTINGS = {
     AT_EXPIRES_TIME: process.env.AT_EXPIRES_TIME || '10s',
     RT_EXPIRES_TIME: process.env.RT_EXPIRES_TIME || '20s',
   },
+  S3: {
+    S3_ACCESS_KEY: process.env.S3_ACCESS_KEY || '',
+    S3_SECRET_KEY: process.env.S3_SECRET_KEY || '',
+    S3_CONNECTION_STRING: process.env.S3_CONNECTION_STRING || '',
+    S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || '',
+    S3_PUBLIC_URL: process.env.S3_PUBLIC_URL || '',
+    S3_REGION: process.env.S3_REGION || '',
+  },
 };
 
 export enum ResultStatus {

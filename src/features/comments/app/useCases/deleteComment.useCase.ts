@@ -19,18 +19,14 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
   ) {}
 
   async execute(command: DeleteCommentCommand): Promise<boolean> {
-    const commentId = Number(command.commentId);
-    if (isNaN(commentId)) {
-      throw new NotFoundException('Comment not found');
-    }
-    const comment = await this.commentsRepository.findCommentById(commentId);
+    const comment = await this.commentsRepository.findCommentById(command.commentId);
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    if (comment.commentatorId !== Number(command.userId)) {
+    if (comment.commentatorId !== command.userId) {
       throw new ForbiddenException('User not author of comment');
     }
-    const deleteResult = await this.commentsRepository.deleteComment(commentId);
+    const deleteResult = await this.commentsRepository.deleteComment(command.commentId);
     if (!deleteResult) throw new NotFoundException();
     return true;
   }

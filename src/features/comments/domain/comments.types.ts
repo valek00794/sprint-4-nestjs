@@ -10,6 +10,6 @@ export class CommentType {
   content: string;
   createdAt: string;
   commentatorInfo: CommentatorInfo;
-  postId: number;
-  id?: number;
+  postId: string;
+  id?: string;
 }

@@ -5,8 +5,8 @@ import { Blog } from 'src/features/blogs/infrastructure/blogs.entity';
 import { PostsLike } from 'src/features/likes/infrastructure/postslikes.entity';
 @Entity()
 export class Post {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   title: string;
@@ -25,7 +25,7 @@ export class Post {
   blog: Blog;
 
   @Column()
-  blogId: number;
+  blogId: string;
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];

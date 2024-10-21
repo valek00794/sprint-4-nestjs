@@ -55,7 +55,7 @@ export class UsersDevicesRepository {
     return await this.usersDevicesRepository.findOneBy({ deviceId });
   }
 
-  async deleteAllUserDevices(userId: number) {
+  async deleteAllUserDevices(userId: string) {
     return await this.usersDevicesRepository.delete({
       userId,
     });

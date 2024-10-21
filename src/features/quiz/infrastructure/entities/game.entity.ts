@@ -6,8 +6,8 @@ import { QuestionOfTheGame } from './questionOfTheGame.entity';
 
 @Entity()
 export class Game {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @OneToOne(() => PlayerProgress, { cascade: true })
   @JoinColumn()

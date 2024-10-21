@@ -1,15 +1,15 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { CreatePostModel } from '../../api/models/input/posts.input.model';
-import { PostsRepository } from '../../infrastructure/posts.repository';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
+import { CreatePostModel } from 'src/features/posts/api/models/input/posts.input.model';
+import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
 
 export class UpdatePostCommand {
   constructor(
     public inputModel: CreatePostModel,
     public postId: string,
-    public blogId?: number,
+    public blogId?: string,
     public userId?: string,
   ) {}
 }
@@ -22,15 +22,9 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
   ) {}
 
   async execute(command: UpdatePostCommand) {
-    const getBlogId = command.inputModel.blogId
-      ? Number(command.inputModel.blogId)
-      : command.blogId!;
-    const postId = Number(command.postId);
-    const userId = Number(command.userId);
-    if (isNaN(getBlogId) || isNaN(postId) || isNaN(userId)) {
-      throw new NotFoundException('BlogId, PostId or UserId syntax error');
-    }
-    const post = await this.postsRepository.findPostbyId(postId);
+    const getBlogId = command.inputModel.blogId ? command.inputModel.blogId : command.blogId!;
+
+    const post = await this.postsRepository.findPostbyId(command.postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -38,7 +32,7 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
-    if (userId !== blog.blogOwnerInfo!.id) {
+    if (command.userId !== blog.blogOwnerInfo!.id) {
       throw new ForbiddenException('User try to update post that doesnt belong to current user');
     }
     const updatedPost = {
@@ -48,6 +42,6 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
       createdAt: new Date(post!.createdAt).toISOString(),
       blogId: getBlogId,
     };
-    return await this.postsRepository.updatePost(updatedPost, postId);
+    return await this.postsRepository.updatePost(updatedPost, command.postId);
   }
 }

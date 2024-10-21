@@ -7,10 +7,10 @@ import { UsersBanInfo } from '../banInfo/usersBanInfo.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ collation: 'C' })
   login: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
