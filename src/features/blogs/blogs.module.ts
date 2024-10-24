@@ -27,7 +27,7 @@ import { PostsLike } from '../likes/infrastructure/postslikes.entity';
 import { CommentsLike } from '../likes/infrastructure/commentsLikes.entity';
 import { Like } from '../likes/infrastructure/likes.entity';
 import { UsersRepository } from '../users/infrastructure/users/users.repository';
-import { User } from '../users/infrastructure/users/users.entity';
+import { User } from '../users/infrastructure/users/user.entity';
 import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEmailConfirmationInfo.entity';
 import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
 import { BlogsBloggerController } from './api/blogger/blogs.blogger.controller';
@@ -57,6 +57,9 @@ import { BindBlogUseCase } from './app/useCases/commandBus/bindBlog.useCase';
 import { CreateBlogUseCase } from './app/useCases/commandBus/createBlog.useCase';
 import { DeleteBlogUseCase } from './app/useCases/commandBus/deleteBlog.useCase';
 import { UpdateBlogUseCase } from './app/useCases/commandBus/updateBlog.useCase';
+import { SubscribeToBlogUseCase } from './app/useCases/commandBus/subscribeToBlog.useCase';
+import { BlogSubscriberInfo } from './infrastructure/blogs-subscriber-info.entity';
+import { UserTelegramInfo } from '../users/infrastructure/integratons/userTelegramInfo.entity';
 
 const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository, ImageInfoRepository];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
@@ -72,6 +75,7 @@ const blogsUseCases = [
   DeleteBlogUseCase,
   BanBlogUseCase,
   GetBlogsUseCase,
+  SubscribeToBlogUseCase,
 ];
 
 const imagesUseCases = [
@@ -116,6 +120,8 @@ const services = [FileStorageService, ImageStorageService];
       BlogWallpaperInfo,
       BlogMainImageInfo,
       PostMainImageInfo,
+      BlogSubscriberInfo,
+      UserTelegramInfo,
     ]),
   ],
   controllers: [

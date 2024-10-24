@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, OneToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { User } from 'src/features/users/infrastructure/users/users.entity';
+import { User } from 'src/features/users/infrastructure/users/user.entity';
 import { Answer } from './answer.entity';
 import { GameResultStatuses } from '../../domain/quiz.types';
 

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from './users.entity';
+import { User } from './user.entity';
 import { UsersRecoveryPasssword } from './UsersRecoveryPasssword.entity ';
 import {
   UserType,
@@ -11,6 +11,8 @@ import {
 } from '../../domain/users.types';
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 import { UsersBanInfo } from '../banInfo/usersBanInfo.entity';
+import { UserTelegramInfo } from '../integratons/userTelegramInfo.entity';
+
 @Injectable()
 export class UsersRepository {
   constructor(
@@ -19,6 +21,8 @@ export class UsersRepository {
     protected userEmailConfirmationInfoRepository: Repository<UserEmailConfirmationInfo>,
     @InjectRepository(UsersRecoveryPasssword)
     protected usersRecoveryPassswordRepository: Repository<UsersRecoveryPasssword>,
+    @InjectRepository(UserTelegramInfo)
+    protected userTelegramInfoRepository: Repository<UserTelegramInfo>,
   ) {}
 
   async createUser(newUser: UserType, emailConfirmationInfo?: UserEmailConfirmationInfoType) {
@@ -135,12 +139,32 @@ export class UsersRepository {
   async findUserById(id?: string): Promise<User | null> {
     return await this.usersRepository.findOne({
       where: { id },
+      relations: {
+        telegramInfo: true,
+      },
     });
   }
+
   async updateBanInfo(userId: string, banInfo: UsersBanInfo): Promise<boolean> {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (user) {
       user.banInfo = banInfo;
+      await this.usersRepository.save(user);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async setUserTelegramInfo(userId: string, telegramUserId: number) {
+    const userTelegramInfo = await this.userTelegramInfoRepository.save({
+      userId,
+      telegramId: telegramUserId,
+    });
+
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (user) {
+      user.telegramInfo = userTelegramInfo;
       await this.usersRepository.save(user);
       return true;
     } else {

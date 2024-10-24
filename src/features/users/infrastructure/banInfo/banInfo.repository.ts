@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { UsersBanInfo } from './usersBanInfo.entity';
-import { User } from '../users/users.entity';
+import { User } from '../users/user.entity';
 import { UsersBanInfoForBlogs } from './usersBanInfoForBlogs.entity';
 
 @Injectable()

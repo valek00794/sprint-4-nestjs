@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity()
 export class UserEmailConfirmationInfo {
@@ -14,6 +15,11 @@ export class UserEmailConfirmationInfo {
   @Column({ type: 'boolean', nullable: false })
   isConfirmed: boolean;
 
+  @OneToOne(() => User, (u) => u.emailConfirmation, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @Column({ type: 'varchar', nullable: false })
   userId: string;
 }

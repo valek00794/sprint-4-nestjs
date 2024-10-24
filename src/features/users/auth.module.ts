@@ -21,11 +21,12 @@ import { UsersDevicesRepository } from './infrastructure/devices/usersDevices-re
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { UsersRepository } from './infrastructure/users/users.repository';
 import { UsersQueryRepository } from './infrastructure/users/users.query-repository';
-import { User } from './infrastructure/users/users.entity';
+import { User } from './infrastructure/users/user.entity';
 import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
 import { UsersRecoveryPasssword } from './infrastructure/users/UsersRecoveryPasssword.entity ';
 import { UserEmailConfirmationInfo } from './infrastructure/users/usersEmailConfirmationInfo.entity';
 import { SignUpUserUseCase } from './app/useCases/users/signUpUser.useCase';
+import { UserTelegramInfo } from './infrastructure/integratons/userTelegramInfo.entity';
 
 const usersDevicesUseCases = [
   AddUserDeviceUseCase,
@@ -57,6 +58,7 @@ const usersDevicesProviders = [
       UsersRecoveryPasssword,
       UserEmailConfirmationInfo,
       UsersDevices,
+      UserTelegramInfo,
     ]),
     // ThrottlerModule.forRoot([
     //   {

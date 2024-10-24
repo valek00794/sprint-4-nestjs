@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { LikeStatus } from '../domain/likes.types';
-import { User } from 'src/features/users/infrastructure/users/users.entity';
+import { User } from 'src/features/users/infrastructure/users/user.entity';
 
 @Entity()
 export class Like {

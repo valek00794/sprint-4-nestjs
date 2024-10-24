@@ -15,7 +15,7 @@ import { PlayerProgress } from './infrastructure/entities/playerProgress.entity'
 import { Game } from './infrastructure/entities/game.entity';
 import { Answer } from './infrastructure/entities/answer.entity';
 import { QuizGameRepository } from './infrastructure/quizGame.repository';
-import { User } from '../users/infrastructure/users/users.entity';
+import { User } from '../users/infrastructure/users/user.entity';
 import { QuizPublicController } from './api/public/quiz.public.controller';
 import { QuizGameQueryRepository } from './infrastructure/quizGame.query-repository ';
 import { QuizGameService } from './app/quizGame.service';
@@ -24,6 +24,7 @@ import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEm
 import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
 import { AnswerQuestionGameUseCase } from './app/useCases/answerQuestion.useCase';
 import { QuestionOfTheGame } from './infrastructure/entities/questionOfTheGame.entity';
+import { UserTelegramInfo } from '../users/infrastructure/integratons/userTelegramInfo.entity';
 
 const quizAdminUseCases = [
   CreateQuestionUseCase,
@@ -56,6 +57,7 @@ const quizProviders = [
       PlayerProgress,
       UserEmailConfirmationInfo,
       UsersRecoveryPasssword,
+      UserTelegramInfo,
     ]),
   ],
   controllers: [QuizAdminController, QuizPublicController],

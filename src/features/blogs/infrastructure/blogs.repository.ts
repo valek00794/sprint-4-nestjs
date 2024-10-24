@@ -4,10 +4,15 @@ import { Repository } from 'typeorm';
 
 import { Blog } from './blogs.entity';
 import { BlogType } from '../domain/blogs.types';
+import { BlogSubscriberInfo } from './blogs-subscriber-info.entity';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectRepository(Blog) protected blogsRepository: Repository<Blog>) {}
+  constructor(
+    @InjectRepository(Blog) protected blogsRepository: Repository<Blog>,
+    @InjectRepository(BlogSubscriberInfo)
+    protected blogSubscriberInfoRepository: Repository<BlogSubscriberInfo>,
+  ) {}
 
   async createBlog(newBlog: BlogType) {
     return await this.blogsRepository.save(newBlog);
@@ -75,5 +80,17 @@ export class BlogsRepository {
     } else {
       return null;
     }
+  }
+
+  async subscribeToBlog(blogId: string, userId: string) {
+    return await this.blogSubscriberInfoRepository.save({ blogId, userId });
+  }
+
+  async getSubscription(blogId: string) {
+    return await this.blogSubscriberInfoRepository.findOneBy({ blogId });
+  }
+
+  async deleteSubscription(blogId: string, userId?: string) {
+    return await this.blogSubscriberInfoRepository.delete({ blogId, userId });
   }
 }

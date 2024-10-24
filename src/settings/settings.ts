@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 config();
 
 export const SETTINGS = {
+  BASE_APP_URL: process.env.BASE_APP_URL || 'localhost',
   PORT: process.env.PORT || 3000,
   PATH: {
     videos: '/videos',
@@ -13,6 +14,8 @@ export const SETTINGS = {
     usersSa: '/sa/users',
     usersBlogger: '/blogger/users',
     auth: '/auth',
+    integrations: '/integrations',
+    telegramWebHook: '/telegram/webhook',
     devices: '/security/devices',
     comments: '/comments',
     quizQuestionsSa: '/sa/quiz/questions',
@@ -37,6 +40,9 @@ export const SETTINGS = {
     S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || '',
     S3_PUBLIC_URL: process.env.S3_PUBLIC_URL || '',
     S3_REGION: process.env.S3_REGION || '',
+  },
+  TELEGRAM: {
+    token: process.env.TELEGRAM_TOKEN || '',
   },
 };
 
