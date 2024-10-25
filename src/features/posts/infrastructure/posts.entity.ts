@@ -3,8 +3,13 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { Comment } from 'src/features/comments/infrastructure/comments.entity';
 import { Blog } from 'src/features/blogs/infrastructure/blogs.entity';
 import { PostsLike } from 'src/features/likes/infrastructure/postslikes.entity';
+import { CreatePostForBlogModel } from 'src/features/blogs/api/models/input/blogs.input.model';
+import { CreatePostModel } from '../api/models/input/posts.input.model';
+import { PostCreatedEvent } from '../domain/events/post-created.event';
+import { AggregateRoot } from '@nestjs/cqrs';
+
 @Entity()
-export class Post {
+export class Post extends AggregateRoot {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -20,7 +25,11 @@ export class Post {
   @Column({ type: 'timestamp with time zone', nullable: false })
   createdAt: string;
 
-  @ManyToOne(() => Blog, (blog) => blog.posts, { nullable: false, cascade: true })
+  @ManyToOne(() => Blog, (blog) => blog.posts, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'blogId' })
   blog: Blog;
 
@@ -32,4 +41,19 @@ export class Post {
 
   @OneToMany(() => PostsLike, (likes) => likes.post)
   likes: PostsLike[];
+
+  static create(inputModel: CreatePostModel | CreatePostForBlogModel, blogId: string) {
+    const newPost = new Post();
+    newPost.title = inputModel.title;
+    newPost.shortDescription = inputModel.shortDescription;
+    newPost.content = inputModel.content;
+    newPost.createdAt = new Date().toISOString();
+    newPost.blogId = blogId;
+
+    const postCreatedEvent = new PostCreatedEvent(blogId);
+
+    newPost.apply(postCreatedEvent);
+
+    return newPost;
+  }
 }

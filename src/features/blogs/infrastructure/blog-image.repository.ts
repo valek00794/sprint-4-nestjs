@@ -32,7 +32,6 @@ export class ImageInfoRepository {
       existingPhoto.width = width;
       existingPhoto.height = height;
       existingPhoto.size = size;
-      //existingPhoto.createdAt = new Date().toISOString();
       return await this.blogWallpaperInfoRepository.save(existingPhoto);
     } else {
       const newPhoto = this.blogWallpaperInfoRepository.create({

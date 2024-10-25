@@ -16,9 +16,9 @@ import { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { AuthBasicGuard } from 'src/infrastructure/guards/auth-basic.guard';
 import { Public } from 'src/infrastructure/decorators/transform/public.decorator';
 import { ChangeBanStatusForBlogInputModel } from '../models/input/blogs.input.model';
-import { GetBlogsQuery } from '../../app/useCases/queryBus/getBlogs.useCase';
 import { BanBlogCommand } from '../../app/useCases/commandBus/banBlog.useCase';
 import { BindBlogCommand } from '../../app/useCases/commandBus/bindBlog.useCase';
+import { GetBlogsByAdminQuery } from '../../app/useCases/queryBus/getBlogsByAdmin.useCase';
 
 @Public()
 @UseGuards(AuthBasicGuard)
@@ -31,7 +31,7 @@ export class BlogsAdminController {
 
   @Get()
   async getBlogs(@Query() query?: SearchQueryParametersType) {
-    return await this.queryBus.execute(new GetBlogsQuery(query, true, false));
+    return await this.queryBus.execute(new GetBlogsByAdminQuery(query));
   }
 
   @Put(':id/bind-with-user/:userId')

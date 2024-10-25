@@ -1,4 +1,4 @@
-import { User } from 'src/features/users/infrastructure/users/users.entity';
+import { User } from 'src/features/users/infrastructure/users/user.entity';
 
 export class BlogType {
   constructor(

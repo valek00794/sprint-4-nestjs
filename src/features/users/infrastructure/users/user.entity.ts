@@ -4,6 +4,7 @@ import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 import { Comment } from '../../../comments/infrastructure/comments.entity';
 import { Like } from 'src/features/likes/infrastructure/likes.entity';
 import { UsersBanInfo } from '../banInfo/usersBanInfo.entity';
+import { UserTelegramInfo } from '../integratons/userTelegramInfo.entity';
 
 @Entity()
 export class User {
@@ -22,11 +23,7 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: false })
   passwordHash: string;
 
-  @OneToOne(() => UserEmailConfirmationInfo, (ec) => ec.userId, {
-    nullable: true,
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @OneToOne(() => UserEmailConfirmationInfo, (ec) => ec.userId)
   @JoinColumn()
   emailConfirmation: UserEmailConfirmationInfo | null;
 
@@ -36,11 +33,11 @@ export class User {
   @OneToMany(() => Like, (like) => like.author)
   likes: Like[];
 
-  @OneToOne(() => UsersBanInfo, (bi) => bi.userId, {
-    nullable: true,
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @OneToOne(() => UsersBanInfo, (bi) => bi.userId)
   @JoinColumn()
   banInfo: UsersBanInfo | null;
+
+  @OneToOne(() => UserTelegramInfo, (ut) => ut.userId)
+  @JoinColumn()
+  telegramInfo: UserTelegramInfo | null;
 }

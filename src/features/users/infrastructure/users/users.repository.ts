@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from './users.entity';
-import { UsersRecoveryPasssword } from './UsersRecoveryPasssword.entity ';
+import { User } from './user.entity';
+import { UsersRecoveryPasssword } from './usersRecoveryPasssword.entity';
 import {
   UserType,
   UserEmailConfirmationInfoType,
@@ -11,6 +11,7 @@ import {
 } from '../../domain/users.types';
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 import { UsersBanInfo } from '../banInfo/usersBanInfo.entity';
+
 @Injectable()
 export class UsersRepository {
   constructor(
@@ -135,8 +136,12 @@ export class UsersRepository {
   async findUserById(id?: string): Promise<User | null> {
     return await this.usersRepository.findOne({
       where: { id },
+      relations: {
+        telegramInfo: true,
+      },
     });
   }
+
   async updateBanInfo(userId: string, banInfo: UsersBanInfo): Promise<boolean> {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (user) {

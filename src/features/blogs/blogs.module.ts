@@ -27,9 +27,9 @@ import { PostsLike } from '../likes/infrastructure/postslikes.entity';
 import { CommentsLike } from '../likes/infrastructure/commentsLikes.entity';
 import { Like } from '../likes/infrastructure/likes.entity';
 import { UsersRepository } from '../users/infrastructure/users/users.repository';
-import { User } from '../users/infrastructure/users/users.entity';
+import { User } from '../users/infrastructure/users/user.entity';
 import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEmailConfirmationInfo.entity';
-import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
+import { UsersRecoveryPasssword } from '../users/infrastructure/users/usersRecoveryPasssword.entity';
 import { BlogsBloggerController } from './api/blogger/blogs.blogger.controller';
 import { GetCommentUseCase } from '../comments/app/useCases/getComment.useCase';
 import { GetPostUseCase } from '../posts/app/useCases/queryBus/getPost.useCase';
@@ -57,10 +57,26 @@ import { BindBlogUseCase } from './app/useCases/commandBus/bindBlog.useCase';
 import { CreateBlogUseCase } from './app/useCases/commandBus/createBlog.useCase';
 import { DeleteBlogUseCase } from './app/useCases/commandBus/deleteBlog.useCase';
 import { UpdateBlogUseCase } from './app/useCases/commandBus/updateBlog.useCase';
+import { SubscribeToBlogUseCase } from './app/useCases/commandBus/subscribeToBlog.useCase';
+import { BlogSubscriberInfo } from './infrastructure/blogs-subscriber-info.entity';
+import { UserTelegramInfo } from '../users/infrastructure/integratons/userTelegramInfo.entity';
+import { BlogsSubscriberInfoRepository } from './infrastructure/blogs-subscriber-info.repository';
+import { SendNotificationWhenPostCreatedHendler } from '../posts/app/eventHandlers/sendNotificationWhenPostCreated.handler';
+import { TelegramAdapter } from 'src/infrastructure/adapters/telegram/telegram.adapter';
+import { UsersTelegramInfoRepository } from '../users/infrastructure/users/users-telegram-info.repository';
+import { DeleteSubscriptionUseCase } from './app/useCases/commandBus/deleteSubscription.useCase';
+import { GetBlogUseCase } from './app/useCases/queryBus/getBlog.useCase';
+import { GetBlogsByAdminUseCase } from './app/useCases/queryBus/getBlogsByAdmin.useCase';
 
-const blogsProviders = [BlogsService, BlogsRepository, BlogsQueryRepository, ImageInfoRepository];
+const blogsProviders = [
+  BlogsService,
+  BlogsRepository,
+  BlogsQueryRepository,
+  ImageInfoRepository,
+  BlogsSubscriberInfoRepository,
+];
 const postsProviders = [PostsService, PostsRepository, PostsQueryRepository];
-const usersProviders = [UsersRepository];
+const usersProviders = [UsersRepository, UsersTelegramInfoRepository];
 const commentsProviders = [CommentsRepository, CommentsQueryRepository];
 const banInfoProviders = [BanInfoRepository];
 const likesProviders = [LikesRepository, LikesQueryRepository];
@@ -72,6 +88,11 @@ const blogsUseCases = [
   DeleteBlogUseCase,
   BanBlogUseCase,
   GetBlogsUseCase,
+  GetBlogUseCase,
+  SubscribeToBlogUseCase,
+  DeleteSubscriptionUseCase,
+  SendNotificationWhenPostCreatedHendler,
+  GetBlogsByAdminUseCase,
 ];
 
 const imagesUseCases = [
@@ -116,6 +137,8 @@ const services = [FileStorageService, ImageStorageService];
       BlogWallpaperInfo,
       BlogMainImageInfo,
       PostMainImageInfo,
+      BlogSubscriberInfo,
+      UserTelegramInfo,
     ]),
   ],
   controllers: [
@@ -126,6 +149,7 @@ const services = [FileStorageService, ImageStorageService];
     CommentsController,
   ],
   providers: [
+    TelegramAdapter,
     ...blogsProviders,
     ...postsProviders,
     ...commentsProviders,

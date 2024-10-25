@@ -7,7 +7,7 @@ import { Paginator } from 'src/features/domain/result.types';
 import type { SearchQueryParametersType } from 'src/features/domain/query.types';
 import { getSanitizationQuery } from 'src/features/utils';
 import { UserInfo } from '../../domain/users.types';
-import { User } from './users.entity';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersQueryRepository {
