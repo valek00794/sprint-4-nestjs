@@ -7,6 +7,8 @@ import { getSanitizationQuery } from 'src/features/utils';
 import { BlogOwnerInfo, BlogViewModel } from '../api/models/output/blogs.output.model';
 import { Blog } from './blogs.entity';
 import { ImageInfo } from '../domain/image.types';
+import { SubscriptionStatuses } from '../domain/subscriber.type';
+import { BlogSubscriberInfo } from './blogs-subscriber-info.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -64,8 +66,12 @@ export class BlogsQueryRepository {
   async findUnbannedBlogById(id: string) {
     const blog = await this.blogsRepository.findOne({
       where: [{ id, isBanned: false }],
+      relations: {
+        blogOwnerInfo: true,
+      },
     });
-    return blog ? this.mapToOutput(blog) : null;
+
+    return blog ? blog : null;
   }
 
   async findBlogById(id: string): Promise<Blog | null> {
@@ -78,7 +84,23 @@ export class BlogsQueryRepository {
     return blog;
   }
 
-  mapToOutput(blog: Blog, images?: ImageInfo): BlogViewModel {
+  mapToOutput(
+    blog: Blog,
+    subscribers?: BlogSubscriberInfo[],
+    images?: ImageInfo,
+    userId?: string,
+  ): BlogViewModel {
+    const subscribersCount = subscribers
+      ? subscribers.filter((sub) => sub.status === SubscriptionStatuses.Subscribed).length
+      : 0;
+    let currentUserSubscriptionStatus = SubscriptionStatuses.None;
+    if (userId && subscribers && subscribers.length !== 0) {
+      const userSubscription = subscribers.find((subscriber) => subscriber.userId === userId);
+      if (userSubscription) {
+        currentUserSubscriptionStatus = userSubscription.status;
+      }
+    }
+
     return new BlogViewModel(
       blog.id,
       blog.name,
@@ -87,10 +109,12 @@ export class BlogsQueryRepository {
       blog.createdAt,
       blog.isMembership,
       images ? images : new ImageInfo([], null),
+      subscribersCount,
+      currentUserSubscriptionStatus,
     );
   }
 
-  mapToBloggerOutput(blog: Blog, images?: ImageInfo): BlogViewModel {
+  mapToAdminOutput(blog: Blog): BlogViewModel {
     const banInfo = { isBanned: blog.isBanned, banDate: blog.banDate };
     return new BlogViewModel(
       blog.id,
@@ -99,10 +123,12 @@ export class BlogsQueryRepository {
       blog.websiteUrl,
       blog.createdAt,
       blog.isMembership,
-      images ? images : new ImageInfo([], null),
+      undefined,
+      undefined,
+      undefined,
       banInfo,
       blog.blogOwnerInfo
-        ? new BlogOwnerInfo(blog.blogOwnerInfo.id.toString(), blog.blogOwnerInfo.login)
+        ? new BlogOwnerInfo(blog.blogOwnerInfo.id, blog.blogOwnerInfo.login)
         : null,
     );
   }

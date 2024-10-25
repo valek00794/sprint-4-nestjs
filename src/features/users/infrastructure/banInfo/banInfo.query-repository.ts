@@ -45,7 +45,7 @@ export class BanInfoQueryRepository {
   }
 
   mapBannedUserForBlogToOutput(user: UsersBanInfoForBlogs): BannedUserForBlogViewModel {
-    return new BannedUserForBlogViewModel(user.userId.toString(), user.bannedUser.login, {
+    return new BannedUserForBlogViewModel(user.userId, user.bannedUser.login, {
       isBanned: user.isBanned,
       banDate: user.banDate,
       banReason: user.banReason,

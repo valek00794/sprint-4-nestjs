@@ -7,7 +7,7 @@ import { IsUserAlreadyExistConstraint } from 'src/infrastructure/decorators/vali
 import { BlogIdExistConstraint } from 'src/infrastructure/decorators/validate/blog-exists.decorator';
 import { User } from '../users/infrastructure/users/user.entity';
 import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEmailConfirmationInfo.entity';
-import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
+import { UsersRecoveryPasssword } from '../users/infrastructure/users/usersRecoveryPasssword.entity';
 import { Blog } from '../blogs/infrastructure/blogs.entity';
 import { UserTelegramInfo } from '../users/infrastructure/integratons/userTelegramInfo.entity';
 

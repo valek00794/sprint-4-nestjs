@@ -1,4 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { UsersTelegramInfoRepository } from 'src/features/users/infrastructure/users/users-telegram-info.repository';
 
 import { UsersRepository } from 'src/features/users/infrastructure/users/users.repository';
 
@@ -20,7 +21,10 @@ export class SetInfoAboutTelegramUserCommand {
 export class SetInfoAboutTelegramUserUseCase
   implements ICommandHandler<SetInfoAboutTelegramUserCommand>
 {
-  constructor(protected usersRepository: UsersRepository) {}
+  constructor(
+    protected usersRepository: UsersRepository,
+    protected usersTelegramInfoRepository: UsersTelegramInfoRepository,
+  ) {}
 
   async execute(command: SetInfoAboutTelegramUserCommand) {
     const user = await this.usersRepository.findUserById(command.userId);
@@ -30,7 +34,7 @@ export class SetInfoAboutTelegramUserUseCase
     if (user.telegramInfo && user.telegramInfo.telegramId === command.telegramUserId) {
       return ResultCodes.UserAlreadyActivatedBotEarly;
     }
-    const result = await this.usersRepository.setUserTelegramInfo(
+    const result = await this.usersTelegramInfoRepository.setUserTelegramInfo(
       command.userId,
       command.telegramUserId,
     );

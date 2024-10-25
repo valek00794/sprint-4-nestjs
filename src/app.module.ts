@@ -57,7 +57,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(UserIdFromJWT)
       .forRoutes(
-        { path: 'blogs/:blogId/posts', method: RequestMethod.GET },
+        { path: 'blogs/*', method: RequestMethod.GET },
+        { path: 'blogs', method: RequestMethod.GET },
         { path: 'comments/:id', method: RequestMethod.GET },
         { path: 'posts/*', method: RequestMethod.GET },
         { path: 'posts', method: RequestMethod.GET },

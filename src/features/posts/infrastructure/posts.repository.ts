@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 import { Post } from './posts.entity';
 import { PostType } from '../domain/posts/posts.types';
 
 @Injectable()
 export class PostsRepository {
-  constructor(
-    @InjectDataSource() protected dataSource: DataSource,
-    @InjectRepository(Post) protected postsRepository: Repository<Post>,
-  ) {}
+  constructor(@InjectRepository(Post) protected postsRepository: Repository<Post>) {}
 
   async createPost(newPosts: PostType) {
     const post = await this.postsRepository.save(newPosts);

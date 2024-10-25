@@ -21,7 +21,7 @@ import { QuizGameQueryRepository } from './infrastructure/quizGame.query-reposit
 import { QuizGameService } from './app/quizGame.service';
 import { UsersRepository } from '../users/infrastructure/users/users.repository';
 import { UserEmailConfirmationInfo } from '../users/infrastructure/users/usersEmailConfirmationInfo.entity';
-import { UsersRecoveryPasssword } from '../users/infrastructure/users/UsersRecoveryPasssword.entity ';
+import { UsersRecoveryPasssword } from '../users/infrastructure/users/usersRecoveryPasssword.entity';
 import { AnswerQuestionGameUseCase } from './app/useCases/answerQuestion.useCase';
 import { QuestionOfTheGame } from './infrastructure/entities/questionOfTheGame.entity';
 import { UserTelegramInfo } from '../users/infrastructure/integratons/userTelegramInfo.entity';

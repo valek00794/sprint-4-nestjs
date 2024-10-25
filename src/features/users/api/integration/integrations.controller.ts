@@ -9,18 +9,18 @@ import { Public } from 'src/infrastructure/decorators/transform/public.decorator
 import { TelegramPyloadType } from 'src/infrastructure/adapters/telegram/telegram.adapter';
 import { HandleTelegramUpdatesCommand } from 'src/infrastructure/adapters/telegram/useCases/handle-telegram-updates.userCase';
 
-@Public()
+@UseGuards(AuthBearerGuard)
 @Controller(SETTINGS.PATH.integrations)
 export class IntegrationsController {
   constructor(private commandBus: CommandBus) {}
 
   @Get('/telegram/auth-bot-link')
-  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.OK)
   async getAuthBotLink(@Req() req: Request) {
+    console.log('integ', req.user?.userId);
     return await this.commandBus.execute(new GetAuthBotLinkCommand(req.user?.userId));
   }
-
+  @Public()
   @Post(SETTINGS.PATH.telegramWebHook)
   @HttpCode(HttpStatus.NO_CONTENT)
   async webhook(@Body() payload: TelegramPyloadType) {

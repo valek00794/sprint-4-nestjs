@@ -10,7 +10,7 @@ import { CreateUserUseCase } from './app/useCases/users/createUser.useCase';
 import { JwtAdapter } from 'src/infrastructure/adapters/jwt/jwt-adapter';
 import { User } from './infrastructure/users/user.entity';
 import { UserEmailConfirmationInfo } from './infrastructure/users/usersEmailConfirmationInfo.entity';
-import { UsersRecoveryPasssword } from './infrastructure/users/UsersRecoveryPasssword.entity ';
+import { UsersRecoveryPasssword } from './infrastructure/users/usersRecoveryPasssword.entity';
 import { ChangeUserBanStatusUseCase } from './app/useCases/banInfo/changeUserBanStatus.useCase';
 import { UsersDevicesRepository } from './infrastructure/devices/usersDevices-repository';
 import { UsersDevices } from './infrastructure/devices/usersDevices.entity';
@@ -30,6 +30,7 @@ import { GetAuthBotLinkUseCase } from './app/useCases/integrations/getAuthBotLin
 import { SetInfoAboutTelegramUserUseCase } from './app/useCases/integrations/setInfoAboutTelegramUser.useCase';
 import { TelegramAdapter } from 'src/infrastructure/adapters/telegram/telegram.adapter';
 import { HandleTelegramUpdatesUseCase } from 'src/infrastructure/adapters/telegram/useCases/handle-telegram-updates.userCase';
+import { UsersTelegramInfoRepository } from './infrastructure/users/users-telegram-info.repository';
 
 const usersUseCases = [
   CreateUserUseCase,
@@ -46,6 +47,7 @@ const usersProviders = [
   UsersRepository,
   UsersQueryRepository,
   UsersDevicesRepository,
+  UsersTelegramInfoRepository,
   BanInfoRepository,
   BanInfoQueryRepository,
   BlogsRepository,

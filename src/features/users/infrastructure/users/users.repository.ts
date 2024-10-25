@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from './user.entity';
-import { UsersRecoveryPasssword } from './UsersRecoveryPasssword.entity ';
+import { UsersRecoveryPasssword } from './usersRecoveryPasssword.entity';
 import {
   UserType,
   UserEmailConfirmationInfoType,
@@ -11,7 +11,6 @@ import {
 } from '../../domain/users.types';
 import { UserEmailConfirmationInfo } from './usersEmailConfirmationInfo.entity';
 import { UsersBanInfo } from '../banInfo/usersBanInfo.entity';
-import { UserTelegramInfo } from '../integratons/userTelegramInfo.entity';
 
 @Injectable()
 export class UsersRepository {
@@ -21,8 +20,6 @@ export class UsersRepository {
     protected userEmailConfirmationInfoRepository: Repository<UserEmailConfirmationInfo>,
     @InjectRepository(UsersRecoveryPasssword)
     protected usersRecoveryPassswordRepository: Repository<UsersRecoveryPasssword>,
-    @InjectRepository(UserTelegramInfo)
-    protected userTelegramInfoRepository: Repository<UserTelegramInfo>,
   ) {}
 
   async createUser(newUser: UserType, emailConfirmationInfo?: UserEmailConfirmationInfoType) {
@@ -149,22 +146,6 @@ export class UsersRepository {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (user) {
       user.banInfo = banInfo;
-      await this.usersRepository.save(user);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  async setUserTelegramInfo(userId: string, telegramUserId: number) {
-    const userTelegramInfo = await this.userTelegramInfoRepository.save({
-      userId,
-      telegramId: telegramUserId,
-    });
-
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
-    if (user) {
-      user.telegramInfo = userTelegramInfo;
       await this.usersRepository.save(user);
       return true;
     } else {

@@ -1,6 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { SubscriptionStatuses } from '../domain/subscriber.type';
 
 @Entity()
+@Unique(['userId', 'blogId'])
 export class BlogSubscriberInfo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -11,6 +13,9 @@ export class BlogSubscriberInfo {
   @Column()
   userId: string;
 
-  @Column({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @Column()
+  status: SubscriptionStatuses;
+
+  @Column({ type: 'timestamp with time zone' })
   subscribeDate: string;
 }

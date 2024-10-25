@@ -26,7 +26,11 @@ export class Blog {
   @OneToMany(() => Post, (post) => post.blog)
   posts: Post[];
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   blogOwnerInfo: User | null;
 

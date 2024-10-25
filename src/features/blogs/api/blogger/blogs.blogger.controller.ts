@@ -59,7 +59,9 @@ export class BlogsBloggerController {
 
   @Get()
   async getBlogs(@Req() req: Request, @Query() query?: SearchQueryParametersType) {
-    return await this.queryBus.execute(new GetBlogsQuery(query, false, false, req.user!.userId));
+    return await this.queryBus.execute(
+      new GetBlogsQuery(query, false, req.user?.userId, req.user?.userId),
+    );
   }
 
   @Post()

@@ -11,7 +11,7 @@ export class UserTelegramInfo {
   @PrimaryColumn()
   userId: string;
 
-  @Column()
+  @Column({ type: 'bigint' })
   telegramId: number;
 
   @Column({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
