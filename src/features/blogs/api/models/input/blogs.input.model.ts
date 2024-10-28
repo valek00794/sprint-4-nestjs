@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDefined, IsNotEmpty, Matches, MaxLength } from 'class-validator';
 import { Trim } from 'src/infrastructure/decorators/transform/trim.decorator';
 
@@ -46,6 +47,11 @@ export class CreatePostForBlogModel {
 }
 
 export class ChangeBanStatusForBlogInputModel {
+  @ApiProperty({
+    description: 'Info for update ban status',
+    type: String,
+    required: true,
+  })
   @IsNotEmpty()
   @IsBoolean()
   isBanned: boolean;

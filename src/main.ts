@@ -18,9 +18,9 @@ async function bootstrap() {
   });
   const telegramAdapter = await app.resolve(TelegramAdapter);
 
-  const url = await connctToNgrok(Number(SETTINGS.PORT));
-  const urlForTgWebhook = url + SETTINGS.PATH.integrations + SETTINGS.PATH.telegramWebHook;
-  console.log(urlForTgWebhook);
-  await telegramAdapter.setWebhook(urlForTgWebhook);
+  // const url = await connctToNgrok(Number(SETTINGS.PORT));
+  // const urlForTgWebhook = url + SETTINGS.PATH.integrations + SETTINGS.PATH.telegramWebHook;
+  // console.log(urlForTgWebhook);
+  // await telegramAdapter.setWebhook(urlForTgWebhook);
 }
 bootstrap();

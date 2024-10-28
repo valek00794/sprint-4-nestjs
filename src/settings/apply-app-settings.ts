@@ -1,4 +1,5 @@
 import { BadRequestException, INestApplication, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import cookieParser from 'cookie-parser';
 
@@ -32,4 +33,21 @@ export const applyAppSettings = (app: INestApplication) => {
   );
   app.useGlobalFilters(new HttpExceptionFilter());
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  const config = new DocumentBuilder()
+    .setTitle('NestJS blog app api')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access-token',
+    )
+    .addBasicAuth()
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  const swaggerPath = '/swagger';
+  SwaggerModule.setup(swaggerPath, app, document);
 };

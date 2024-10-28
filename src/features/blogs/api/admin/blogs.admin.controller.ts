@@ -19,6 +19,9 @@ import { ChangeBanStatusForBlogInputModel } from '../models/input/blogs.input.mo
 import { BanBlogCommand } from '../../app/useCases/commandBus/banBlog.useCase';
 import { BindBlogCommand } from '../../app/useCases/commandBus/bindBlog.useCase';
 import { GetBlogsByAdminQuery } from '../../app/useCases/queryBus/getBlogsByAdmin.useCase';
+import { GetBlogsSwagger } from '../swagger/admin/get-blogs.swagger';
+import { BindBlogWithUserSwagger } from '../swagger/admin/bind-blog-with-user.swagger';
+import { BanBlogSwagger } from '../swagger/admin/ban-blog.swagger';
 
 @Public()
 @UseGuards(AuthBasicGuard)
@@ -30,17 +33,20 @@ export class BlogsAdminController {
   ) {}
 
   @Get()
+  @GetBlogsSwagger()
   async getBlogs(@Query() query?: SearchQueryParametersType) {
     return await this.queryBus.execute(new GetBlogsByAdminQuery(query));
   }
 
   @Put(':id/bind-with-user/:userId')
+  @BindBlogWithUserSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async bindBlog(@Param('id') id: string, @Param('userId') userId: string) {
     await this.commandBus.execute(new BindBlogCommand(id, userId));
   }
 
   @Put(':id/ban')
+  @BanBlogSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async changeBlogBanStatus(
     @Param('id') id: string,
